@@ -15,20 +15,12 @@ namespace Server.Gumps
 		private PropertyInfo m_Property;
 		private Mobile m_Mobile;
 		private object m_Object;
-#if (NEWTIMERS)
 		private Stack<PropertiesGump.StackEntry> m_Stack;
-#else
-		private Stack m_Stack;
-#endif
 		private Type m_Type;
 		private int m_Page;
 		private ArrayList m_List;
 
-#if (NEWTIMERS)
 		public XmlSetObjectTarget( PropertyInfo prop, Mobile mobile, object o, Stack<PropertiesGump.StackEntry> stack, Type type, int page, ArrayList list ) : base( -1, false, TargetFlags.None )
-#else
-		public XmlSetObjectTarget( PropertyInfo prop, Mobile mobile, object o, Stack stack, Type type, int page, ArrayList list ) : base( -1, false, TargetFlags.None )
-#endif
 		{
 			m_Property = prop;
 			m_Mobile = mobile;

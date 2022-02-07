@@ -984,8 +984,8 @@ namespace Server.Engines.XmlSpawner2
 						int gfac = reader.ReadInt();
 
 						// look up the enum by name
-						GroupTypes gtype = GroupTypes.End_Unused;
-						if(!BaseXmlSpawner.TryParse(gname, out gtype))
+						GroupTypes gtype;
+						if(!Enum.TryParse(gname, true, out gtype))
 							gtype=GroupTypes.End_Unused;
 
 						// try to find the matching entry in the recently constructed faction status list

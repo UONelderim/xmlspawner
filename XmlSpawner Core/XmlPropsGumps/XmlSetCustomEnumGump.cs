@@ -12,11 +12,7 @@ namespace Server.Gumps
 	public class XmlSetCustomEnumGump : XmlSetListOptionGump
 	{
 		private string[] m_Names;
-#if (NEWTIMERS)
 		public XmlSetCustomEnumGump( PropertyInfo prop, Mobile mobile, object o, Stack<PropertiesGump.StackEntry> stack, int propspage, ArrayList list, string[] names ) : base( prop, mobile, o, stack, propspage, list, names, null )
-#else
-		public XmlSetCustomEnumGump( PropertyInfo prop, Mobile mobile, object o, Stack stack, int propspage, ArrayList list, string[] names ) : base( prop, mobile, o, stack, propspage, list, names, null )
-#endif
 		{
 			m_Names = names;
 		}

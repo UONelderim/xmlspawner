@@ -1,0 +1,107 @@
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/!svn/ver/19/trunk/XmlSpawner%20Core/XmlQuest
+END
+QuestRewardGump.cs
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/!svn/ver/9/trunk/XmlSpawner%20Core/XmlQuest/QuestRewardGump.cs
+END
+XmlQuestPointsRewards.cs
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/!svn/ver/9/trunk/XmlSpawner%20Core/XmlQuest/XmlQuestPointsRewards.cs
+END
+QuestLeadersBoard.cs
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/!svn/ver/9/trunk/XmlSpawner%20Core/XmlQuest/QuestLeadersBoard.cs
+END
+QuestLeadersStone.cs
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/!svn/ver/2/trunk/XmlSpawner%20Core/XmlQuest/QuestLeadersStone.cs
+END
+XmlQuestPoints.cs
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/!svn/ver/9/trunk/XmlSpawner%20Core/XmlQuest/XmlQuestPoints.cs
+END
+QuestRewardStone.cs
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/!svn/ver/9/trunk/XmlSpawner%20Core/XmlQuest/QuestRewardStone.cs
+END
+XmlQuestHolder.cs
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/!svn/ver/19/trunk/XmlSpawner%20Core/XmlQuest/XmlQuestHolder.cs
+END
+XmlQuest.cs
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/!svn/ver/9/trunk/XmlSpawner%20Core/XmlQuest/XmlQuest.cs
+END
+XmlQuestLeaders.cs
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/!svn/ver/9/trunk/XmlSpawner%20Core/XmlQuest/XmlQuestLeaders.cs
+END
+XmlQuestToken.cs
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/!svn/ver/19/trunk/XmlSpawner%20Core/XmlQuest/XmlQuestToken.cs
+END
+XmlQuestBookGump.cs
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/!svn/ver/2/trunk/XmlSpawner%20Core/XmlQuest/XmlQuestBookGump.cs
+END
+XmlPlayerQuestGump.cs
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/!svn/ver/10/trunk/XmlSpawner%20Core/XmlQuest/XmlPlayerQuestGump.cs
+END
+XmlQuestAttachment.cs
+K 25
+svn:wc:ra_dav:version-url
+V 70
+/svn/!svn/ver/9/trunk/XmlSpawner%20Core/XmlQuest/XmlQuestAttachment.cs
+END
+XmlQuestHolderGumps.cs
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/!svn/ver/9/trunk/XmlSpawner%20Core/XmlQuest/XmlQuestHolderGumps.cs
+END
+QuestLogGump.cs
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/!svn/ver/10/trunk/XmlSpawner%20Core/XmlQuest/QuestLogGump.cs
+END
+XmlQuestBook.cs
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/!svn/ver/19/trunk/XmlSpawner%20Core/XmlQuest/XmlQuestBook.cs
+END
+XmlQuestGumps.cs
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/!svn/ver/9/trunk/XmlSpawner%20Core/XmlQuest/XmlQuestGumps.cs
+END

@@ -1,0 +1,65 @@
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/!svn/ver/4/trunk/XMLSpawner%20Extras/XmlLevelItem
+END
+LevelAttributes.cs
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/svn/!svn/ver/4/trunk/XMLSpawner%20Extras/XmlLevelItem/LevelAttributes.cs
+END
+ItemExperienceGump.cs
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/!svn/ver/4/trunk/XMLSpawner%20Extras/XmlLevelItem/ItemExperienceGump.cs
+END
+LevelItemManager.cs
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/!svn/ver/4/trunk/XMLSpawner%20Extras/XmlLevelItem/LevelItemManager.cs
+END
+XmlLevelItem Install NEW.txt
+K 25
+svn:wc:ra_dav:version-url
+V 87
+/svn/!svn/ver/4/trunk/XMLSpawner%20Extras/XmlLevelItem/XmlLevelItem%20Install%20NEW.txt
+END
+ILevelable.cs
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/!svn/ver/4/trunk/XMLSpawner%20Extras/XmlLevelItem/ILevelable.cs
+END
+LevelInfoEntry.cs
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/!svn/ver/4/trunk/XMLSpawner%20Extras/XmlLevelItem/LevelInfoEntry.cs
+END
+LevelUpAcceptGump.cs
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/!svn/ver/4/trunk/XMLSpawner%20Extras/XmlLevelItem/LevelUpAcceptGump.cs
+END
+AwaitingSmithApprovalGump.cs
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/!svn/ver/4/trunk/XMLSpawner%20Extras/XmlLevelItem/AwaitingSmithApprovalGump.cs
+END
+ItemExpCommand.cs
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/!svn/ver/4/trunk/XMLSpawner%20Extras/XmlLevelItem/ItemExpCommand.cs
+END
+LevelableItemSettings.cs
+K 25
+svn:wc:ra_dav:version-url
+V 79
+/svn/!svn/ver/4/trunk/XMLSpawner%20Extras/XmlLevelItem/LevelableItemSettings.cs
+END

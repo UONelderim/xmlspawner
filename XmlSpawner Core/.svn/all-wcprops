@@ -1,0 +1,47 @@
+K 25
+svn:wc:ra_dav:version-url
+V 40
+/svn/!svn/ver/23/trunk/XmlSpawner%20Core
+END
+XmlTextEntryBook.cs
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/!svn/ver/2/trunk/XmlSpawner%20Core/XmlTextEntryBook.cs
+END
+XmlSpawner2.cs
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/!svn/ver/21/trunk/XmlSpawner%20Core/XmlSpawner2.cs
+END
+PacketHandlerOverrides.cs
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/!svn/ver/2/trunk/XmlSpawner%20Core/PacketHandlerOverrides.cs
+END
+BaseXmlSpawner.cs
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svn/!svn/ver/23/trunk/XmlSpawner%20Core/BaseXmlSpawner.cs
+END
+ItemFlags.cs
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/svn/!svn/ver/2/trunk/XmlSpawner%20Core/ItemFlags.cs
+END
+XmlSpawnerGumps.cs
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/!svn/ver/12/trunk/XmlSpawner%20Core/XmlSpawnerGumps.cs
+END
+XmlSpawnerSkillCheck.cs
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svn/!svn/ver/2/trunk/XmlSpawner%20Core/XmlSpawnerSkillCheck.cs
+END

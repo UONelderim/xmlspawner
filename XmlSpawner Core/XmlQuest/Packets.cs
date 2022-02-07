@@ -30,7 +30,7 @@ namespace Server.Network
         	        {
         		        var child = items[i];
     
-        		        if (!child.Deleted && beholder.CanSee(child))
+        		        if (!child.Deleted)
         		        {
         			        m_Stream.Write(child.Serial);
         			        m_Stream.Write((ushort)child.ItemID);

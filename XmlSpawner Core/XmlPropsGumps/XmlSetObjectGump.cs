@@ -2,7 +2,6 @@ using System;
 using System.Reflection;
 using System.Collections;
 using System.Collections.Generic;
-using Server;
 using Server.Network;
 using Server.Prompts;
 using Server.Commands;
@@ -57,12 +56,13 @@ namespace Server.Gumps
 		private static readonly int EntryWidth = 212;
 
 		private static readonly int TotalWidth = OffsetSize + EntryWidth + OffsetSize + SetWidth + OffsetSize;
-		private static readonly int TotalHeight = OffsetSize + (5 * (EntryHeight + OffsetSize));
+		private static readonly int TotalHeight = OffsetSize + 5 * (EntryHeight + OffsetSize);
 
 		private static readonly int BackWidth = BorderSize + TotalWidth + BorderSize;
 		private static readonly int BackHeight = BorderSize + TotalHeight + BorderSize;
 
-		public XmlSetObjectGump( PropertyInfo prop, Mobile mobile, object o, Stack<PropertiesGump.StackEntry> stack, Type type, int page, ArrayList list ) : base( GumpOffsetX, GumpOffsetY )
+		public XmlSetObjectGump(PropertyInfo prop, Mobile mobile, object o, Stack<PropertiesGump.StackEntry> stack,
+			Type type, int page, ArrayList list) : base(GumpOffsetX, GumpOffsetY)
 		{
 			m_Property = prop;
 			m_Mobile = mobile;
@@ -72,70 +72,71 @@ namespace Server.Gumps
 			m_Page = page;
 			m_List = list;
 
-			string initialText = XmlPropertiesGump.ValueToString( o, prop );
+			var initialText = XmlPropertiesGump.ValueToString(o, prop);
 
-			AddPage( 0 );
+			AddPage(0);
 
-			AddBackground( 0, 0, BackWidth, BackHeight, BackGumpID );
-			AddImageTiled( BorderSize, BorderSize, TotalWidth - (OldStyle ? SetWidth + OffsetSize : 0), TotalHeight, OffsetGumpID );
+			AddBackground(0, 0, BackWidth, BackHeight, BackGumpID);
+			AddImageTiled(BorderSize, BorderSize, TotalWidth - (OldStyle ? SetWidth + OffsetSize : 0), TotalHeight,
+				OffsetGumpID);
 
-			int x = BorderSize + OffsetSize;
-			int y = BorderSize + OffsetSize;
+			var x = BorderSize + OffsetSize;
+			var y = BorderSize + OffsetSize;
 
-			AddImageTiled( x, y, EntryWidth, EntryHeight, EntryGumpID );
-			AddLabelCropped( x + TextOffsetX, y, EntryWidth - TextOffsetX, EntryHeight, TextHue, prop.Name );
+			AddImageTiled(x, y, EntryWidth, EntryHeight, EntryGumpID);
+			AddLabelCropped(x + TextOffsetX, y, EntryWidth - TextOffsetX, EntryHeight, TextHue, prop.Name);
 			x += EntryWidth + OffsetSize;
 
-			if ( SetGumpID != 0 )
-				AddImageTiled( x, y, SetWidth, EntryHeight, SetGumpID );
+			if (SetGumpID != 0)
+				AddImageTiled(x, y, SetWidth, EntryHeight, SetGumpID);
 
 			x = BorderSize + OffsetSize;
 			y += EntryHeight + OffsetSize;
 
-			AddImageTiled( x, y, EntryWidth, EntryHeight, EntryGumpID );
-			AddLabelCropped( x + TextOffsetX, y, EntryWidth - TextOffsetX, EntryHeight, TextHue, initialText );
+			AddImageTiled(x, y, EntryWidth, EntryHeight, EntryGumpID);
+			AddLabelCropped(x + TextOffsetX, y, EntryWidth - TextOffsetX, EntryHeight, TextHue, initialText);
 			x += EntryWidth + OffsetSize;
 
-			if ( SetGumpID != 0 )
-				AddImageTiled( x, y, SetWidth, EntryHeight, SetGumpID );
+			if (SetGumpID != 0)
+				AddImageTiled(x, y, SetWidth, EntryHeight, SetGumpID);
 
-			AddButton( x + SetOffsetX, y + SetOffsetY, SetButtonID1, SetButtonID2, 1, GumpButtonType.Reply, 0 );
+			AddButton(x + SetOffsetX, y + SetOffsetY, SetButtonID1, SetButtonID2, 1, GumpButtonType.Reply, 0);
 
 			x = BorderSize + OffsetSize;
 			y += EntryHeight + OffsetSize;
 
-			AddImageTiled( x, y, EntryWidth, EntryHeight, EntryGumpID );
-			AddLabelCropped( x + TextOffsetX, y, EntryWidth - TextOffsetX, EntryHeight, TextHue, "Change by Serial" );
+			AddImageTiled(x, y, EntryWidth, EntryHeight, EntryGumpID);
+			AddLabelCropped(x + TextOffsetX, y, EntryWidth - TextOffsetX, EntryHeight, TextHue, "Change by Serial");
 			x += EntryWidth + OffsetSize;
 
-			if ( SetGumpID != 0 )
-				AddImageTiled( x, y, SetWidth, EntryHeight, SetGumpID );
+			if (SetGumpID != 0)
+				AddImageTiled(x, y, SetWidth, EntryHeight, SetGumpID);
 
-			AddButton( x + SetOffsetX, y + SetOffsetY, SetButtonID1, SetButtonID2, 2, GumpButtonType.Reply, 0 );
+			AddButton(x + SetOffsetX, y + SetOffsetY, SetButtonID1, SetButtonID2, 2, GumpButtonType.Reply, 0);
 
 			x = BorderSize + OffsetSize;
 			y += EntryHeight + OffsetSize;
 
-			AddImageTiled( x, y, EntryWidth, EntryHeight, EntryGumpID );
-			AddLabelCropped( x + TextOffsetX, y, EntryWidth - TextOffsetX, EntryHeight, TextHue, "Nullify" );
+			AddImageTiled(x, y, EntryWidth, EntryHeight, EntryGumpID);
+			AddLabelCropped(x + TextOffsetX, y, EntryWidth - TextOffsetX, EntryHeight, TextHue, "Nullify");
 			x += EntryWidth + OffsetSize;
 
-			if ( SetGumpID != 0 )
-				AddImageTiled( x, y, SetWidth, EntryHeight, SetGumpID );
+			if (SetGumpID != 0)
+				AddImageTiled(x, y, SetWidth, EntryHeight, SetGumpID);
 
-			AddButton( x + SetOffsetX, y + SetOffsetY, SetButtonID1, SetButtonID2, 3, GumpButtonType.Reply, 0 );
+			AddButton(x + SetOffsetX, y + SetOffsetY, SetButtonID1, SetButtonID2, 3, GumpButtonType.Reply, 0);
 
 			x = BorderSize + OffsetSize;
 			y += EntryHeight + OffsetSize;
 
-			AddImageTiled( x, y, EntryWidth, EntryHeight, EntryGumpID );
-			AddLabelCropped( x + TextOffsetX, y, EntryWidth - TextOffsetX, EntryHeight, TextHue, "View Properties" );
+			AddImageTiled(x, y, EntryWidth, EntryHeight, EntryGumpID);
+			AddLabelCropped(x + TextOffsetX, y, EntryWidth - TextOffsetX, EntryHeight, TextHue, "View Properties");
 			x += EntryWidth + OffsetSize;
 
-			if ( SetGumpID != 0 )
-				AddImageTiled( x, y, SetWidth, EntryHeight, SetGumpID );
+			if (SetGumpID != 0)
+				AddImageTiled(x, y, SetWidth, EntryHeight, SetGumpID);
 
-			AddButton( x + SetOffsetX, y + SetOffsetY, SetButtonID1, SetButtonID2, 4, GumpButtonType.Reply, 0 );
+			AddButton(x + SetOffsetX, y + SetOffsetY, SetButtonID1, SetButtonID2, 4, GumpButtonType.Reply, 0);
 		}
 
 		private class InternalPrompt : Prompt
@@ -148,7 +149,8 @@ namespace Server.Gumps
 			private int m_Page;
 			private ArrayList m_List;
 
-			public InternalPrompt( PropertyInfo prop, Mobile mobile, object o, Stack<PropertiesGump.StackEntry> stack, Type type, int page, ArrayList list )
+			public InternalPrompt(PropertyInfo prop, Mobile mobile, object o, Stack<PropertiesGump.StackEntry> stack,
+				Type type, int page, ArrayList list)
 			{
 				m_Property = prop;
 				m_Mobile = mobile;
@@ -159,73 +161,74 @@ namespace Server.Gumps
 				m_List = list;
 			}
 
-			public override void OnCancel( Mobile from )
+			public override void OnCancel(Mobile from)
 			{
-				m_Mobile.SendGump( new XmlSetObjectGump( m_Property, m_Mobile, m_Object, m_Stack, m_Type, m_Page, m_List ) );
+				m_Mobile.SendGump(new XmlSetObjectGump(m_Property, m_Mobile, m_Object, m_Stack, m_Type, m_Page,
+					m_List));
 			}
 
-			public override void OnResponse( Mobile from, string text )
+			public override void OnResponse(Mobile from, string text)
 			{
 				object toSet;
 				bool shouldSet;
 
 				try
 				{
-					Serial serial = Utility.ToSerial( text );
+					var serial = Utility.ToSerial(text);
 
-					toSet = World.FindEntity( serial );
+					toSet = World.FindEntity(serial);
 
-					if ( toSet == null )
+					if (toSet == null)
 					{
 						shouldSet = false;
-						m_Mobile.SendMessage( "No object with that serial was found." );
+						m_Mobile.SendMessage("No object with that serial was found.");
 					}
-					else if ( !m_Type.IsAssignableFrom( toSet.GetType() ) )
+					else if (!m_Type.IsAssignableFrom(toSet.GetType()))
 					{
 						toSet = null;
 						shouldSet = false;
-						m_Mobile.SendMessage( "The object with that serial could not be assigned to a property of type : {0}", m_Type.Name );
+						m_Mobile.SendMessage(
+							"The object with that serial could not be assigned to a property of type : {0}",
+							m_Type.Name);
 					}
 					else
-					{
 						shouldSet = true;
-					}
 				}
 				catch
 				{
 					toSet = null;
 					shouldSet = false;
-					m_Mobile.SendMessage( "Bad format" );
+					m_Mobile.SendMessage("Bad format");
 				}
 
-				if ( shouldSet )
-				{
+				if (shouldSet)
 					try
 					{
-						CommandLogging.LogChangeProperty( m_Mobile, m_Object, m_Property.Name, toSet==null?"(null)":toSet.ToString() );
-						m_Property.SetValue( m_Object, toSet, null );
+						CommandLogging.LogChangeProperty(m_Mobile, m_Object, m_Property.Name,
+							toSet == null ? "(null)" : toSet.ToString());
+						m_Property.SetValue(m_Object, toSet, null);
 					}
 					catch
 					{
-						m_Mobile.SendMessage( "An exception was caught. The property may not have changed." );
+						m_Mobile.SendMessage("An exception was caught. The property may not have changed.");
 					}
-				}
 
-				m_Mobile.SendGump( new XmlSetObjectGump( m_Property, m_Mobile, m_Object, m_Stack, m_Type, m_Page, m_List ) );
+				m_Mobile.SendGump(new XmlSetObjectGump(m_Property, m_Mobile, m_Object, m_Stack, m_Type, m_Page,
+					m_List));
 			}
 		}
 
-		public override void OnResponse( NetState sender, RelayInfo info )
+		public override void OnResponse(NetState sender, RelayInfo info)
 		{
 			object toSet;
 			bool shouldSet, shouldSend = true;
 			object viewProps = null;
 
-			switch ( info.ButtonID )
+			switch (info.ButtonID)
 			{
 				case 0: // closed
 				{
-					m_Mobile.SendGump( new XmlPropertiesGump( m_Mobile, m_Object, m_Stack, m_List, m_Page ) );
+					m_Mobile.SendGump(new XmlPropertiesGump(m_Mobile, m_Object, m_Stack, m_List, m_Page));
 
 					toSet = null;
 					shouldSet = false;
@@ -235,7 +238,8 @@ namespace Server.Gumps
 				}
 				case 1: // Change by Target
 				{
-					m_Mobile.Target = new XmlSetObjectTarget( m_Property, m_Mobile, m_Object, m_Stack, m_Type, m_Page, m_List );
+					m_Mobile.Target =
+						new XmlSetObjectTarget(m_Property, m_Mobile, m_Object, m_Stack, m_Type, m_Page, m_List);
 					toSet = null;
 					shouldSet = false;
 					shouldSend = false;
@@ -247,8 +251,9 @@ namespace Server.Gumps
 					shouldSet = false;
 					shouldSend = false;
 
-					m_Mobile.SendMessage( "Enter the serial you wish to find:" );
-					m_Mobile.Prompt = new InternalPrompt( m_Property, m_Mobile, m_Object, m_Stack, m_Type, m_Page, m_List );
+					m_Mobile.SendMessage("Enter the serial you wish to find:");
+					m_Mobile.Prompt =
+						new InternalPrompt(m_Property, m_Mobile, m_Object, m_Stack, m_Type, m_Page, m_List);
 
 					break;
 				}
@@ -264,12 +269,12 @@ namespace Server.Gumps
 					toSet = null;
 					shouldSet = false;
 
-					object obj = m_Property.GetValue( m_Object, null );
+					var obj = m_Property.GetValue(m_Object, null);
 
-					if ( obj == null )
-						m_Mobile.SendMessage( "The property is null and so you cannot view its properties." );
-					else if ( !BaseCommand.IsAccessible( m_Mobile, obj ) )
-						m_Mobile.SendMessage( "You may not view their properties." );
+					if (obj == null)
+						m_Mobile.SendMessage("The property is null and so you cannot view its properties.");
+					else if (!BaseCommand.IsAccessible(m_Mobile, obj))
+						m_Mobile.SendMessage("You may not view their properties.");
 					else
 						viewProps = obj;
 
@@ -284,24 +289,24 @@ namespace Server.Gumps
 				}
 			}
 
-			if ( shouldSet )
-			{
+			if (shouldSet)
 				try
 				{
-					CommandLogging.LogChangeProperty( m_Mobile, m_Object, m_Property.Name, toSet==null?"(null)":toSet.ToString() );
-					m_Property.SetValue( m_Object, toSet, null );
+					CommandLogging.LogChangeProperty(m_Mobile, m_Object, m_Property.Name,
+						toSet == null ? "(null)" : toSet.ToString());
+					m_Property.SetValue(m_Object, toSet, null);
 				}
 				catch
 				{
-					m_Mobile.SendMessage( "An exception was caught. The property may not have changed." );
+					m_Mobile.SendMessage("An exception was caught. The property may not have changed.");
 				}
-			}
 
-			if ( shouldSend )
-				m_Mobile.SendGump( new XmlSetObjectGump( m_Property, m_Mobile, m_Object, m_Stack, m_Type, m_Page, m_List ) );
+			if (shouldSend)
+				m_Mobile.SendGump(new XmlSetObjectGump(m_Property, m_Mobile, m_Object, m_Stack, m_Type, m_Page,
+					m_List));
 
-			if ( viewProps != null )
-				m_Mobile.SendGump( new XmlPropertiesGump( m_Mobile, viewProps ) );
+			if (viewProps != null)
+				m_Mobile.SendGump(new XmlPropertiesGump(m_Mobile, viewProps));
 		}
 	}
 }

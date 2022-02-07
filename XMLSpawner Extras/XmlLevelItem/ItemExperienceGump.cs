@@ -1,25 +1,20 @@
-using System;
-using Server;
 using Server.Items;
-using System.Collections;
 using Server.Network;
-using Server.Misc;
-using Server.Mobiles;
-using Server.Gumps;
 using Server.Engines.XmlSpawner2;
 
 namespace Server.Gumps
 {
-    #region " Gump "
-    public class ItemExperienceGump : Gump
+	#region " Gump "
+
+	public class ItemExperienceGump : Gump
 	{
 		private Mobile m_From;
 		private Item m_Item;
 		private AttributeCategory m_Cat;
 		private GumpPage m_Page;
 
-        private const int LabelHue = 0x480;
-        private const int TitleHue = 0x12B;
+		private const int LabelHue = 0x480;
+		private const int TitleHue = 0x12B;
 
 		private enum GumpPage
 		{
@@ -27,23 +22,23 @@ namespace Server.Gumps
 			AttributeList
 		}
 
-		public ItemExperienceGump( Mobile from, Item item, AttributeCategory cat ) : this( from, item, cat, GumpPage.None )
+		public ItemExperienceGump(Mobile from, Item item, AttributeCategory cat) : this(from, item, cat, GumpPage.None)
 		{
 		}
 
-		private ItemExperienceGump( Mobile from, Item item, AttributeCategory cat, GumpPage page ) : base( 40, 40 )
+		private ItemExperienceGump(Mobile from, Item item, AttributeCategory cat, GumpPage page) : base(40, 40)
 		{
 			m_From = from;
 			m_Item = item;
 			m_Cat = cat;
 			m_Page = page;
 
-			from.CloseGump( typeof( ItemExperienceGump ) );
+			from.CloseGump(typeof(ItemExperienceGump));
 
-			Closable=true;
-			Disposable=true;
-			Dragable=true;
-			Resizable=false;
+			Closable = true;
+			Disposable = true;
+			Dragable = true;
+			Resizable = false;
 
 			AddPage(0);
 			AddBackground(50, 35, 540, 382, 9270);
@@ -54,158 +49,113 @@ namespace Server.Gumps
 
 			AddLabel(262, 56, TitleHue, @"Item Experience");
 
-            AddLabel(136, 93, TitleHue, @"Categories");
-			AddButton(75, 116, 4005, 4007, GetButtonID( 1, 0 ), GumpButtonType.Reply, 0);
-            AddLabel(112, 117, LabelHue, @"Melee Attributes");
-			AddButton(75, 138, 4005, 4007, GetButtonID( 1, 1 ), GumpButtonType.Reply, 0);
-            AddLabel(112, 139, LabelHue, @"Magic Attributes");
-			AddButton(75, 160, 4005, 4007, GetButtonID( 1, 2 ), GumpButtonType.Reply, 0);
-            AddLabel(112, 161, LabelHue, @"Character Stats");
-			AddButton(75, 182, 4005, 4007, GetButtonID( 1, 3 ), GumpButtonType.Reply, 0);
-            AddLabel(112, 183, LabelHue, @"Resistances");
-            if (m_Item is BaseWeapon)
-			    AddButton(75, 204, 4005, 4007, GetButtonID( 1, 4 ), GumpButtonType.Reply, 0);
-            AddLabel(112, 205, LabelHue, @"Weapon Hits");
-			AddButton(75, 226, 4005, 4007, GetButtonID( 1, 5 ), GumpButtonType.Reply, 0);
-            AddLabel(112, 227, LabelHue, @"Misc. Attributes");
+			AddLabel(136, 93, TitleHue, @"Categories");
+			AddButton(75, 116, 4005, 4007, GetButtonID(1, 0), GumpButtonType.Reply, 0);
+			AddLabel(112, 117, LabelHue, @"Melee Attributes");
+			AddButton(75, 138, 4005, 4007, GetButtonID(1, 1), GumpButtonType.Reply, 0);
+			AddLabel(112, 139, LabelHue, @"Magic Attributes");
+			AddButton(75, 160, 4005, 4007, GetButtonID(1, 2), GumpButtonType.Reply, 0);
+			AddLabel(112, 161, LabelHue, @"Character Stats");
+			AddButton(75, 182, 4005, 4007, GetButtonID(1, 3), GumpButtonType.Reply, 0);
+			AddLabel(112, 183, LabelHue, @"Resistances");
+			if (m_Item is BaseWeapon)
+				AddButton(75, 204, 4005, 4007, GetButtonID(1, 4), GumpButtonType.Reply, 0);
+			AddLabel(112, 205, LabelHue, @"Weapon Hits");
+			AddButton(75, 226, 4005, 4007, GetButtonID(1, 5), GumpButtonType.Reply, 0);
+			AddLabel(112, 227, LabelHue, @"Misc. Attributes");
 
 			AddLabel(394, 93, TitleHue, @"Attributes");
 
 			AddImage(0, 4, 10440);
 			AddImage(554, 4, 10441);
 
-            CreateItemExpList();
+			CreateItemExpList();
 
 			AddButton(280, 379, 241, 243, 0, GumpButtonType.Reply, 0); //Cancel
 
-			if ( page == GumpPage.AttributeList )
-				CreateAttributeList( cat );
+			if (page == GumpPage.AttributeList)
+				CreateAttributeList(cat);
 		}
 
-        public void CreateItemExpList()
-        {
-            //ILevelable levitem = (ILevelable)m_Item;
-            XmlLevelItem levitem = XmlAttach.FindAttachment(m_Item, typeof(XmlLevelItem)) as XmlLevelItem;
-
-            AddLabel(75, 275, LabelHue, @"Max levels on item:");
-            AddLabel(198, 275, LabelHue, levitem.MaxLevel.ToString());
-
-            AddLabel(75, 297, LabelHue, @"Experience:");
-            AddLabel(154, 297, LabelHue, levitem.Experience.ToString());
-
-            int tolevel = 0;
-            for (int i = 0; i < LevelItemManager.ExpTable.Length; ++i)
-            {
-                if (levitem.Experience < LevelItemManager.ExpTable[i])
-                {
-                    tolevel = LevelItemManager.ExpTable[i] - levitem.Experience;
-                    break;
-                }
-            }
-            AddLabel(75, 319, LabelHue, @"Exp. to next level:");
-            AddLabel(191, 319, LabelHue, tolevel.ToString());
-
-            AddLabel(75, 341, LabelHue, @"Spending Points(sp) Avail:");
-            AddLabel(230, 341, LabelHue, levitem.Points.ToString());
-        }
-
-		public void CreateAttributeList( AttributeCategory cat )
+		public void CreateItemExpList()
 		{
-			int index = 0;
+			//ILevelable levitem = (ILevelable)m_Item;
+			var levitem = XmlAttach.FindAttachment(m_Item, typeof(XmlLevelItem)) as XmlLevelItem;
+
+			AddLabel(75, 275, LabelHue, @"Max levels on item:");
+			AddLabel(198, 275, LabelHue, levitem.MaxLevel.ToString());
+
+			AddLabel(75, 297, LabelHue, @"Experience:");
+			AddLabel(154, 297, LabelHue, levitem.Experience.ToString());
+
+			var tolevel = 0;
+			for (var i = 0; i < LevelItemManager.ExpTable.Length; ++i)
+				if (levitem.Experience < LevelItemManager.ExpTable[i])
+				{
+					tolevel = LevelItemManager.ExpTable[i] - levitem.Experience;
+					break;
+				}
+
+			AddLabel(75, 319, LabelHue, @"Exp. to next level:");
+			AddLabel(191, 319, LabelHue, tolevel.ToString());
+
+			AddLabel(75, 341, LabelHue, @"Spending Points(sp) Avail:");
+			AddLabel(230, 341, LabelHue, levitem.Points.ToString());
+		}
+
+		public void CreateAttributeList(AttributeCategory cat)
+		{
+			var index = 0;
 			int pageindex;
 			int attrvalue;
 
-			for ( int i = 0; i < LevelAttributes.m_Attributes.Length; ++i )
-			{
+			for (var i = 0; i < LevelAttributes.m_Attributes.Length; ++i)
 				if (LevelAttributes.m_Attributes[i].m_Category == cat)
 				{
 					pageindex = index % 10;
 
-					if ( pageindex == 0 )
+					if (pageindex == 0)
 					{
-						if ( index > 0 )
+						if (index > 0)
 						{
-							AddButton(536, 343, 4005, 4007, 0, GumpButtonType.Page, (index / 10) + 1);
-                            AddLabel(497, 344, LabelHue, @"Next");
+							AddButton(536, 343, 4005, 4007, 0, GumpButtonType.Page, index / 10 + 1);
+							AddLabel(497, 344, LabelHue, @"Next");
 						}
 
-						AddPage( (index / 10) + 1 );
+						AddPage(index / 10 + 1);
 
-						if ( index > 0 )
+						if (index > 0)
 						{
 							AddButton(301, 343, 4014, 4016, 0, GumpButtonType.Page, index / 10);
-                            AddLabel(337, 344, LabelHue, @"Previous");
+							AddLabel(337, 344, LabelHue, @"Previous");
 						}
 					}
 
-                    if (m_Item is BaseWeapon)
-                        attrvalue = ((BaseWeapon)m_Item).Attributes[LevelAttributes.m_Attributes[i].m_Attribute];
-                    else if (m_Item is BaseArmor)
-                        attrvalue = ((BaseArmor)m_Item).Attributes[LevelAttributes.m_Attributes[i].m_Attribute];
-                    else if (m_Item is BaseJewel)
-                        attrvalue = ((BaseJewel)m_Item).Attributes[LevelAttributes.m_Attributes[i].m_Attribute];
-                    else if (m_Item is BaseClothing)
-                        attrvalue = ((BaseClothing)m_Item).Attributes[LevelAttributes.m_Attributes[i].m_Attribute];
-                    else
-                        return;
+					if (m_Item is BaseWeapon)
+						attrvalue = ((BaseWeapon)m_Item).Attributes[LevelAttributes.m_Attributes[i].m_Attribute];
+					else if (m_Item is BaseArmor)
+						attrvalue = ((BaseArmor)m_Item).Attributes[LevelAttributes.m_Attributes[i].m_Attribute];
+					else if (m_Item is BaseJewel)
+						attrvalue = ((BaseJewel)m_Item).Attributes[LevelAttributes.m_Attributes[i].m_Attribute];
+					else if (m_Item is BaseClothing)
+						attrvalue = ((BaseClothing)m_Item).Attributes[LevelAttributes.m_Attributes[i].m_Attribute];
+					else
+						return;
 
-                    if (attrvalue < LevelAttributes.m_Attributes[i].m_MaxValue)
-					    AddButton(301, 116 + (pageindex * 20), 4005, 4007, GetButtonID( 2, i ), GumpButtonType.Reply, 0);
-                    AddLabel(337, 117 + (pageindex * 20), LabelHue, LevelAttributes.m_Attributes[i].m_Name+" ("+GetPointCost(m_Item, LevelAttributes.m_Attributes[i].m_XP)+"sp)");
-                    AddLabel(540, 117 + (pageindex * 20), LabelHue, attrvalue.ToString());
+					if (attrvalue < LevelAttributes.m_Attributes[i].m_MaxValue)
+						AddButton(301, 116 + pageindex * 20, 4005, 4007, GetButtonID(2, i), GumpButtonType.Reply, 0);
+					AddLabel(337, 117 + pageindex * 20, LabelHue,
+						LevelAttributes.m_Attributes[i].m_Name + " (" +
+						GetPointCost(m_Item, LevelAttributes.m_Attributes[i].m_XP) + "sp)");
+					AddLabel(540, 117 + pageindex * 20, LabelHue, attrvalue.ToString());
 
 					++index;
 				}
-			}
 
-            if (m_Item is BaseWeapon)
-            {
-                for (int i = 0; i < LevelAttributes.m_WeaponAttributes.Length; ++i)
-                {
-                    if (LevelAttributes.m_WeaponAttributes[i].m_Category == cat)
-                    {
-                        pageindex = index % 10;
-
-                        if (pageindex == 0)
-                        {
-                            if (index > 0)
-                            {
-                                AddButton(536, 343, 4005, 4007, 0, GumpButtonType.Page, (index / 10) + 1);
-                                AddLabel(497, 344, LabelHue, @"Next");
-                            }
-
-                            AddPage((index / 10) + 1);
-
-                            if (index > 0)
-                            {
-                                AddButton(301, 343, 4014, 4016, 0, GumpButtonType.Page, index / 10);
-                                AddLabel(337, 344, LabelHue, @"Previous");
-                            }
-                        }
-
-						if (LevelAttributes.m_WeaponAttributes[i].m_Attribute == AosWeaponAttribute.DurabilityBonus)
-						{
-							attrvalue = ((BaseWeapon)m_Item).MaxHitPoints;
-						}
-						else
-						{
-                        	attrvalue = ((BaseWeapon)m_Item).WeaponAttributes[LevelAttributes.m_WeaponAttributes[i].m_Attribute];
-						}
-                        if (attrvalue < LevelAttributes.m_WeaponAttributes[i].m_MaxValue)
-                            AddButton(301, 116 + (pageindex * 20), 4005, 4007, GetButtonID(3, i), GumpButtonType.Reply, 0);
-
-                        AddLabel(337, 117 + (pageindex * 20), LabelHue, LevelAttributes.m_WeaponAttributes[i].m_Name+" ("+GetPointCost(m_Item, LevelAttributes.m_WeaponAttributes[i].m_XP)+"sp)");
-                        AddLabel(540, 117 + (pageindex * 20), LabelHue, attrvalue.ToString());
-
-                        ++index;
-                    }
-                }
-            }
-            else if (m_Item is BaseArmor)
-            {
-                if (cat == AttributeCategory.Resists)
-                {
-					for (int i = 0; i < LevelAttributes.m_ResistanceTypes.Length; ++i)
+			if (m_Item is BaseWeapon)
+			{
+				for (var i = 0; i < LevelAttributes.m_WeaponAttributes.Length; ++i)
+					if (LevelAttributes.m_WeaponAttributes[i].m_Category == cat)
 					{
 						pageindex = index % 10;
 
@@ -213,11 +163,52 @@ namespace Server.Gumps
 						{
 							if (index > 0)
 							{
-								AddButton(536, 343, 4005, 4007, 0, GumpButtonType.Page, (index / 10) + 1);
+								AddButton(536, 343, 4005, 4007, 0, GumpButtonType.Page, index / 10 + 1);
 								AddLabel(497, 344, LabelHue, @"Next");
 							}
 
-							AddPage((index / 10) + 1);
+							AddPage(index / 10 + 1);
+
+							if (index > 0)
+							{
+								AddButton(301, 343, 4014, 4016, 0, GumpButtonType.Page, index / 10);
+								AddLabel(337, 344, LabelHue, @"Previous");
+							}
+						}
+
+						if (LevelAttributes.m_WeaponAttributes[i].m_Attribute == AosWeaponAttribute.DurabilityBonus)
+							attrvalue = ((BaseWeapon)m_Item).MaxHitPoints;
+						else
+							attrvalue = ((BaseWeapon)m_Item).WeaponAttributes[
+								LevelAttributes.m_WeaponAttributes[i].m_Attribute];
+						if (attrvalue < LevelAttributes.m_WeaponAttributes[i].m_MaxValue)
+							AddButton(301, 116 + pageindex * 20, 4005, 4007, GetButtonID(3, i), GumpButtonType.Reply,
+								0);
+
+						AddLabel(337, 117 + pageindex * 20, LabelHue,
+							LevelAttributes.m_WeaponAttributes[i].m_Name + " (" +
+							GetPointCost(m_Item, LevelAttributes.m_WeaponAttributes[i].m_XP) + "sp)");
+						AddLabel(540, 117 + pageindex * 20, LabelHue, attrvalue.ToString());
+
+						++index;
+					}
+			}
+			else if (m_Item is BaseArmor)
+			{
+				if (cat == AttributeCategory.Resists)
+					for (var i = 0; i < LevelAttributes.m_ResistanceTypes.Length; ++i)
+					{
+						pageindex = index % 10;
+
+						if (pageindex == 0)
+						{
+							if (index > 0)
+							{
+								AddButton(536, 343, 4005, 4007, 0, GumpButtonType.Page, index / 10 + 1);
+								AddLabel(497, 344, LabelHue, @"Next");
+							}
+
+							AddPage(index / 10 + 1);
 
 							if (index > 0)
 							{
@@ -240,18 +231,17 @@ namespace Server.Gumps
 							attrvalue = 0;
 
 						if (attrvalue < LevelAttributes.m_ResistanceTypes[i].m_MaxValue)
-							AddButton(301, 116 + (pageindex * 20), 4005, 4007, GetButtonID(5, i), GumpButtonType.Reply, 0);
-						AddLabel(337, 117 + (pageindex * 20), LabelHue, LevelAttributes.m_ResistanceTypes[i].m_Name+" ("+GetPointCost(m_Item, LevelAttributes.m_ResistanceTypes[i].m_XP)+"sp)");
-						AddLabel(540, 117 + (pageindex * 20), LabelHue, attrvalue.ToString());
+							AddButton(301, 116 + pageindex * 20, 4005, 4007, GetButtonID(5, i), GumpButtonType.Reply,
+								0);
+						AddLabel(337, 117 + pageindex * 20, LabelHue,
+							LevelAttributes.m_ResistanceTypes[i].m_Name + " (" +
+							GetPointCost(m_Item, LevelAttributes.m_ResistanceTypes[i].m_XP) + "sp)");
+						AddLabel(540, 117 + pageindex * 20, LabelHue, attrvalue.ToString());
 
 						++index;
 					}
-
-                }
-                else
-                {
-					for (int i = 0; i < LevelAttributes.m_ArmorAttributes.Length; ++i)
-					{
+				else
+					for (var i = 0; i < LevelAttributes.m_ArmorAttributes.Length; ++i)
 						if (LevelAttributes.m_ArmorAttributes[i].m_Category == cat)
 						{
 							pageindex = index % 10;
@@ -260,11 +250,11 @@ namespace Server.Gumps
 							{
 								if (index > 0)
 								{
-									AddButton(536, 343, 4005, 4007, 0, GumpButtonType.Page, (index / 10) + 1);
+									AddButton(536, 343, 4005, 4007, 0, GumpButtonType.Page, index / 10 + 1);
 									AddLabel(497, 344, LabelHue, @"Next");
 								}
 
-								AddPage((index / 10) + 1);
+								AddPage(index / 10 + 1);
 
 								if (index > 0)
 								{
@@ -274,29 +264,26 @@ namespace Server.Gumps
 							}
 
 							if (LevelAttributes.m_ArmorAttributes[i].m_Attribute == AosArmorAttribute.DurabilityBonus)
-							{
 								attrvalue = ((BaseArmor)m_Item).MaxHitPoints;
-							}
 							else
-							{
-								attrvalue = ((BaseArmor)m_Item).ArmorAttributes[LevelAttributes.m_ArmorAttributes[i].m_Attribute];
-							}
+								attrvalue = ((BaseArmor)m_Item).ArmorAttributes[
+									LevelAttributes.m_ArmorAttributes[i].m_Attribute];
 							if (attrvalue < LevelAttributes.m_ArmorAttributes[i].m_MaxValue)
-								AddButton(301, 116 + (pageindex * 20), 4005, 4007, GetButtonID(4, i), GumpButtonType.Reply, 0);
+								AddButton(301, 116 + pageindex * 20, 4005, 4007, GetButtonID(4, i),
+									GumpButtonType.Reply, 0);
 
-							AddLabel(337, 117 + (pageindex * 20), LabelHue, LevelAttributes.m_ArmorAttributes[i].m_Name+" ("+GetPointCost(m_Item, LevelAttributes.m_ArmorAttributes[i].m_XP)+"sp)");
-							AddLabel(540, 117 + (pageindex * 20), LabelHue, attrvalue.ToString());
+							AddLabel(337, 117 + pageindex * 20, LabelHue,
+								LevelAttributes.m_ArmorAttributes[i].m_Name + " (" +
+								GetPointCost(m_Item, LevelAttributes.m_ArmorAttributes[i].m_XP) + "sp)");
+							AddLabel(540, 117 + pageindex * 20, LabelHue, attrvalue.ToString());
 
 							++index;
 						}
-					}
-				}
 			}
-            else if (m_Item is BaseJewel || m_Item is BaseClothing)
+			else if (m_Item is BaseJewel || m_Item is BaseClothing)
 			{
-                if (cat == AttributeCategory.Resists)
-                {
-					for (int i = 0; i < LevelAttributes.m_ElementAttributes.Length; ++i)
+				if (cat == AttributeCategory.Resists)
+					for (var i = 0; i < LevelAttributes.m_ElementAttributes.Length; ++i)
 					{
 						pageindex = index % 10;
 
@@ -304,11 +291,11 @@ namespace Server.Gumps
 						{
 							if (index > 0)
 							{
-								AddButton(536, 343, 4005, 4007, 0, GumpButtonType.Page, (index / 10) + 1);
+								AddButton(536, 343, 4005, 4007, 0, GumpButtonType.Page, index / 10 + 1);
 								AddLabel(497, 344, LabelHue, @"Next");
 							}
 
-							AddPage((index / 10) + 1);
+							AddPage(index / 10 + 1);
 
 							if (index > 0)
 							{
@@ -318,78 +305,80 @@ namespace Server.Gumps
 						}
 
 						if (m_Item is BaseJewel)
-							attrvalue = ((BaseJewel)m_Item).Resistances[LevelAttributes.m_ElementAttributes[i].m_Attribute];
+							attrvalue = ((BaseJewel)m_Item).Resistances[
+								LevelAttributes.m_ElementAttributes[i].m_Attribute];
 						else
-							attrvalue = ((BaseClothing)m_Item).Resistances[LevelAttributes.m_ElementAttributes[i].m_Attribute];
+							attrvalue = ((BaseClothing)m_Item).Resistances[
+								LevelAttributes.m_ElementAttributes[i].m_Attribute];
 
 						if (attrvalue < LevelAttributes.m_ElementAttributes[i].m_MaxValue)
-							AddButton(301, 116 + (pageindex * 20), 4005, 4007, GetButtonID(6, i), GumpButtonType.Reply, 0);
-						AddLabel(337, 117 + (pageindex * 20), LabelHue, LevelAttributes.m_ElementAttributes[i].m_Name+" ("+GetPointCost(m_Item, LevelAttributes.m_ElementAttributes[i].m_XP)+"sp)");
-						AddLabel(540, 117 + (pageindex * 20), LabelHue, attrvalue.ToString());
+							AddButton(301, 116 + pageindex * 20, 4005, 4007, GetButtonID(6, i), GumpButtonType.Reply,
+								0);
+						AddLabel(337, 117 + pageindex * 20, LabelHue,
+							LevelAttributes.m_ElementAttributes[i].m_Name + " (" +
+							GetPointCost(m_Item, LevelAttributes.m_ElementAttributes[i].m_XP) + "sp)");
+						AddLabel(540, 117 + pageindex * 20, LabelHue, attrvalue.ToString());
 
 						++index;
 					}
-				}
-            }
-            else
-            {
-				return;
 			}
+			else
+				return;
 		}
 
-	public static int GetPointCost(Item m_Item, int xp)
-        {
-            int cost = xp;
-
-            if (LevelItems.DoubleArtifactCost)
-            {
-                if (m_Item is BaseWeapon)
-                {
-                    if (((BaseWeapon)m_Item).ArtifactRarity >= 10)
-                        cost *= 2;
-                }
-                else if (m_Item is BaseArmor)
-                {
-                    if (((BaseArmor)m_Item).ArtifactRarity >= 10)
-                        cost *= 2;
-                }
-                else if (m_Item is BaseJewel)
-                {
-                    if (((BaseJewel)m_Item).ArtifactRarity >= 10)
-                        cost *= 2;
-                }
-                else
-                {
-                    if (((BaseClothing)m_Item).ArtifactRarity >= 10)
-                        cost *= 2;
-                }
-            }
-
-            return cost;
-        }
-
-		public static int GetButtonID( int type, int index )
+		public static int GetPointCost(Item m_Item, int xp)
 		{
-			return 1 + type + (index * 7);
+			var cost = xp;
+
+			if (LevelItems.DoubleArtifactCost)
+			{
+				if (m_Item is BaseWeapon)
+				{
+					if (((BaseWeapon)m_Item).ArtifactRarity >= 10)
+						cost *= 2;
+				}
+				else if (m_Item is BaseArmor)
+				{
+					if (((BaseArmor)m_Item).ArtifactRarity >= 10)
+						cost *= 2;
+				}
+				else if (m_Item is BaseJewel)
+				{
+					if (((BaseJewel)m_Item).ArtifactRarity >= 10)
+						cost *= 2;
+				}
+				else
+				{
+					if (((BaseClothing)m_Item).ArtifactRarity >= 10)
+						cost *= 2;
+				}
+			}
+
+			return cost;
 		}
 
-		public override void OnResponse( NetState sender, RelayInfo info )
+		public static int GetButtonID(int type, int index)
 		{
-			if ( info.ButtonID <= 0 )
+			return 1 + type + index * 7;
+		}
+
+		public override void OnResponse(NetState sender, RelayInfo info)
+		{
+			if (info.ButtonID <= 0)
 				return; // Canceled
 
 
-            //ILevelable levitem = (ILevelable)m_Item;
-            XmlLevelItem levitem = XmlAttach.FindAttachment(m_Item, typeof(XmlLevelItem)) as XmlLevelItem;
+			//ILevelable levitem = (ILevelable)m_Item;
+			var levitem = XmlAttach.FindAttachment(m_Item, typeof(XmlLevelItem)) as XmlLevelItem;
 
-			int buttonID = info.ButtonID - 1;
-			int type = buttonID % 7;
-			int index = buttonID / 7;
+			var buttonID = info.ButtonID - 1;
+			var type = buttonID % 7;
+			var index = buttonID / 7;
 
-			int cost = 0;
-			int attrvalue = 0;
+			var cost = 0;
+			var attrvalue = 0;
 
-			switch ( type )
+			switch (type)
 			{
 				case 0: // Cancel
 				{
@@ -397,41 +386,47 @@ namespace Server.Gumps
 				}
 				case 1: // Select Attribute Type
 				{
-					switch ( index )
+					switch (index)
 					{
 						case 0: // Melee
 						{
-							m_From.SendGump( new ItemExperienceGump( m_From, m_Item, AttributeCategory.Melee, GumpPage.AttributeList ) );
+							m_From.SendGump(new ItemExperienceGump(m_From, m_Item, AttributeCategory.Melee,
+								GumpPage.AttributeList));
 
 							break;
 						}
 						case 1: // Magic
 						{
-							m_From.SendGump( new ItemExperienceGump( m_From, m_Item, AttributeCategory.Magic, GumpPage.AttributeList ) );
+							m_From.SendGump(new ItemExperienceGump(m_From, m_Item, AttributeCategory.Magic,
+								GumpPage.AttributeList));
 
 							break;
 						}
 						case 2: // Char Stats
 						{
-							m_From.SendGump( new ItemExperienceGump( m_From, m_Item, AttributeCategory.Stats, GumpPage.AttributeList ) );
+							m_From.SendGump(new ItemExperienceGump(m_From, m_Item, AttributeCategory.Stats,
+								GumpPage.AttributeList));
 
 							break;
 						}
 						case 3: // Resistances
 						{
-							m_From.SendGump( new ItemExperienceGump( m_From, m_Item, AttributeCategory.Resists, GumpPage.AttributeList ) );
+							m_From.SendGump(new ItemExperienceGump(m_From, m_Item, AttributeCategory.Resists,
+								GumpPage.AttributeList));
 
 							break;
 						}
 						case 4: // Weapon Hits
 						{
-							m_From.SendGump( new ItemExperienceGump( m_From, m_Item, AttributeCategory.Hits, GumpPage.AttributeList ) );
+							m_From.SendGump(new ItemExperienceGump(m_From, m_Item, AttributeCategory.Hits,
+								GumpPage.AttributeList));
 
 							break;
 						}
 						case 5: // Misc.
 						{
-							m_From.SendGump( new ItemExperienceGump( m_From, m_Item, AttributeCategory.Misc, GumpPage.AttributeList ) );
+							m_From.SendGump(new ItemExperienceGump(m_From, m_Item, AttributeCategory.Misc,
+								GumpPage.AttributeList));
 
 							break;
 						}
@@ -444,135 +439,141 @@ namespace Server.Gumps
 				{
 					cost = GetPointCost(m_Item, LevelAttributes.m_Attributes[index].m_XP);
 
-                    if ((levitem.Points - cost) >= 0)
-                    {
-                        //add point to selected attribute
-                        if (index >= 0 && index < LevelAttributes.m_Attributes.Length)
-                        {
+					if (levitem.Points - cost >= 0)
+					{
+						//add point to selected attribute
+						if (index >= 0 && index < LevelAttributes.m_Attributes.Length)
+						{
 							if (m_Item is BaseWeapon)
 							{
-								attrvalue = ((BaseWeapon)m_Item).Attributes[LevelAttributes.m_Attributes[index].m_Attribute];
+								attrvalue = ((BaseWeapon)m_Item).Attributes[
+									LevelAttributes.m_Attributes[index].m_Attribute];
 								if (attrvalue < LevelAttributes.m_Attributes[index].m_MaxValue)
 								{
-									((BaseWeapon)m_Item).Attributes[LevelAttributes.m_Attributes[index].m_Attribute] += 1;
+									((BaseWeapon)m_Item).Attributes[LevelAttributes.m_Attributes[index].m_Attribute] +=
+										1;
 									levitem.Points -= cost;
 								}
 							}
 							else if (m_Item is BaseArmor)
 							{
-								attrvalue = ((BaseArmor)m_Item).Attributes[LevelAttributes.m_Attributes[index].m_Attribute];
+								attrvalue = ((BaseArmor)m_Item).Attributes[
+									LevelAttributes.m_Attributes[index].m_Attribute];
 								if (attrvalue < LevelAttributes.m_Attributes[index].m_MaxValue)
 								{
-									((BaseArmor)m_Item).Attributes[LevelAttributes.m_Attributes[index].m_Attribute] += 1;
+									((BaseArmor)m_Item).Attributes[LevelAttributes.m_Attributes[index].m_Attribute] +=
+										1;
 									levitem.Points -= cost;
 								}
 							}
 							else if (m_Item is BaseJewel)
 							{
-								attrvalue = ((BaseJewel)m_Item).Attributes[LevelAttributes.m_Attributes[index].m_Attribute];
+								attrvalue = ((BaseJewel)m_Item).Attributes[
+									LevelAttributes.m_Attributes[index].m_Attribute];
 								if (attrvalue < LevelAttributes.m_Attributes[index].m_MaxValue)
 								{
-									((BaseJewel)m_Item).Attributes[LevelAttributes.m_Attributes[index].m_Attribute] += 1;
+									((BaseJewel)m_Item).Attributes[LevelAttributes.m_Attributes[index].m_Attribute] +=
+										1;
 									levitem.Points -= cost;
 								}
 							}
 							else if (m_Item is BaseClothing)
 							{
-								attrvalue = ((BaseClothing)m_Item).Attributes[LevelAttributes.m_Attributes[index].m_Attribute];
+								attrvalue = ((BaseClothing)m_Item).Attributes[
+									LevelAttributes.m_Attributes[index].m_Attribute];
 								if (attrvalue < LevelAttributes.m_Attributes[index].m_MaxValue)
 								{
-									((BaseClothing)m_Item).Attributes[LevelAttributes.m_Attributes[index].m_Attribute] += 1;
+									((BaseClothing)m_Item).Attributes
+										[LevelAttributes.m_Attributes[index].m_Attribute] += 1;
 									levitem.Points -= cost;
 								}
 							}
 							else
 								return;
-    					}
-                    }
-                    else
-                    {
-                        m_From.SendMessage("You don't have enough points available!  This attribute costs "+cost+" points.");
-                    }
+						}
+					}
+					else
+						m_From.SendMessage("You don't have enough points available!  This attribute costs " + cost +
+						                   " points.");
 
-                    m_From.SendGump(new ItemExperienceGump(m_From, m_Item, LevelAttributes.m_Attributes[index].m_Category, GumpPage.AttributeList));
+					m_From.SendGump(new ItemExperienceGump(m_From, m_Item,
+						LevelAttributes.m_Attributes[index].m_Category, GumpPage.AttributeList));
 
-                    break;
+					break;
 				}
-                case 3: // WeaponAttribute selected
-                {
+				case 3: // WeaponAttribute selected
+				{
 					cost = GetPointCost(m_Item, LevelAttributes.m_WeaponAttributes[index].m_XP);
 
-                    if ((levitem.Points - cost) >= 0)
-                    {
-                        //add point to selected weapon attribute
-                        if (index >= 0 && index < LevelAttributes.m_WeaponAttributes.Length)
-                        {
-							if (LevelAttributes.m_WeaponAttributes[index].m_Attribute == AosWeaponAttribute.DurabilityBonus)
-							{
+					if (levitem.Points - cost >= 0)
+					{
+						//add point to selected weapon attribute
+						if (index >= 0 && index < LevelAttributes.m_WeaponAttributes.Length)
+						{
+							if (LevelAttributes.m_WeaponAttributes[index].m_Attribute ==
+							    AosWeaponAttribute.DurabilityBonus)
 								attrvalue = ((BaseWeapon)m_Item).MaxHitPoints;
-							}
 							else
-							{
-                        		attrvalue = ((BaseWeapon)m_Item).WeaponAttributes[LevelAttributes.m_WeaponAttributes[index].m_Attribute];
-							}
+								attrvalue = ((BaseWeapon)m_Item).WeaponAttributes[
+									LevelAttributes.m_WeaponAttributes[index].m_Attribute];
 
 							if (attrvalue < LevelAttributes.m_WeaponAttributes[index].m_MaxValue)
 							{
-                            	((BaseWeapon)m_Item).WeaponAttributes[LevelAttributes.m_WeaponAttributes[index].m_Attribute] += 1;
-                            	levitem.Points -= cost;
+								((BaseWeapon)m_Item).WeaponAttributes[
+									LevelAttributes.m_WeaponAttributes[index].m_Attribute] += 1;
+								levitem.Points -= cost;
 							}
-                        }
-                    }
-                    else
-                    {
-                        m_From.SendMessage("You don't have enough points available!  This attribute costs "+cost+" points.");
-                    }
+						}
+					}
+					else
+						m_From.SendMessage("You don't have enough points available!  This attribute costs " + cost +
+						                   " points.");
 
-                    m_From.SendGump(new ItemExperienceGump(m_From, m_Item, LevelAttributes.m_WeaponAttributes[index].m_Category, GumpPage.AttributeList));
+					m_From.SendGump(new ItemExperienceGump(m_From, m_Item,
+						LevelAttributes.m_WeaponAttributes[index].m_Category, GumpPage.AttributeList));
 
-                    break;
-                }
-                case 4: // Armor Attributes Selected
-                {
+					break;
+				}
+				case 4: // Armor Attributes Selected
+				{
 					cost = GetPointCost(m_Item, LevelAttributes.m_ArmorAttributes[index].m_XP);
-                    if ((levitem.Points - cost) >= 0)
-                    {
-                        //add point to selected weapon attribute
-                        if (index >= 0 && index < LevelAttributes.m_ArmorAttributes.Length)
-                        {
-							if (LevelAttributes.m_ArmorAttributes[index].m_Attribute == AosArmorAttribute.DurabilityBonus)
-							{
+					if (levitem.Points - cost >= 0)
+					{
+						//add point to selected weapon attribute
+						if (index >= 0 && index < LevelAttributes.m_ArmorAttributes.Length)
+						{
+							if (LevelAttributes.m_ArmorAttributes[index].m_Attribute ==
+							    AosArmorAttribute.DurabilityBonus)
 								attrvalue = ((BaseArmor)m_Item).MaxHitPoints;
-							}
 							else
-							{
-								attrvalue = ((BaseArmor)m_Item).ArmorAttributes[LevelAttributes.m_ArmorAttributes[index].m_Attribute];
-							}
+								attrvalue = ((BaseArmor)m_Item).ArmorAttributes[
+									LevelAttributes.m_ArmorAttributes[index].m_Attribute];
 
 							if (attrvalue < LevelAttributes.m_ArmorAttributes[index].m_MaxValue)
 							{
-                            	((BaseArmor)m_Item).ArmorAttributes[LevelAttributes.m_ArmorAttributes[index].m_Attribute] += 1;
-                            	levitem.Points -= cost;
+								((BaseArmor)m_Item).ArmorAttributes[
+									LevelAttributes.m_ArmorAttributes[index].m_Attribute] += 1;
+								levitem.Points -= cost;
 							}
-                        }
-                    }
-                    else
-                    {
-                        m_From.SendMessage("You don't have enough points available!  This attribute costs "+cost+" points.");
-                    }
+						}
+					}
+					else
+						m_From.SendMessage("You don't have enough points available!  This attribute costs " + cost +
+						                   " points.");
 
-                    m_From.SendGump(new ItemExperienceGump(m_From, m_Item, LevelAttributes.m_ArmorAttributes[index].m_Category, GumpPage.AttributeList));
+					m_From.SendGump(new ItemExperienceGump(m_From, m_Item,
+						LevelAttributes.m_ArmorAttributes[index].m_Category, GumpPage.AttributeList));
 
-                    break;
-                }
-                case 5: // Armor Resists Selected
-                {
+					break;
+				}
+				case 5: // Armor Resists Selected
+				{
 					cost = GetPointCost(m_Item, LevelAttributes.m_ResistanceTypes[index].m_XP);
-                    if ((levitem.Points - cost) >= 0)
-                    {
-                        //add point to selected weapon attribute
-                        if (index >= 0 && index < LevelAttributes.m_ResistanceTypes.Length)
-                        {
+					if (levitem.Points - cost >= 0)
+					{
+						//add point to selected weapon attribute
+						if (index >= 0 && index < LevelAttributes.m_ResistanceTypes.Length)
+						{
 							if (LevelAttributes.m_ResistanceTypes[index].m_Attribute == ResistanceType.Physical)
 							{
 								attrvalue = ((BaseArmor)m_Item).PhysicalBonus;
@@ -620,56 +621,61 @@ namespace Server.Gumps
 							}
 							else
 								return;
-                        }
-                    }
-                    else
-                    {
-                        m_From.SendMessage("You don't have enough points available!  This attribute costs "+cost+" points.");
-                    }
+						}
+					}
+					else
+						m_From.SendMessage("You don't have enough points available!  This attribute costs " + cost +
+						                   " points.");
 
-                    m_From.SendGump(new ItemExperienceGump(m_From, m_Item, LevelAttributes.m_ResistanceTypes[index].m_Category, GumpPage.AttributeList));
+					m_From.SendGump(new ItemExperienceGump(m_From, m_Item,
+						LevelAttributes.m_ResistanceTypes[index].m_Category, GumpPage.AttributeList));
 
-                    break;
-                }
-                case 6: // Jewelry & Clothing Resists Selected
-                {
+					break;
+				}
+				case 6: // Jewelry & Clothing Resists Selected
+				{
 					cost = GetPointCost(m_Item, LevelAttributes.m_ElementAttributes[index].m_XP);
-                    if ((levitem.Points - cost) >= 0)
-                    {
-                        //add point to selected weapon attribute
-                        if (index >= 0 && index < LevelAttributes.m_ElementAttributes.Length)
-                        {
+					if (levitem.Points - cost >= 0)
+					{
+						//add point to selected weapon attribute
+						if (index >= 0 && index < LevelAttributes.m_ElementAttributes.Length)
+						{
 							if (m_Item is BaseJewel)
 							{
-								attrvalue = ((BaseJewel)m_Item).Resistances[LevelAttributes.m_ElementAttributes[index].m_Attribute];
+								attrvalue = ((BaseJewel)m_Item).Resistances[
+									LevelAttributes.m_ElementAttributes[index].m_Attribute];
 								if (attrvalue < LevelAttributes.m_ElementAttributes[index].m_MaxValue)
 								{
-                            		((BaseJewel)m_Item).Resistances[LevelAttributes.m_ElementAttributes[index].m_Attribute] += 1;
-                            		levitem.Points -= cost;
+									((BaseJewel)m_Item).Resistances[
+										LevelAttributes.m_ElementAttributes[index].m_Attribute] += 1;
+									levitem.Points -= cost;
 								}
 							}
 							else
 							{
-								attrvalue = ((BaseClothing)m_Item).Resistances[LevelAttributes.m_ElementAttributes[index].m_Attribute];
+								attrvalue = ((BaseClothing)m_Item).Resistances[
+									LevelAttributes.m_ElementAttributes[index].m_Attribute];
 								if (attrvalue < LevelAttributes.m_ElementAttributes[index].m_MaxValue)
 								{
-                            		((BaseClothing)m_Item).Resistances[LevelAttributes.m_ElementAttributes[index].m_Attribute] += 1;
-                            		levitem.Points -= cost;
+									((BaseClothing)m_Item).Resistances[
+										LevelAttributes.m_ElementAttributes[index].m_Attribute] += 1;
+									levitem.Points -= cost;
 								}
 							}
-                        }
-                    }
-                    else
-                    {
-                        m_From.SendMessage("You don't have enough points available!  This attribute costs "+cost+" points.");
-                    }
+						}
+					}
+					else
+						m_From.SendMessage("You don't have enough points available!  This attribute costs " + cost +
+						                   " points.");
 
-                    m_From.SendGump(new ItemExperienceGump(m_From, m_Item, LevelAttributes.m_ElementAttributes[index].m_Category, GumpPage.AttributeList));
+					m_From.SendGump(new ItemExperienceGump(m_From, m_Item,
+						LevelAttributes.m_ElementAttributes[index].m_Category, GumpPage.AttributeList));
 
-                    break;
-                }
+					break;
+				}
 			}
 		}
-    }
-    #endregion
+	}
+
+	#endregion
 }

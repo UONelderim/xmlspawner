@@ -1,11 +1,3 @@
-using System;
-using Server;
-using Server.Targeting;
-using Server.Network;
-using System.Collections;
-using Server.ContextMenus;
-using Server.Engines.XmlSpawner2;
-
 namespace Server.Items
 {
 	public abstract class SiegeCannonball : BaseSiegeProjectile
@@ -36,7 +28,7 @@ namespace Server.Items
 		{
 			base.Deserialize(reader);
 
-			int version = reader.ReadInt();
+			var version = reader.ReadInt();
 		}
 	}
 
@@ -77,7 +69,7 @@ namespace Server.Items
 		{
 			base.Deserialize(reader);
 
-			int version = reader.ReadInt();
+			var version = reader.ReadInt();
 		}
 	}
 
@@ -118,7 +110,7 @@ namespace Server.Items
 		{
 			base.Deserialize(reader);
 
-			int version = reader.ReadInt();
+			var version = reader.ReadInt();
 		}
 	}
 
@@ -160,14 +152,14 @@ namespace Server.Items
 		{
 			base.Deserialize(reader);
 
-			int version = reader.ReadInt();
+			var version = reader.ReadInt();
 		}
 	}
 
 	public class FierySiegeCannonball : SiegeCannonball
 	{
-		public override int AnimationID { get { return 0x36D4; } }
-		public override int AnimationHue { get { return 0; } }
+		public override int AnimationID => 0x36D4;
+		public override int AnimationHue => 0;
 
 		[Constructable]
 		public FierySiegeCannonball()
@@ -205,7 +197,7 @@ namespace Server.Items
 		{
 			base.Deserialize(reader);
 
-			int version = reader.ReadInt();
+			var version = reader.ReadInt();
 		}
 /*
 		public override Item Dupe(int amount)
@@ -220,7 +212,7 @@ namespace Server.Items
 	public class SiegeGrapeShot : SiegeCannonball
 	{
 		// only does damage to mobiles
-		public override double StructureDamageMultiplier { get { return 0.0; } } //  damage multiplier for structures
+		public override double StructureDamageMultiplier => 0.0; //  damage multiplier for structures
 
 		[Constructable]
 		public SiegeGrapeShot()
@@ -257,7 +249,7 @@ namespace Server.Items
 		{
 			base.Deserialize(reader);
 
-			int version = reader.ReadInt();
+			var version = reader.ReadInt();
 		}
 	}
 }

@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Server.Mobiles
 {
@@ -25,7 +22,7 @@ namespace Server.Mobiles
 			foreach (var r in Region.Regions.Where(r => r.Name == name))
 				reg = r;
 
-			return new EscortDestinationInfo(name,reg);
+			return new EscortDestinationInfo(name, reg);
 		}
 
 		public bool Contains(Point3D location)

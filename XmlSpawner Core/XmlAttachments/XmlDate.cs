@@ -1,8 +1,4 @@
 using System;
-using Server;
-using Server.Items;
-using Server.Network;
-using Server.Mobiles;
 
 namespace Server.Engines.XmlSpawner2
 {
@@ -10,13 +6,17 @@ namespace Server.Engines.XmlSpawner2
 	{
 		private DateTime m_DataValue;
 
-		[CommandProperty( AccessLevel.GameMaster )]
-		public DateTime Date { get{ return m_DataValue; } set { m_DataValue = value; } }
+		[CommandProperty(AccessLevel.GameMaster)]
+		public DateTime Date
+		{
+			get => m_DataValue;
+			set => m_DataValue = value;
+		}
 
 		// These are the various ways in which the message attachment can be constructed.  
 		// These can be called via the [addatt interface, via scripts, via the spawner ATTACH keyword.
 		// Other overloads could be defined to handle other types of arguments
-       
+
 		// a serial constructor is REQUIRED
 		public XmlDate(ASerial serial) : base(serial)
 		{
@@ -28,14 +28,13 @@ namespace Server.Engines.XmlSpawner2
 			Name = name;
 			Date = DateTime.Now;
 		}
-        
+
 		[Attachable]
 		public XmlDate(string name, double expiresin)
 		{
 			Name = name;
 			Date = DateTime.Now;
 			Expiration = TimeSpan.FromMinutes(expiresin);
-
 		}
 
 		[Attachable]
@@ -44,41 +43,35 @@ namespace Server.Engines.XmlSpawner2
 			Name = name;
 			Date = value;
 			Expiration = TimeSpan.FromMinutes(expiresin);
-
 		}
 
 
-		public override void Serialize( GenericWriter writer )
+		public override void Serialize(GenericWriter writer)
 		{
 			base.Serialize(writer);
 
-			writer.Write( (int) 0 );
+			writer.Write((int)0);
 			// version 0
 			writer.Write(m_DataValue);
-
 		}
 
 		public override void Deserialize(GenericReader reader)
 		{
 			base.Deserialize(reader);
 
-			int version = reader.ReadInt();
+			var version = reader.ReadInt();
 			// version 0
 			m_DataValue = reader.ReadDateTime();
 		}
 
 		public override string OnIdentify(Mobile from)
 		{
-			if(from == null || from.AccessLevel == AccessLevel.Player) return null;
+			if (from == null || from.AccessLevel == AccessLevel.Player) return null;
 
-			if(Expiration > TimeSpan.Zero)
-			{
-				return String.Format("{2}: Date {0} expires in {1} mins",Date,Expiration.TotalMinutes, Name);
-			} 
+			if (Expiration > TimeSpan.Zero)
+				return String.Format("{2}: Date {0} expires in {1} mins", Date, Expiration.TotalMinutes, Name);
 			else
-			{
-				return String.Format("{1}: Date {0}",Date, Name);
-			}
+				return String.Format("{1}: Date {0}", Date, Name);
 		}
 	}
 }

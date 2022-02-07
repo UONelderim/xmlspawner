@@ -1,4 +1,3 @@
-using System;
 using Server.Gumps;
 
 /*
@@ -11,43 +10,39 @@ using Server.Gumps;
 
 namespace Server.Items
 {
-    public class MobFactionsRewardStone : Item
-    {
-        [Constructable]
-        public MobFactionsRewardStone() : base( 0xED4 )
-        {
-            Movable = false;
-            Name = "a MobFactions Reward Stone";
-        }
+	public class MobFactionsRewardStone : Item
+	{
+		[Constructable]
+		public MobFactionsRewardStone() : base(0xED4)
+		{
+			Movable = false;
+			Name = "a MobFactions Reward Stone";
+		}
 
-        public MobFactionsRewardStone( Serial serial ) : base( serial )
-        { 
-        }
+		public MobFactionsRewardStone(Serial serial) : base(serial)
+		{
+		}
 
-        public override void Serialize( GenericWriter writer )
-        {
-            base.Serialize( writer );
+		public override void Serialize(GenericWriter writer)
+		{
+			base.Serialize(writer);
 
-            writer.Write( (int) 0 ); // version
-        }
+			writer.Write((int)0); // version
+		}
 
-        public override void Deserialize( GenericReader reader )
-        {
-            base.Deserialize( reader );
+		public override void Deserialize(GenericReader reader)
+		{
+			base.Deserialize(reader);
 
-            int version = reader.ReadInt();
-        }
-        
-        public override void OnDoubleClick( Mobile from )
-        {
-            if ( from.InRange( GetWorldLocation(), 2 ) )
-            {
-                from.SendGump( new MobFactionsRewardGump( from, 0 ) );
-            }
-            else
-            {
-                from.SendLocalizedMessage( 500446 ); // That is too far away.
-            }
-        }
-    }
-} 
+			var version = reader.ReadInt();
+		}
+
+		public override void OnDoubleClick(Mobile from)
+		{
+			if (from.InRange(GetWorldLocation(), 2))
+				@from.SendGump(new MobFactionsRewardGump(@from, 0));
+			else
+				@from.SendLocalizedMessage(500446); // That is too far away.
+		}
+	}
+}

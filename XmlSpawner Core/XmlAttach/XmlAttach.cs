@@ -1,6 +1,4 @@
 using System;
-using System.Text;
-using Server;
 using Server.Commands;
 using Server.Commands.Generic;
 using Server.Network;
@@ -13,11 +11,8 @@ using System.Reflection;
 using Server.Gumps;
 using Server.Items;
 using System.IO;
-using System.Diagnostics;
-using Server.Accounting;
 using System.Net.Mail;
 using Server.Misc;
-using Server.ContextMenus;
 
 namespace Server.Engines.XmlSpawner2
 {
@@ -31,10 +26,9 @@ namespace Server.Engines.XmlSpawner2
 
 	public class ASerial
 	{
-
 		private int m_SerialValue;
 
-		public int Value { get { return m_SerialValue; } }
+		public int Value => m_SerialValue;
 
 		public ASerial(int serial)
 		{
@@ -52,16 +46,16 @@ namespace Server.Engines.XmlSpawner2
 			// Resolve unassigned serials in initialization
 			if (!serialInitialized) return new ASerial(0);
 
-			if (m_GlobalSerialValue == int.MaxValue || m_GlobalSerialValue < 0) m_GlobalSerialValue = 0;
+			if (m_GlobalSerialValue == Int32.MaxValue || m_GlobalSerialValue < 0) m_GlobalSerialValue = 0;
 
 			// try the next serial number in the series
-			int newserialno = m_GlobalSerialValue + 1;
+			var newserialno = m_GlobalSerialValue + 1;
 
 			// check to make sure that it is not in use
 			while (XmlAttach.AllAttachments.ContainsKey(newserialno))
 			{
 				newserialno++;
-				if (newserialno == int.MaxValue || newserialno < 0) newserialno = 1;
+				if (newserialno == Int32.MaxValue || newserialno < 0) newserialno = 1;
 			}
 
 			m_GlobalSerialValue = newserialno;
@@ -82,7 +76,6 @@ namespace Server.Engines.XmlSpawner2
 
 	public class XmlAttach
 	{
-
 		private static Type m_AttachableType = typeof(Attachable);
 
 		public static bool IsAttachable(ConstructorInfo ctor)
@@ -94,18 +87,18 @@ namespace Server.Engines.XmlSpawner2
 		public static void HashSerial(ASerial key, XmlAttachment o)
 		{
 			if (key.Value != 0)
-			{
-				AllAttachments[key.Value]=o;//.Add(key.Value, o);
-			}
+				AllAttachments[key.Value] = o; //.Add(key.Value, o);
 			else
-			{
 				UnassignedAttachments.Add(o);
-			}
 		}
 
 		// each entry in the hashtable is an array of XmlAttachments that is keyed by an object.
-		public static Dictionary<Item, List<XmlAttachment>> ItemAttachments = new Dictionary<Item, List<XmlAttachment>>();
-		public static Dictionary<Mobile, List<XmlAttachment>> MobileAttachments = new Dictionary<Mobile, List<XmlAttachment>>();
+		public static Dictionary<Item, List<XmlAttachment>> ItemAttachments =
+			new Dictionary<Item, List<XmlAttachment>>();
+
+		public static Dictionary<Mobile, List<XmlAttachment>> MobileAttachments =
+			new Dictionary<Mobile, List<XmlAttachment>>();
+
 		public static Dictionary<int, XmlAttachment> AllAttachments = new Dictionary<int, XmlAttachment>();
 		private static List<XmlAttachment> UnassignedAttachments = new List<XmlAttachment>();
 
@@ -114,30 +107,28 @@ namespace Server.Engines.XmlSpawner2
 			if (o == null) return false;
 
 			List<XmlAttachment> alist;
-			if (o is Item && ItemAttachments.TryGetValue((Item)o, out alist))//.Contains(o))
+			if (o is Item && ItemAttachments.TryGetValue((Item)o, out alist)) //.Contains(o))
 			{
 				// see if the attachment list is empty
 				if (alist == null || alist.Count == 0) return false;
 
 				// check to see if there are any valid attachments in the list
-				foreach (XmlAttachment a in alist)
-				{
-					if (!a.Deleted) return true;
-				}
+				foreach (var a in alist)
+					if (!a.Deleted)
+						return true;
 
 				return false;
 			}
 
-			if (o is Mobile && MobileAttachments.TryGetValue((Mobile)o, out alist))//.Contains(o))
+			if (o is Mobile && MobileAttachments.TryGetValue((Mobile)o, out alist)) //.Contains(o))
 			{
 				// see if the attachment list is empty
 				if (alist == null || alist.Count == 0) return false;
 
 				// check to see if there are any valid attachments in the list
-				foreach (XmlAttachment a in alist)
-				{
-					if (!a.Deleted) return true;
-				}
+				foreach (var a in alist)
+					if (!a.Deleted)
+						return true;
 
 				return false;
 			}
@@ -149,8 +140,8 @@ namespace Server.Engines.XmlSpawner2
 		{
 			get
 			{
-				XmlAttachment[] valuearray = new XmlAttachment[XmlAttach.AllAttachments.Count];
-				XmlAttach.AllAttachments.Values.CopyTo(valuearray, 0);
+				var valuearray = new XmlAttachment[AllAttachments.Count];
+				AllAttachments.Values.CopyTo(valuearray, 0);
 				return valuearray;
 			}
 		}
@@ -166,14 +157,14 @@ namespace Server.Engines.XmlSpawner2
 			ASerial.serialInitialized = true;
 
 			// resolve unassigned serials
-			foreach (XmlAttachment a in UnassignedAttachments)
+			foreach (var a in UnassignedAttachments)
 			{
 				// get the next unique serial id
-				ASerial serial = ASerial.NewSerial();
+				var serial = ASerial.NewSerial();
 				a.Serial = serial;
 
 				// register the attachment in the serial keyed hashtable
-				XmlAttach.HashSerial(serial, a);
+				HashSerial(serial, a);
 			}
 
 			// Register our speech handler
@@ -190,7 +181,8 @@ namespace Server.Engines.XmlSpawner2
 			//CommandSystem.Register( "AddAtt", AccessLevel.GameMaster, new CommandEventHandler( AddAttachment_OnCommand ) );
 			TargetCommands.Register(new AddAttCommand());
 			TargetCommands.Register(new DelAttCommand());
-			CommandSystem.Register("AvailAtt", AccessLevel.GameMaster, new CommandEventHandler(ListAvailableAttachments_OnCommand));
+			CommandSystem.Register("AvailAtt", AccessLevel.GameMaster,
+				new CommandEventHandler(ListAvailableAttachments_OnCommand));
 		}
 
 		public class AddAttCommand : BaseCommand
@@ -219,60 +211,48 @@ namespace Server.Engines.XmlSpawner2
 			{
 				if (e != null && list != null && e.Length >= 1)
 				{
-
 					// create a new attachment and add it to the item
-					int nargs = e.Arguments.Length - 1;
+					var nargs = e.Arguments.Length - 1;
 
-					string[] args = new string[nargs];
+					var args = new string[nargs];
 
-					for (int j = 0; j < nargs; j++)
-					{
-						args[j] = (string)e.Arguments[j + 1];
-					}
+					for (var j = 0; j < nargs; j++) args[j] = (string)e.Arguments[j + 1];
 
-					Type attachtype = SpawnerType.GetType(e.Arguments[0]);
+					var attachtype = SpawnerType.GetType(e.Arguments[0]);
 
 					if (attachtype != null && attachtype.IsSubclassOf(typeof(XmlAttachment)))
 					{
 						// go through all of the objects in the list
-						int count = 0;
+						var count = 0;
 
-						for (int i = 0; i < list.Count; ++i)
+						for (var i = 0; i < list.Count; ++i)
 						{
-
-							XmlAttachment o = (XmlAttachment)XmlSpawner.CreateObject(attachtype, args, false, true);
+							var o = (XmlAttachment)XmlSpawner.CreateObject(attachtype, args, false, true);
 
 							if (o == null)
 							{
-								AddResponse(String.Format("Unable to construct {0} with specified args", attachtype.Name));
+								AddResponse(String.Format("Unable to construct {0} with specified args",
+									attachtype.Name));
 								break;
 							}
 
-							if (XmlAttach.AttachTo(null, list[i], o, true))
+							if (AttachTo(null, list[i], o, true))
 							{
 								if (list.Count < 10)
-								{
 									AddResponse(String.Format("Added {0} to {1}", attachtype.Name, list[i]));
-								}
 								count++;
 							}
 							else
 								LogFailure(String.Format("Attachment {0} not added to {1}", attachtype.Name, list[i]));
+						}
 
-						}
 						if (count > 0)
-						{
 							AddResponse(String.Format("Attachment {0} has been added [{1}]", attachtype.Name, count));
-						}
 						else
-						{
 							AddResponse(String.Format("Attachment {0} not added", attachtype.Name));
-						}
 					}
 					else
-					{
 						AddResponse(String.Format("Invalid attachment type {0}", e.Arguments[0]));
-					}
 				}
 			}
 		}
@@ -303,46 +283,35 @@ namespace Server.Engines.XmlSpawner2
 			{
 				if (e != null && list != null && e.Length >= 1)
 				{
-					Type attachtype = SpawnerType.GetType(e.Arguments[0]);
+					var attachtype = SpawnerType.GetType(e.Arguments[0]);
 
 					if (attachtype != null && attachtype.IsSubclassOf(typeof(XmlAttachment)))
 					{
-
 						// go through all of the objects in the list
-						int count = 0;
+						var count = 0;
 
-						for (int i = 0; i < list.Count; ++i)
+						for (var i = 0; i < list.Count; ++i)
 						{
-							List<XmlAttachment> alist = XmlAttach.FindAttachments(list[i], attachtype);
+							var alist = FindAttachments(list[i], attachtype);
 
 							if (alist != null)
-							{
 								// delete the attachments
-								foreach (XmlAttachment a in alist)
+								foreach (var a in alist)
 								{
 									a.Delete();
 									if (list.Count < 10)
-									{
 										AddResponse(String.Format("Deleted {0} from {1}", attachtype.Name, list[i]));
-									}
 									count++;
 								}
-							}
 						}
 
 						if (count > 0)
-						{
 							AddResponse(String.Format("Attachment {0} has been deleted [{1}]", attachtype.Name, count));
-						}
 						else
-						{
 							AddResponse(String.Format("Attachment {0} not deleted", attachtype.Name));
-						}
 					}
 					else
-					{
 						AddResponse(String.Format("Invalid attachment type {0}", e.Arguments[0]));
-					}
 				}
 			}
 		}
@@ -350,27 +319,24 @@ namespace Server.Engines.XmlSpawner2
 		public static void CleanUp()
 		{
 			// clean up any unowned attachments
-			foreach (XmlAttachment a in XmlAttach.Values)
-			{
-				if (a.OwnedBy == null || (a.OwnedBy is Mobile && ((Mobile)a.OwnedBy).Deleted) || (a.OwnedBy is Item && ((Item)a.OwnedBy).Deleted))
-				{
+			foreach (var a in Values)
+				if (a.OwnedBy == null || a.OwnedBy is Mobile && ((Mobile)a.OwnedBy).Deleted ||
+				    a.OwnedBy is Item && ((Item)a.OwnedBy).Deleted)
 					a.Delete();
-				}
-			}
 		}
 
 		public static void Save(WorldSaveEventArgs e)
 		{
-			if (XmlAttach.MobileAttachments == null && XmlAttach.ItemAttachments == null) return;
+			if (MobileAttachments == null && ItemAttachments == null) return;
 
 			CleanUp();
 
 			if (!Directory.Exists("Saves/Attachments"))
 				Directory.CreateDirectory("Saves/Attachments");
 
-			string filePath = Path.Combine("Saves/Attachments", "Attachments.bin");        // the attachment serializations
-			string imaPath = Path.Combine("Saves/Attachments", "Attachments.ima");         // the item/mob attachment tables
-			string fpiPath = Path.Combine("Saves/Attachments", "Attachments.fpi");        // the file position indices
+			var filePath = Path.Combine("Saves/Attachments", "Attachments.bin"); // the attachment serializations
+			var imaPath = Path.Combine("Saves/Attachments", "Attachments.ima"); // the item/mob attachment tables
+			var fpiPath = Path.Combine("Saves/Attachments", "Attachments.fpi"); // the file position indices
 
 			BinaryFileWriter writer = null;
 			BinaryFileWriter imawriter = null;
@@ -381,7 +347,6 @@ namespace Server.Engines.XmlSpawner2
 				writer = new BinaryFileWriter(filePath, true);
 				imawriter = new BinaryFileWriter(imaPath, true);
 				fpiwriter = new BinaryFileWriter(fpiPath, true);
-
 			}
 			catch (Exception err)
 			{
@@ -395,25 +360,25 @@ namespace Server.Engines.XmlSpawner2
 				ASerial.GlobalSerialize(writer);
 
 				// remove all deleted attachments
-				XmlAttach.FullDefrag();
+				FullDefrag();
 
 				// save the attachments themselves
-				if (XmlAttach.AllAttachments != null)
+				if (AllAttachments != null)
 				{
-					writer.Write(XmlAttach.AllAttachments.Count);
+					writer.Write(AllAttachments.Count);
 
-					XmlAttachment[] valuearray = new XmlAttachment[XmlAttach.AllAttachments.Count];
-					XmlAttach.AllAttachments.Values.CopyTo(valuearray, 0);
+					var valuearray = new XmlAttachment[AllAttachments.Count];
+					AllAttachments.Values.CopyTo(valuearray, 0);
 
-					int[] keyarray = new int[XmlAttach.AllAttachments.Count];
-					XmlAttach.AllAttachments.Keys.CopyTo(keyarray, 0);
+					var keyarray = new int[AllAttachments.Count];
+					AllAttachments.Keys.CopyTo(keyarray, 0);
 
-					for (int i = 0; i < keyarray.Length; i++)
+					for (var i = 0; i < keyarray.Length; i++)
 					{
 						// write the key
 						writer.Write((int)keyarray[i]);
 
-						XmlAttachment a = valuearray[i];
+						var a = valuearray[i];
 
 						// write the value type
 						writer.Write(a.GetType().ToString());
@@ -426,34 +391,32 @@ namespace Server.Engines.XmlSpawner2
 					}
 				}
 				else
-				{
 					writer.Write((int)0);
-				}
 
 				writer.Close();
 
 				// save the hash table info for items and mobiles
 				// mobile attachments
-				if (XmlAttach.MobileAttachments != null)
+				if (MobileAttachments != null)
 				{
-					imawriter.Write(XmlAttach.MobileAttachments.Count);
+					imawriter.Write(MobileAttachments.Count);
 
-					List<XmlAttachment>[] valuearray = new List<XmlAttachment>[XmlAttach.MobileAttachments.Count];
-					XmlAttach.MobileAttachments.Values.CopyTo(valuearray, 0);
+					var valuearray = new List<XmlAttachment>[MobileAttachments.Count];
+					MobileAttachments.Values.CopyTo(valuearray, 0);
 
-					Mobile[] keyarray = new Mobile[XmlAttach.MobileAttachments.Count];
-					XmlAttach.MobileAttachments.Keys.CopyTo(keyarray, 0);
+					var keyarray = new Mobile[MobileAttachments.Count];
+					MobileAttachments.Keys.CopyTo(keyarray, 0);
 
-					for (int i = 0; i < keyarray.Length; i++)
+					for (var i = 0; i < keyarray.Length; i++)
 					{
 						// write the key
 						imawriter.Write(keyarray[i]);
 
 						// write out the attachments
-						List<XmlAttachment> alist = valuearray[i];
+						var alist = valuearray[i];
 
 						imawriter.Write(alist.Count);
-						foreach (XmlAttachment a in alist)
+						foreach (var a in alist)
 						{
 							// write the attachment serial
 							imawriter.Write(a.Serial.Value);
@@ -467,32 +430,30 @@ namespace Server.Engines.XmlSpawner2
 					}
 				}
 				else
-				{
 					// no mobile attachments
 					imawriter.Write((int)0);
-				}
 
 				// item attachments
-				if (XmlAttach.ItemAttachments != null)
+				if (ItemAttachments != null)
 				{
-					imawriter.Write(XmlAttach.ItemAttachments.Count);
+					imawriter.Write(ItemAttachments.Count);
 
-					List<XmlAttachment>[] valuearray = new List<XmlAttachment>[XmlAttach.ItemAttachments.Count];
-					XmlAttach.ItemAttachments.Values.CopyTo(valuearray, 0);
+					var valuearray = new List<XmlAttachment>[ItemAttachments.Count];
+					ItemAttachments.Values.CopyTo(valuearray, 0);
 
-					Item[] keyarray = new Item[XmlAttach.ItemAttachments.Count];
-					XmlAttach.ItemAttachments.Keys.CopyTo(keyarray, 0);
+					var keyarray = new Item[ItemAttachments.Count];
+					ItemAttachments.Keys.CopyTo(keyarray, 0);
 
-					for (int i = 0; i < keyarray.Length; i++)
+					for (var i = 0; i < keyarray.Length; i++)
 					{
 						// write the key
 						imawriter.Write(keyarray[i]);
 
 						// write out the attachments			             
-						List<XmlAttachment> alist = valuearray[i];
+						var alist = valuearray[i];
 
 						imawriter.Write(alist.Count);
-						foreach (XmlAttachment a in alist)
+						foreach (var a in alist)
 						{
 							// write the attachment serial
 							imawriter.Write(a.Serial.Value);
@@ -506,10 +467,8 @@ namespace Server.Engines.XmlSpawner2
 					}
 				}
 				else
-				{
 					// no item attachments
 					imawriter.Write((int)0);
-				}
 
 				imawriter.Close();
 				fpiwriter.Close();
@@ -518,14 +477,11 @@ namespace Server.Engines.XmlSpawner2
 
 		public static void Load()
 		{
-			string filePath = Path.Combine("Saves/Attachments", "Attachments.bin");    // the attachment serializations
-			string imaPath = Path.Combine("Saves/Attachments", "Attachments.ima");     // the item/mob attachment tables
-			string fpiPath = Path.Combine("Saves/Attachments", "Attachments.fpi");     // the file position indices
+			var filePath = Path.Combine("Saves/Attachments", "Attachments.bin"); // the attachment serializations
+			var imaPath = Path.Combine("Saves/Attachments", "Attachments.ima"); // the item/mob attachment tables
+			var fpiPath = Path.Combine("Saves/Attachments", "Attachments.fpi"); // the file position indices
 
-			if (!File.Exists(filePath))
-			{
-				return;
-			}
+			if (!File.Exists(filePath)) return;
 
 
 			FileStream fs = null;
@@ -566,7 +522,7 @@ namespace Server.Engines.XmlSpawner2
 				ASerial.serialInitialized = true;
 
 				// read in the serial attachment hash table information
-				int count = 0;
+				var count = 0;
 				try
 				{
 					count = reader.ReadInt();
@@ -577,7 +533,7 @@ namespace Server.Engines.XmlSpawner2
 					return;
 				}
 
-				for (int i = 0; i < count; i++)
+				for (var i = 0; i < count; i++)
 				{
 					// read the serial
 					ASerial serialno = null;
@@ -608,7 +564,6 @@ namespace Server.Engines.XmlSpawner2
 					try
 					{
 						position = fpireader.ReadLong();
-
 					}
 					catch (Exception e)
 					{
@@ -616,7 +571,7 @@ namespace Server.Engines.XmlSpawner2
 						return;
 					}
 
-					bool skip = false;
+					var skip = false;
 
 					XmlAttachment o = null;
 					try
@@ -632,9 +587,11 @@ namespace Server.Engines.XmlSpawner2
 					{
 						if (!AlreadyReported(valuetype))
 						{
-							Console.WriteLine("\nError deserializing attachments {0}.\nMissing a serial constructor?\n", valuetype);
+							Console.WriteLine("\nError deserializing attachments {0}.\nMissing a serial constructor?\n",
+								valuetype);
 							ReportDeserError(valuetype, "Missing a serial constructor?");
 						}
+
 						// position the .ima file at the next deser point
 						try
 						{
@@ -642,9 +599,11 @@ namespace Server.Engines.XmlSpawner2
 						}
 						catch
 						{
-							ErrorReporter.GenerateErrorReport("Error deserializing. Attachments save file corrupted. Attachment load aborted.");
+							ErrorReporter.GenerateErrorReport(
+								"Error deserializing. Attachments save file corrupted. Attachment load aborted.");
 							return;
 						}
+
 						continue;
 					}
 
@@ -663,8 +622,10 @@ namespace Server.Engines.XmlSpawner2
 						if (!AlreadyReported(valuetype))
 						{
 							Console.WriteLine("\nError deserializing attachments {0}\n", valuetype);
-							ReportDeserError(valuetype, "save file corruption or incorrect Serialize/Deserialize methods?");
+							ReportDeserError(valuetype,
+								"save file corruption or incorrect Serialize/Deserialize methods?");
 						}
+
 						// position the .ima file at the next deser point
 						try
 						{
@@ -672,9 +633,11 @@ namespace Server.Engines.XmlSpawner2
 						}
 						catch
 						{
-							ErrorReporter.GenerateErrorReport("Error deserializing. Attachments save file corrupted. Attachment load aborted.");
+							ErrorReporter.GenerateErrorReport(
+								"Error deserializing. Attachments save file corrupted. Attachment load aborted.");
 							return;
 						}
+
 						continue;
 					}
 
@@ -685,8 +648,9 @@ namespace Server.Engines.XmlSpawner2
 					}
 					catch
 					{
-						ErrorReporter.GenerateErrorReport(String.Format("\nError deserializing {0} serialno {1}. Attachments save file corrupted. Attachment load aborted.\n",
-						valuetype, serialno.Value));
+						ErrorReporter.GenerateErrorReport(String.Format(
+							"\nError deserializing {0} serialno {1}. Attachments save file corrupted. Attachment load aborted.\n",
+							valuetype, serialno.Value));
 						return;
 					}
 				}
@@ -702,9 +666,8 @@ namespace Server.Engines.XmlSpawner2
 					return;
 				}
 
-				for (int i = 0; i < count; i++)
+				for (var i = 0; i < count; i++)
 				{
-
 					Mobile key = null;
 					try
 					{
@@ -716,7 +679,7 @@ namespace Server.Engines.XmlSpawner2
 						return;
 					}
 
-					int nattach = 0;
+					var nattach = 0;
 					try
 					{
 						nattach = imareader.ReadInt();
@@ -727,7 +690,7 @@ namespace Server.Engines.XmlSpawner2
 						return;
 					}
 
-					for (int j = 0; j < nattach; j++)
+					for (var j = 0; j < nattach; j++)
 					{
 						// and serial
 						ASerial serialno = null;
@@ -765,15 +728,17 @@ namespace Server.Engines.XmlSpawner2
 							return;
 						}
 
-						XmlAttachment o = FindAttachmentBySerial(serialno.Value);
+						var o = FindAttachmentBySerial(serialno.Value);
 
 						if (o == null || imareader.Position != position)
 						{
 							if (!AlreadyReported(valuetype))
 							{
 								Console.WriteLine("\nError deserializing attachments of type {0}.\n", valuetype);
-								ReportDeserError(valuetype, "save file corruption or incorrect Serialize/Deserialize methods?");
+								ReportDeserError(valuetype,
+									"save file corruption or incorrect Serialize/Deserialize methods?");
 							}
+
 							// position the .ima file at the next deser point
 							try
 							{
@@ -781,9 +746,11 @@ namespace Server.Engines.XmlSpawner2
 							}
 							catch
 							{
-								ErrorReporter.GenerateErrorReport("Error deserializing. Attachments save file corrupted. Attachment load aborted.");
+								ErrorReporter.GenerateErrorReport(
+									"Error deserializing. Attachments save file corrupted. Attachment load aborted.");
 								return;
 							}
+
 							continue;
 						}
 
@@ -803,7 +770,7 @@ namespace Server.Engines.XmlSpawner2
 					return;
 				}
 
-				for (int i = 0; i < count; i++)
+				for (var i = 0; i < count; i++)
 				{
 					Item key = null;
 					try
@@ -816,7 +783,7 @@ namespace Server.Engines.XmlSpawner2
 						return;
 					}
 
-					int nattach = 0;
+					var nattach = 0;
 					try
 					{
 						nattach = imareader.ReadInt();
@@ -827,7 +794,7 @@ namespace Server.Engines.XmlSpawner2
 						return;
 					}
 
-					for (int j = 0; j < nattach; j++)
+					for (var j = 0; j < nattach; j++)
 					{
 						// and serial
 						ASerial serialno = null;
@@ -865,15 +832,17 @@ namespace Server.Engines.XmlSpawner2
 							return;
 						}
 
-						XmlAttachment o = FindAttachmentBySerial(serialno.Value);
+						var o = FindAttachmentBySerial(serialno.Value);
 
 						if (o == null || imareader.Position != position)
 						{
 							if (!AlreadyReported(valuetype))
 							{
 								Console.WriteLine("\nError deserializing attachments of type {0}.\n", valuetype);
-								ReportDeserError(valuetype, "save file corruption or incorrect Serialize/Deserialize methods?");
+								ReportDeserError(valuetype,
+									"save file corruption or incorrect Serialize/Deserialize methods?");
 							}
+
 							// position the .ima file at the next deser point
 							try
 							{
@@ -881,9 +850,11 @@ namespace Server.Engines.XmlSpawner2
 							}
 							catch
 							{
-								ErrorReporter.GenerateErrorReport("Error deserializing. Attachments save file corrupted. Attachment load aborted.");
+								ErrorReporter.GenerateErrorReport(
+									"Error deserializing. Attachments save file corrupted. Attachment load aborted.");
 								return;
 							}
+
 							continue;
 						}
 
@@ -891,6 +862,7 @@ namespace Server.Engines.XmlSpawner2
 						AttachTo(key, o, false);
 					}
 				}
+
 				if (fs != null)
 					fs.Close();
 				if (imafs != null)
@@ -899,11 +871,8 @@ namespace Server.Engines.XmlSpawner2
 					fpifs.Close();
 
 				if (desererror != null)
-				{
 					ErrorReporter.GenerateErrorReport("Error deserializing particular attachments.");
-				}
 			}
-
 		}
 
 		private class DeserErrorDetails
@@ -916,9 +885,10 @@ namespace Server.Engines.XmlSpawner2
 				Type = type;
 				Details = details;
 			}
-
 		}
+
 		private static List<DeserErrorDetails> desererror = null;
+
 		private static void ReportDeserError(string typestr, string detailstr)
 		{
 			if (desererror == null)
@@ -926,19 +896,18 @@ namespace Server.Engines.XmlSpawner2
 
 			desererror.Add(new DeserErrorDetails(typestr, detailstr));
 		}
+
 		private static bool AlreadyReported(string typestr)
 		{
 			if (desererror == null) return false;
-			foreach (DeserErrorDetails s in desererror)
-			{
-				if (s.Type == typestr) return true;
-			}
+			foreach (var s in desererror)
+				if (s.Type == typestr)
+					return true;
 			return false;
 		}
 
 		public static void CheckOnBeforeKill(Mobile m_killed, Mobile m_killer)
 		{
-
 			// do not register creature vs creature kills, nor any kills involving staff
 			//            if (m_killer == null || m_killed == null || !(m_killer.Player || m_killed.Player) /*|| (m_killer.AccessLevel > AccessLevel.Player) || (m_killed.AccessLevel > AccessLevel.Player) */)
 			//				return;
@@ -946,61 +915,40 @@ namespace Server.Engines.XmlSpawner2
 			if (m_killer != null)
 			{
 				// check the killer
-				List<XmlAttachment> alist = XmlAttach.FindAttachments(m_killer);
+				var alist = FindAttachments(m_killer);
 				if (alist != null)
-				{
-					foreach (XmlAttachment a in alist)
-					{
+					foreach (var a in alist)
 						if (a != null && !a.Deleted && a.HandlesOnKill)
-						{
 							a.OnBeforeKill(m_killed, m_killer);
-						}
-					}
-				}
 
 				// check any equipped items
-				List<Item> equiplist = m_killer.Items;
+				var equiplist = m_killer.Items;
 				if (equiplist != null)
-				{
-					foreach (Item i in equiplist)
+					foreach (var i in equiplist)
 					{
 						if (i == null || i.Deleted) continue;
-						alist = XmlAttach.FindAttachments(i);
+						alist = FindAttachments(i);
 						if (alist != null)
-						{
-							foreach (XmlAttachment a in alist)
-							{
+							foreach (var a in alist)
 								if (a != null && !a.Deleted && a.CanActivateEquipped && a.HandlesOnKill)
-								{
 									a.OnBeforeKill(m_killed, m_killer);
-								}
-							}
-						}
 					}
-				}
 			}
 
 			if (m_killed != null)
 			{
 				// check the killed
-				List<XmlAttachment> alist = XmlAttach.FindAttachments(m_killed);
+				var alist = FindAttachments(m_killed);
 				if (alist != null)
-				{
-					foreach (XmlAttachment a in alist)
-					{
+					foreach (var a in alist)
 						if (a != null && !a.Deleted && a.HandlesOnKilled)
-						{
 							a.OnBeforeKilled(m_killed, m_killer);
-						}
-					}
-				}
 			}
 		}
 
 
 		public static void CheckOnKill(Mobile m_killed, Mobile m_killer)
 		{
-
 			// do not register creature vs creature kills, nor any kills involving staff
 			//            if (m_killer == null || m_killed == null || !(m_killer.Player || m_killed.Player) /*|| (m_killer.AccessLevel > AccessLevel.Player) || (m_killed.AccessLevel > AccessLevel.Player) */)
 			//				return;
@@ -1008,60 +956,40 @@ namespace Server.Engines.XmlSpawner2
 			if (m_killer != null)
 			{
 				// check the killer
-				List<XmlAttachment> alist = XmlAttach.FindAttachments(m_killer);
+				var alist = FindAttachments(m_killer);
 				if (alist != null)
-				{
-					foreach (XmlAttachment a in alist)
-					{
+					foreach (var a in alist)
 						if (a != null && !a.Deleted && a.HandlesOnKill)
-						{
 							a.OnKill(m_killed, m_killer);
-						}
-					}
-				}
 
 				// check any equipped items
-				List<Item> equiplist = m_killer.Items;
+				var equiplist = m_killer.Items;
 				if (equiplist != null)
-				{
-					foreach (Item i in equiplist)
+					foreach (var i in equiplist)
 					{
 						if (i == null || i.Deleted) continue;
-						alist = XmlAttach.FindAttachments(i);
+						alist = FindAttachments(i);
 						if (alist != null)
-						{
-							foreach (XmlAttachment a in alist)
-							{
+							foreach (var a in alist)
 								if (a != null && !a.Deleted && a.CanActivateEquipped && a.HandlesOnKill)
-								{
 									a.OnKill(m_killed, m_killer);
-								}
-							}
-						}
 					}
-				}
 			}
 
 			if (m_killed != null)
 			{
 				// check the killed
-				List<XmlAttachment> alist = XmlAttach.FindAttachments(m_killed);
+				var alist = FindAttachments(m_killed);
 				if (alist != null)
-				{
-					foreach (XmlAttachment a in alist)
-					{
+					foreach (var a in alist)
 						if (a != null && !a.Deleted && a.HandlesOnKilled)
-						{
 							a.OnKilled(m_killed, m_killer);
-						}
-					}
-				}
 			}
 		}
 
 		public static void EventSink_Movement(MovementEventArgs args)
 		{
-			Mobile from = args.Mobile;
+			var from = args.Mobile;
 
 			if (!from.Player /* || from.AccessLevel > AccessLevel.Player */)
 				return;
@@ -1076,18 +1004,13 @@ namespace Server.Engines.XmlSpawner2
 					{
 						if (i == null || i.Deleted) continue;
 
-						List<XmlAttachment> alist = XmlAttach.FindAttachments(i);
+						var alist = FindAttachments(i);
 						if (alist != null)
-						{
-							foreach (XmlAttachment a in alist)
-							{
+							foreach (var a in alist)
 								if (a != null && !a.Deleted && a.HandlesOnMovement)
-								{
 									a.OnMovement(args);
-								}
-							}
-						}
 					}
+
 					itemlist.Free();
 				}
 
@@ -1101,18 +1024,13 @@ namespace Server.Engines.XmlSpawner2
 						// dont respond to self motion
 						if (i == null || i.Deleted || i == from) continue;
 
-						List<XmlAttachment> alist = XmlAttach.FindAttachments(i);
+						var alist = FindAttachments(i);
 						if (alist != null)
-						{
-							foreach (XmlAttachment a in alist)
-							{
+							foreach (var a in alist)
 								if (a != null && !a.Deleted && a.HandlesOnMovement)
-								{
 									a.OnMovement(args);
-								}
-							}
-						}
 					}
+
 					moblist.Free();
 				}
 			}
@@ -1120,22 +1038,16 @@ namespace Server.Engines.XmlSpawner2
 
 		public static void EventSink_Speech(SpeechEventArgs args)
 		{
-			Mobile from = args.Mobile;
+			var from = args.Mobile;
 
 			if (from == null || from.Map == null /*|| from.AccessLevel > AccessLevel.Player */) return;
 
 			// check the mob for any attachments that might handle speech
-			List<XmlAttachment> alist = XmlAttach.FindAttachments(from);
+			var alist = FindAttachments(from);
 			if (alist != null)
-			{
-				foreach (XmlAttachment a in alist)
-				{
+				foreach (var a in alist)
 					if (a != null && !a.Deleted && a.HandlesOnSpeech)
-					{
 						a.OnSpeech(args);
-					}
-				}
-			}
 
 			// check for any nearby items
 			IPooledEnumerable itemlist = from.Map.GetItemsInRange(from.Location, Map.SectorSize);
@@ -1145,18 +1057,13 @@ namespace Server.Engines.XmlSpawner2
 				{
 					if (i == null || i.Deleted) continue;
 
-					alist = XmlAttach.FindAttachments(i);
+					alist = FindAttachments(i);
 					if (alist != null)
-					{
-						foreach (XmlAttachment a in alist)
-						{
+						foreach (var a in alist)
 							if (a != null && !a.Deleted && a.CanActivateInWorld && a.HandlesOnSpeech)
-							{
 								a.OnSpeech(args);
-							}
-						}
-					}
 				}
+
 				itemlist.Free();
 			}
 
@@ -1169,132 +1076,95 @@ namespace Server.Engines.XmlSpawner2
 				{
 					if (i == null || i.Deleted) continue;
 
-					alist = XmlAttach.FindAttachments(i);
+					alist = FindAttachments(i);
 					if (alist != null)
-					{
-						foreach (XmlAttachment a in alist)
-						{
+						foreach (var a in alist)
 							if (a != null && !a.Deleted && a.HandlesOnSpeech)
-							{
 								a.OnSpeech(args);
-							}
-						}
-					}
 				}
+
 				moblist.Free();
 			}
-
 
 
 			// also check for any items in the mobs toplevel backpack
 			if (from.Backpack != null)
 			{
-				List<Item> packlist = from.Backpack.Items;
+				var packlist = from.Backpack.Items;
 				if (packlist != null)
-				{
-					foreach (Item i in packlist)
+					foreach (var i in packlist)
 					{
 						if (i == null || i.Deleted) continue;
-						alist = XmlAttach.FindAttachments(i);
+						alist = FindAttachments(i);
 						if (alist != null)
-						{
-							foreach (XmlAttachment a in alist)
-							{
+							foreach (var a in alist)
 								if (a != null && !a.Deleted && a.CanActivateInBackpack && a.HandlesOnSpeech)
-								{
 									a.OnSpeech(args);
-								}
-							}
-						}
 					}
-				}
 			}
 
 			// check any equipped items
-			List<Item> equiplist = from.Items;
+			var equiplist = from.Items;
 			if (equiplist != null)
-			{
-				foreach (Item i in equiplist)
+				foreach (var i in equiplist)
 				{
 					if (i == null || i.Deleted) continue;
-					alist = XmlAttach.FindAttachments(i);
+					alist = FindAttachments(i);
 					if (alist != null)
-					{
-						foreach (XmlAttachment a in alist)
-						{
+						foreach (var a in alist)
 							if (a != null && !a.Deleted && a.CanActivateEquipped && a.HandlesOnSpeech)
-							{
 								a.OnSpeech(args);
-							}
-						}
-					}
 				}
-			}
 		}
 
 		public static XmlAttachment FindAttachmentOnMobile(Mobile from, Type type, string name)
 		{
 			if (from == null) return null;
 			// check the mob for any attachments
-			List<XmlAttachment> alist = XmlAttach.FindAttachments(from);
+			var alist = FindAttachments(from);
 			if (alist != null)
-			{
-				foreach (XmlAttachment a in alist)
-				{
-					if (a != null && !a.Deleted && (type == null || (a.GetType() == type || a.GetType().IsSubclassOf(type))) && (name == null || name == a.Name))
-					{
+				foreach (var a in alist)
+					if (a != null && !a.Deleted &&
+					    (type == null || a.GetType() == type || a.GetType().IsSubclassOf(type)) &&
+					    (name == null || name == a.Name))
 						return a;
-					}
-				}
-			}
 
 
 			// also check for any items in the mobs toplevel backpack
 			if (from.Backpack != null)
 			{
-				List<Item> itemlist = from.Backpack.Items;
+				var itemlist = from.Backpack.Items;
 				if (itemlist != null)
-				{
-					foreach (Item i in itemlist)
+					foreach (var i in itemlist)
 					{
 						if (i == null || i.Deleted) continue;
-						alist = XmlAttach.FindAttachments(i);
+						alist = FindAttachments(i);
 						if (alist != null)
-						{
-							foreach (XmlAttachment a in alist)
-							{
-								if (a != null && !a.Deleted && (type == null || (a.GetType() == type || a.GetType().IsSubclassOf(type))) && (name == null || name == a.Name))
-								{
+							foreach (var a in alist)
+								if (a != null && !a.Deleted &&
+								    (type == null || a.GetType() == type || a.GetType().IsSubclassOf(type)) &&
+								    (name == null || name == a.Name))
 									return a;
-								}
-							}
-						}
 					}
-				}
 			}
 
 			// check any equipped items
-			List<Item> equiplist = from.Items;
+			var equiplist = from.Items;
 			if (equiplist != null)
-			{
-				foreach (Item i in equiplist)
+				foreach (var i in equiplist)
 				{
 					if (i == null || i.Deleted) continue;
 
-					alist = XmlAttach.FindAttachments(i);
+					alist = FindAttachments(i);
 
 					if (alist != null)
-					{
-						foreach (XmlAttachment a in alist)
-						{
-							if (a != null && !a.Deleted && (type == null || (a.GetType() == type || a.GetType().IsSubclassOf(type))) && (name == null || name == a.Name))
-							{
+						foreach (var a in alist)
+							if (a != null && !a.Deleted &&
+							    (type == null || a.GetType() == type || a.GetType().IsSubclassOf(type)) &&
+							    (name == null || name == a.Name))
 								return a;
-							}
-						}
-					}
 				}
-			}
+
 			return null;
 		}
 
@@ -1309,6 +1179,7 @@ namespace Server.Engines.XmlSpawner2
 				m_e = e;
 				m_set = set;
 			}
+
 			protected override void OnTarget(Mobile from, object targeted)
 			{
 				if (from == null || targeted == null) return;
@@ -1316,18 +1187,12 @@ namespace Server.Engines.XmlSpawner2
 				Type type = null;
 				string name = null;
 
-				if (m_e.Arguments.Length > 0)
-				{
-					type = SpawnerType.GetType(m_e.Arguments[0]);
-				}
-				if (m_e.Arguments.Length > 1)
-				{
-					name = m_e.Arguments[1];
-				}
+				if (m_e.Arguments.Length > 0) type = SpawnerType.GetType(m_e.Arguments[0]);
+				if (m_e.Arguments.Length > 1) name = m_e.Arguments[1];
 
-				XmlAttach.Defrag(targeted);
+				Defrag(targeted);
 
-				List<XmlAttachment> plist = XmlAttach.FindAttachments(targeted, type);
+				var plist = FindAttachments(targeted, type);
 
 				if (plist == null && m_set != "add")
 				{
@@ -1346,38 +1211,31 @@ namespace Server.Engines.XmlSpawner2
 						}
 
 						// create a new attachment and add it to the item
-						int nargs = m_e.Arguments.Length - 1;
+						var nargs = m_e.Arguments.Length - 1;
 
-						string[] args = new string[nargs];
+						var args = new string[nargs];
 
-						for (int j = 0; j < nargs; j++)
-						{
-							args[j] = (string)m_e.Arguments[j + 1];
-						}
+						for (var j = 0; j < nargs; j++) args[j] = (string)m_e.Arguments[j + 1];
 
 
 						XmlAttachment o = null;
 
-						Type attachtype = SpawnerType.GetType(m_e.Arguments[0]);
+						var attachtype = SpawnerType.GetType(m_e.Arguments[0]);
 
 						if (attachtype != null && attachtype.IsSubclassOf(typeof(XmlAttachment)))
-						{
-
 							o = (XmlAttachment)XmlSpawner.CreateObject(attachtype, args, false, true);
-						}
 
 						if (o != null)
 						{
 							//o.Name = aname;
-							if (XmlAttach.AttachTo(from, targeted, o, true))
-								from.SendMessage("Added attachment {2} : {0} to {1}", m_e.Arguments[0], targeted, o.Serial.Value);
+							if (AttachTo(from, targeted, o, true))
+								from.SendMessage("Added attachment {2} : {0} to {1}", m_e.Arguments[0], targeted,
+									o.Serial.Value);
 							else
 								from.SendMessage("Attachment not added: {0}", m_e.Arguments[0]);
 						}
 						else
-						{
-							from.SendMessage("Unable to construct attachment {0}", m_e.Arguments[0]);
-						}
+							@from.SendMessage("Unable to construct attachment {0}", m_e.Arguments[0]);
 
 						break;
 					case "get":
@@ -1407,11 +1265,13 @@ namespace Server.Engines.XmlSpawner2
 
 						break;
 					case "activate":
-						foreach (XmlAttachment p in plist)
+						foreach (var p in plist)
 						{
-							if (p == null || p.Deleted || (name != null && name != p.Name) || (type != null && type != p.GetType())) continue;
+							if (p == null || p.Deleted || name != null && name != p.Name ||
+							    type != null && type != p.GetType()) continue;
 
-							from.SendMessage("Activating attachment {3} : {0} : {1} : {2}", p.GetType().Name, p.Name, p.OnIdentify(from), p.Serial.Value);
+							from.SendMessage("Activating attachment {3} : {0} : {1} : {2}", p.GetType().Name, p.Name,
+								p.OnIdentify(from), p.Serial.Value);
 							p.OnTrigger(null, from);
 						}
 
@@ -1424,29 +1284,25 @@ namespace Server.Engines.XmlSpawner2
 		[Description("Returns descriptions of the attachments on the targeted object.")]
 		public static void GetAttachments_OnCommand(CommandEventArgs e)
 		{
-			int ser = -1;
+			var ser = -1;
 			if (e.Arguments.Length > 0)
 			{
 				// is this a numeric arg?
-				char c = e.Arguments[0][0];
+				var c = e.Arguments[0][0];
 				if (c >= '0' && c <= '9')
 				{
 					try
 					{
-						ser = int.Parse(e.Arguments[0]);
+						ser = Int32.Parse(e.Arguments[0]);
 					}
 					catch { }
-					XmlAttachment a = FindAttachmentBySerial(ser);
+
+					var a = FindAttachmentBySerial(ser);
 					if (a != null)
-					{
 						// open up the props gump on the attachment
 						e.Mobile.SendGump(new PropertiesGump(e.Mobile, a));
-
-					}
 					else
-					{
 						e.Mobile.SendMessage("Attachment {0} does not exist", ser);
-					}
 				}
 			}
 
@@ -1465,28 +1321,27 @@ namespace Server.Engines.XmlSpawner2
 		[Description("Deletes attachments on the targeted object.")]
 		public static void DeleteAttachments_OnCommand(CommandEventArgs e)
 		{
-			int ser = -1;
+			var ser = -1;
 			if (e.Arguments.Length > 0)
 			{
 				// is this a numeric arg?
-				char c = e.Arguments[0][0];
+				var c = e.Arguments[0][0];
 				if (c >= '0' && c <= '9')
 				{
 					try
 					{
-						ser = int.Parse(e.Arguments[0]);
+						ser = Int32.Parse(e.Arguments[0]);
 					}
 					catch { }
-					XmlAttachment a = FindAttachmentBySerial(ser);
+
+					var a = FindAttachmentBySerial(ser);
 					if (a != null)
 					{
 						e.Mobile.SendMessage("Deleting attachment {0} : {1}", ser, a);
 						a.Delete();
 					}
 					else
-					{
 						e.Mobile.SendMessage("Attachment {0} does not exist", ser);
-					}
 				}
 			}
 
@@ -1507,56 +1362,49 @@ namespace Server.Engines.XmlSpawner2
 		{
 			if (ItemAttachments == null) return;
 
-			XmlAttach.FullDefrag(ItemAttachments);
+			FullDefrag(ItemAttachments);
 
-			Item[] itemarray = new Item[ItemAttachments.Count];
+			var itemarray = new Item[ItemAttachments.Count];
 
 			ItemAttachments.Keys.CopyTo(itemarray, 0);
 
 			e.Mobile.SendMessage("{0} items with attachments", ItemAttachments.Count);
 
-			for (int i = 0; i < itemarray.Length; i++)
+			for (var i = 0; i < itemarray.Length; i++)
 			{
 				e.Mobile.SendMessage("Attachments for {0} :", itemarray[i]);
-				List<XmlAttachment> list = FindAttachments(itemarray[i]);
+				var list = FindAttachments(itemarray[i]);
 
 				if (list != null)
-				{
-					foreach (XmlAttachment a in list)
-					{
+					foreach (var a in list)
 						if (a != null && !a.Deleted)
 							e.Mobile.SendMessage("\t{0} : {1} : {2}", a.GetType().Name, a.Name, a.OnIdentify(e.Mobile));
-					}
-				}
 			}
 		}
+
 		[Usage("MobAtt")]
 		[Description("Lists all mobile attachments.")]
 		public static void ListMobileAttachments_OnCommand(CommandEventArgs e)
 		{
 			if (MobileAttachments == null) return;
 
-			XmlAttach.FullDefrag(MobileAttachments);
+			FullDefrag(MobileAttachments);
 
-			Mobile[] mobilearray = new Mobile[MobileAttachments.Count];
+			var mobilearray = new Mobile[MobileAttachments.Count];
 
 			MobileAttachments.Keys.CopyTo(mobilearray, 0);
 
 			e.Mobile.SendMessage("{0} mobiles with attachments", MobileAttachments.Count);
 
-			for (int i = 0; i < mobilearray.Length; i++)
+			for (var i = 0; i < mobilearray.Length; i++)
 			{
 				e.Mobile.SendMessage("Attachments for {0} :", mobilearray[i]);
-				List<XmlAttachment> list = FindAttachments(mobilearray[i]);
+				var list = FindAttachments(mobilearray[i]);
 
 				if (list != null)
-				{
-					foreach (XmlAttachment a in list)
-					{
+					foreach (var a in list)
 						if (a != null && !a.Deleted)
 							e.Mobile.SendMessage("\t{0} : {1} : {2}", a.GetType().Name, a.Name, a.OnIdentify(e.Mobile));
-					}
-				}
 			}
 		}
 
@@ -1565,26 +1413,23 @@ namespace Server.Engines.XmlSpawner2
 			if (matchtype == null)
 				return;
 
-			for (int i = 0; i < types.Length; ++i)
+			for (var i = 0; i < types.Length; ++i)
 			{
-				Type t = types[i];
+				var t = types[i];
 
-				if (t.IsSubclassOf(matchtype))
-				{
-					results.Add(t);
-				}
+				if (t.IsSubclassOf(matchtype)) results.Add(t);
 			}
 		}
 
 
 		private static List<Type> Match(Type matchtype)
 		{
-			List<Type> results = new List<Type>();
+			var results = new List<Type>();
 			Type[] types;
 
-			Assembly[] asms = ScriptCompiler.Assemblies;
+			var asms = ScriptCompiler.Assemblies;
 
-			for (int i = 0; i < asms.Length; ++i)
+			for (var i = 0; i < asms.Length; ++i)
 			{
 				types = ScriptCompiler.GetTypeCache(asms[i]).Types;
 				Match(matchtype, types, results);
@@ -1611,46 +1456,40 @@ namespace Server.Engines.XmlSpawner2
 		[Description("Lists all available attachments.")]
 		public static void ListAvailableAttachments_OnCommand(CommandEventArgs e)
 		{
-			List<Type> attachtypes = Match(typeof(XmlAttachment));
+			var attachtypes = Match(typeof(XmlAttachment));
 
 			string parmliststr = null;
 
-			foreach (Type attachtype in attachtypes)
+			foreach (var attachtype in attachtypes)
 			{
 				// get all constructors derived from the XmlAttachment class
-				ConstructorInfo[] ctors = attachtype.GetConstructors();
+				var ctors = attachtype.GetConstructors();
 
-				for (int i = 0; i < ctors.Length; ++i)
+				for (var i = 0; i < ctors.Length; ++i)
 				{
-					ConstructorInfo ctor = ctors[i];
+					var ctor = ctors[i];
 
-					if (!IsAttachable(ctor))
-					{
-						continue;
-					}
+					if (!IsAttachable(ctor)) continue;
 
-					ParameterInfo[] paramList = ctor.GetParameters();
+					var paramList = ctor.GetParameters();
 
 					if (paramList != null)
 					{
-						string parms = attachtype.Name;
+						var parms = attachtype.Name;
 
 
-						for (int j = 0; j < paramList.Length; j++)
-						{
-							parms += ", " + paramList[j].Name;
-						}
+						for (var j = 0; j < paramList.Length; j++) parms += ", " + paramList[j].Name;
 
 						parmliststr += parms + "\n";
 					}
 				}
 			}
+
 			e.Mobile.SendGump(new ListAttachmentsGump(parmliststr, 20, 20));
 		}
 
 		private class ListAttachmentsGump : Gump
 		{
-
 			public ListAttachmentsGump(string attachmentlist, int X, int Y)
 				: base(X, Y)
 			{
@@ -1687,21 +1526,20 @@ namespace Server.Engines.XmlSpawner2
 		{
 			if (from == null || o == null) return;
 
-			List<XmlAttachment> plist = XmlAttach.FindAttachments(o);
+			var plist = FindAttachments(o);
 
 			if (plist == null) return;
 
 			string msg = null;
 
-			foreach (XmlAttachment p in plist)
-			{
+			foreach (var p in plist)
 				if (p != null && !p.Deleted)
 				{
-					string pmsg = p.OnIdentify(from);
+					var pmsg = p.OnIdentify(@from);
 					if (pmsg != null)
 						msg += String.Format("\n{0}\n", pmsg);
 				}
-			}
+
 			if (msg != null)
 			{
 				from.CloseGump(typeof(DisplayAttachmentGump));
@@ -1730,19 +1568,19 @@ namespace Server.Engines.XmlSpawner2
 		{
 			if (attachment == null || o == null) return false;
 
-			Item it=null;
-			Mobile mob=null;
+			Item it = null;
+			Mobile mob = null;
 			List<XmlAttachment> attachmententry;
 			if (o is Item)
 			{
-				it=(Item)o;
-				XmlAttach.Defrag(ItemAttachments, it);
+				it = (Item)o;
+				Defrag(ItemAttachments, it);
 				attachmententry = FindAttachments(it, true);
 			}
 			else if (o is Mobile)
 			{
-				mob=(Mobile)o;
-				XmlAttach.Defrag(MobileAttachments, mob);
+				mob = (Mobile)o;
+				Defrag(MobileAttachments, mob);
 				attachmententry = FindAttachments(mob, true);
 			}
 			else
@@ -1752,15 +1590,11 @@ namespace Server.Engines.XmlSpawner2
 			if (attachmententry != null)
 			{
 				// if an existing entry list was found then just add the attachment to that list after making sure there is not a duplicate
-				foreach (XmlAttachment i in attachmententry)
-				{
+				foreach (var i in attachmententry)
 					// and attachment is considered a duplicate if both the type and name match
 					if (i != null && !i.Deleted && i.GetType() == attachment.GetType() && i.Name == attachment.Name)
-					{
 						// duplicate found so replace it
 						i.Delete();
-					}
-				}
 
 				attachmententry.Add(attachment);
 			}
@@ -1773,34 +1607,25 @@ namespace Server.Engines.XmlSpawner2
 				attachmententry.Add(attachment);
 
 				// and add it to the correct dictionary table
-				if(mob!=null)
-					MobileAttachments[mob]=attachmententry;
-				else if(it!=null)
-					ItemAttachments[it]=attachmententry;
+				if (mob != null)
+					MobileAttachments[mob] = attachmententry;
+				else if (it != null)
+					ItemAttachments[it] = attachmententry;
 			}
 
 			attachment.AttachedTo = o;
 			attachment.OwnedBy = o;
 
 			if (from is Mobile)
-			{
-				attachment.SetAttachedBy(((Mobile)from).Name);
-			}
-			else if (from is Item)
-			{
-				attachment.SetAttachedBy(((Item)from).Name);
-			}
+				attachment.SetAttachedBy(((Mobile)@from).Name);
+			else if (from is Item) attachment.SetAttachedBy(((Item)@from).Name);
 
 			// if this is being attached for the first time, then call the OnAttach method
 			// if it is being reattached due to deserialization then dont
 			if (first)
-			{
 				attachment.OnAttach();
-			}
 			else
-			{
 				attachment.OnReattach();
-			}
 
 			return !attachment.Deleted;
 		}
@@ -1838,13 +1663,8 @@ namespace Server.Engines.XmlSpawner2
 		public static List<XmlAttachment> FindAttachments(object o, Type type, string name)
 		{
 			if (o is Item)
-			{
 				return FindAttachments(ItemAttachments, (Item)o, type, name, false);
-			}
-			else if (o is Mobile)
-			{
-				return FindAttachments(MobileAttachments, (Mobile)o, type, name, false);
-			}
+			else if (o is Mobile) return FindAttachments(MobileAttachments, (Mobile)o, type, name, false);
 			return null;
 		}
 
@@ -1868,27 +1688,30 @@ namespace Server.Engines.XmlSpawner2
 			return FindAttachments(MobileAttachments, o, null, null, original);
 		}
 
-		public static List<XmlAttachment> FindAttachments(Dictionary<Item, List<XmlAttachment>> attachments, Item o, Type type, string name)
+		public static List<XmlAttachment> FindAttachments(Dictionary<Item, List<XmlAttachment>> attachments, Item o,
+			Type type, string name)
 		{
 			return FindAttachments(attachments, o, type, name, false);
 		}
 
-		public static List<XmlAttachment> FindAttachments(Dictionary<Mobile, List<XmlAttachment>> attachments, Mobile o, Type type, string name)
+		public static List<XmlAttachment> FindAttachments(Dictionary<Mobile, List<XmlAttachment>> attachments, Mobile o,
+			Type type, string name)
 		{
 			return FindAttachments(attachments, o, type, name, false);
 		}
 
-		public static List<XmlAttachment> FindAttachments(Dictionary<Item, List<XmlAttachment>> attachments, Item o, Type type, string name, bool original)
+		public static List<XmlAttachment> FindAttachments(Dictionary<Item, List<XmlAttachment>> attachments, Item o,
+			Type type, string name, bool original)
 		{
 			if (o == null || attachments == null || o.Deleted) return null;
 
 			List<XmlAttachment> list;
-			if(!attachments.TryGetValue(o, out list) || list==null)
+			if (!attachments.TryGetValue(o, out list) || list == null)
 				return null;
 
 			if (type == null && name == null)
 			{
-				if(original)
+				if (original)
 					return list;
 				else
 					return list.GetRange(0, list.Count);
@@ -1896,37 +1719,36 @@ namespace Server.Engines.XmlSpawner2
 			else
 			{
 				// just get those of a particular type and/or name
-				List<XmlAttachment> newlist = new List<XmlAttachment>();
+				var newlist = new List<XmlAttachment>();
 
-				foreach (XmlAttachment i in list)
+				foreach (var i in list)
 				{
 					// see if it is deleted
 					if (i == null || i.Deleted)
 						continue;
 
-					Type itype = i.GetType();
+					var itype = i.GetType();
 
-					if ((type == null || (itype != null && (itype == type || itype.IsSubclassOf(type)))) && (name == null || (name == i.Name)))
-					{
-						newlist.Add(i);
-					}
+					if ((type == null || itype != null && (itype == type || itype.IsSubclassOf(type))) &&
+					    (name == null || name == i.Name)) newlist.Add(i);
 				}
 
 				return newlist;
 			}
 		}
 
-		public static List<XmlAttachment> FindAttachments(Dictionary<Mobile, List<XmlAttachment>> attachments, Mobile o, Type type, string name, bool original)
+		public static List<XmlAttachment> FindAttachments(Dictionary<Mobile, List<XmlAttachment>> attachments, Mobile o,
+			Type type, string name, bool original)
 		{
 			if (o == null || attachments == null || o.Deleted) return null;
 
 			List<XmlAttachment> list;
-			if(!attachments.TryGetValue(o, out list) || list==null)
+			if (!attachments.TryGetValue(o, out list) || list == null)
 				return null;
 
 			if (type == null && name == null)
 			{
-				if(original)
+				if (original)
 					return list;
 				else
 					return list.GetRange(0, list.Count);
@@ -1934,20 +1756,18 @@ namespace Server.Engines.XmlSpawner2
 			else
 			{
 				// just get those of a particular type and/or name
-				List<XmlAttachment> newlist = new List<XmlAttachment>();
+				var newlist = new List<XmlAttachment>();
 
-				foreach (XmlAttachment i in list)
+				foreach (var i in list)
 				{
 					// see if it is deleted
 					if (i == null || i.Deleted)
 						continue;
 
-					Type itype = i.GetType();
+					var itype = i.GetType();
 
-					if ((type == null || (itype != null && (itype == type || itype.IsSubclassOf(type)))) && (name == null || (name == i.Name)))
-					{
-						newlist.Add(i);
-					}
+					if ((type == null || itype != null && (itype == type || itype.IsSubclassOf(type))) &&
+					    (name == null || name == i.Name)) newlist.Add(i);
 				}
 
 				return newlist;
@@ -1987,13 +1807,8 @@ namespace Server.Engines.XmlSpawner2
 		public static XmlAttachment FindAttachment(object o, Type type, string name)
 		{
 			if (o is Item)
-			{
 				return FindAttachment(ItemAttachments, (Item)o, type, name);
-			}
-			else if (o is Mobile)
-			{
-				return FindAttachment(MobileAttachments, (Mobile)o, type, name);
-			}
+			else if (o is Mobile) return FindAttachment(MobileAttachments, (Mobile)o, type, name);
 			return null;
 		}
 
@@ -2012,76 +1827,71 @@ namespace Server.Engines.XmlSpawner2
 			return FindAttachment(attachments, o, type, null);
 		}
 
-		public static XmlAttachment FindAttachment(Dictionary<Mobile, List<XmlAttachment>> attachments, Mobile o, Type type)
+		public static XmlAttachment FindAttachment(Dictionary<Mobile, List<XmlAttachment>> attachments, Mobile o,
+			Type type)
 		{
 			return FindAttachment(attachments, o, type, null);
 		}
 
-		public static XmlAttachment FindAttachment(Dictionary<Item, List<XmlAttachment>> attachments, Item o, Type type, string name)
+		public static XmlAttachment FindAttachment(Dictionary<Item, List<XmlAttachment>> attachments, Item o, Type type,
+			string name)
 		{
 			List<XmlAttachment> list;
-			if(o == null || attachments == null || o.Deleted || !attachments.TryGetValue(o, out list) || list==null) return null;
+			if (o == null || attachments == null || o.Deleted || !attachments.TryGetValue(o, out list) ||
+			    list == null) return null;
 
 			if (type == null && name == null)
 			{
 				// return the first valid attachment
-				foreach (XmlAttachment i in list)
-				{
+				foreach (var i in list)
 					if (i != null && !i.Deleted)
 						return i;
-				}
 			}
 			else
-			{
 				// just get those of a particular type and/or name
-				foreach (XmlAttachment i in list)
+				foreach (var i in list)
 				{
 					// see if it is deleted
 					if (i == null || i.Deleted)
 						continue;
 
-					Type itype = i.GetType();
+					var itype = i.GetType();
 
-					if ((type == null || (itype != null && (itype == type || itype.IsSubclassOf(type)))) && (name == null || (name == i.Name)))
-					{
-						return i;
-					}
+					if ((type == null || itype != null && (itype == type || itype.IsSubclassOf(type))) &&
+					    (name == null || name == i.Name)) return i;
 				}
-			}
+
 			return null;
 		}
 
-		public static XmlAttachment FindAttachment(Dictionary<Mobile, List<XmlAttachment>> attachments, Mobile o, Type type, string name)
+		public static XmlAttachment FindAttachment(Dictionary<Mobile, List<XmlAttachment>> attachments, Mobile o,
+			Type type, string name)
 		{
 			List<XmlAttachment> list;
-			if(o == null || attachments == null || o.Deleted || !attachments.TryGetValue(o, out list) || list==null) return null;
+			if (o == null || attachments == null || o.Deleted || !attachments.TryGetValue(o, out list) ||
+			    list == null) return null;
 
 			if (type == null && name == null)
 			{
 				// return the first valid attachment
-				foreach (XmlAttachment i in list)
-				{
+				foreach (var i in list)
 					if (i != null && !i.Deleted)
 						return i;
-				}
 			}
 			else
-			{
 				// just get those of a particular type and/or name
-				foreach (XmlAttachment i in list)
+				foreach (var i in list)
 				{
 					// see if it is deleted
 					if (i == null || i.Deleted)
 						continue;
 
-					Type itype = i.GetType();
+					var itype = i.GetType();
 
-					if ((type == null || (itype != null && (itype == type || itype.IsSubclassOf(type)))) && (name == null || (name == i.Name)))
-					{
-						return i;
-					}
+					if ((type == null || itype != null && (itype == type || itype.IsSubclassOf(type))) &&
+					    (name == null || name == i.Name)) return i;
 				}
-			}
+
 			return null;
 		}
 
@@ -2105,36 +1915,33 @@ namespace Server.Engines.XmlSpawner2
 
 		private static void FullDefrag(Dictionary<Item, List<XmlAttachment>> attachments)
 		{
-			Item[] keyarray = new Item[attachments.Count];
+			var keyarray = new Item[attachments.Count];
 
 			attachments.Keys.CopyTo(keyarray, 0);
-			for(int i=keyarray.Length - 1; i>=0; --i)
+			for (var i = keyarray.Length - 1; i >= 0; --i)
 				Defrag(attachments, keyarray[i]);
 		}
 
 		private static void FullDefrag(Dictionary<Mobile, List<XmlAttachment>> attachments)
 		{
-			Mobile[] keyarray = new Mobile[attachments.Count];
+			var keyarray = new Mobile[attachments.Count];
 
 			attachments.Keys.CopyTo(keyarray, 0);
-			for(int i=keyarray.Length - 1; i>=0; --i)
+			for (var i = keyarray.Length - 1; i >= 0; --i)
 				Defrag(attachments, keyarray[i]);
 		}
 
 		private static void FullSerialDefrag(Dictionary<int, XmlAttachment> attachments)
 		{
 			// go through the item attachments
-			int[] keyarray = new int[attachments.Count];
+			var keyarray = new int[attachments.Count];
 
 			attachments.Keys.CopyTo(keyarray, 0);
-			for (int i = 0; i < keyarray.Length; i++)
+			for (var i = 0; i < keyarray.Length; i++)
 			{
-				XmlAttachment a = attachments[keyarray[i]];
+				var a = attachments[keyarray[i]];
 
-				if (a == null || a.Deleted)
-				{
-					attachments.Remove(keyarray[i]);
-				}
+				if (a == null || a.Deleted) attachments.Remove(keyarray[i]);
 			}
 		}
 
@@ -2153,15 +1960,11 @@ namespace Server.Engines.XmlSpawner2
 		{
 			//Hashtable attachments = null;
 			if (o is Item)
-			{
 				Defrag(ItemAttachments, (Item)o);
-				//attachments = ItemAttachments;
-			}
+			//attachments = ItemAttachments;
 			else if (o is Mobile)
-			{
 				Defrag(MobileAttachments, (Mobile)o);
-				//attachments = MobileAttachments;
-			}
+			//attachments = MobileAttachments;
 			//Defrag(attachments, o);
 		}
 
@@ -2169,26 +1972,25 @@ namespace Server.Engines.XmlSpawner2
 		{
 			if (o == null || attachments == null) return;
 
-			bool removeall = false;
+			var removeall = false;
 			List<XmlAttachment> list = null;
-			if(ItemAttachments.TryGetValue(o, out list))
+			if (ItemAttachments.TryGetValue(o, out list))
 				removeall = o.Deleted;
 
 			if (list != null)
 			{
 				if (removeall)
-				{
 					attachments.Remove(o);
-				}
 				else
 				{
-					for(int i = list.Count - 1; i>=0; --i)
+					for (var i = list.Count - 1; i >= 0; --i)
 					{
-						XmlAttachment x = list[i];
+						var x = list[i];
 						if (x == null || x.Deleted)
 							list.Remove(x);
 					}
-					if(list.Count == 0)
+
+					if (list.Count == 0)
 						attachments.Remove(o);
 				}
 			}
@@ -2199,26 +2001,25 @@ namespace Server.Engines.XmlSpawner2
 		private static void Defrag(Dictionary<Mobile, List<XmlAttachment>> attachments, Mobile o)
 		{
 			if (o == null || attachments == null) return;
-			bool removeall = false;
+			var removeall = false;
 			List<XmlAttachment> list = null;
-			if(MobileAttachments.TryGetValue(o, out list))
+			if (MobileAttachments.TryGetValue(o, out list))
 				removeall = o.Deleted;
 
 			if (list != null)
 			{
 				if (removeall)
-				{
 					attachments.Remove(o);
-				}
 				else
 				{
-					for(int i = list.Count - 1; i>=0; --i)
+					for (var i = list.Count - 1; i >= 0; --i)
 					{
-						XmlAttachment x = list[i];
+						var x = list[i];
 						if (x == null || x.Deleted)
 							list.Remove(x);
 					}
-					if(list.Count == 0)
+
+					if (list.Count == 0)
 						attachments.Remove(o);
 				}
 			}
@@ -2230,95 +2031,72 @@ namespace Server.Engines.XmlSpawner2
 		{
 			// call the CanEquip method on any attachments on the item
 			// look for attachments on the item
-			List<XmlAttachment> attachments = FindAttachments(item);
+			var attachments = FindAttachments(item);
 
 			if (attachments != null)
-			{
-				foreach (XmlAttachment a in attachments)
-				{
+				foreach (var a in attachments)
 					if (a != null && !a.Deleted)
-						if (!a.CanEquip(from)) return false;
-				}
-			}
+						if (!a.CanEquip(@from))
+							return false;
 			return true;
 		}
 
 		public static void CheckOnEquip(Item item, Mobile from)
 		{
 			// look for attachments on the item
-			List<XmlAttachment> attachments = FindAttachments(item);
+			var attachments = FindAttachments(item);
 
 			if (attachments != null)
-			{
-				foreach (XmlAttachment a in attachments)
-				{
+				foreach (var a in attachments)
 					if (a != null && !a.Deleted)
-						a.OnEquip(from);
-				}
-			}
+						a.OnEquip(@from);
 		}
 
 		public static void CheckOnRemoved(Item item, object parent)
 		{
 			// look for attachments on the item
-			List<XmlAttachment> attachments = FindAttachments(item);
+			var attachments = FindAttachments(item);
 
 			if (attachments != null)
-			{
-				foreach (XmlAttachment a in attachments)
-				{
+				foreach (var a in attachments)
 					if (a != null && !a.Deleted)
 						a.OnRemoved(parent);
-				}
-			}
 		}
 
 		public static void OnWeaponHit(BaseWeapon weapon, Mobile attacker, Mobile defender, int damage)
 		{
 			// look for attachments on the weapon
-			List<XmlAttachment> attachments = FindAttachments(weapon);
+			var attachments = FindAttachments(weapon);
 
 			if (attachments != null)
-			{
-				foreach (XmlAttachment a in attachments)
-				{
+				foreach (var a in attachments)
 					if (a != null && !a.Deleted)
-					   a.OnWeaponHit(attacker, defender, weapon, damage);
-				}
-			}
+						a.OnWeaponHit(attacker, defender, weapon, damage);
 
 			// also support OnWeaponHit for the mobile owner
 			attachments = FindAttachments(attacker);
 
 			if (attachments != null)
-			{
-				foreach (XmlAttachment a in attachments)
-				{
+				foreach (var a in attachments)
 					if (a != null && !a.Deleted)
 						a.OnWeaponHit(attacker, defender, weapon, damage);
-				}
-			}
 		}
 
 		public static int OnArmorHit(Mobile attacker, Mobile defender, Item armor, BaseWeapon weapon, int damage)
 		{
-			int damageTaken = 0;
+			var damageTaken = 0;
 
 			// figure out who the attacker and defender are based upon who is carrying the armor/weapon
 
 			// look for attachments on the armor
 			if (armor != null)
 			{
-				List<XmlAttachment> attachments = FindAttachments(armor);
+				var attachments = FindAttachments(armor);
 
 				if (attachments != null)
-				{
-					foreach (XmlAttachment a in attachments)
-					{
+					foreach (var a in attachments)
 						if (a != null && !a.Deleted)
 							damageTaken += a.OnArmorHit(attacker, defender, armor, weapon, damage);
-					}
-				}
 			}
 
 			return damageTaken;
@@ -2330,13 +2108,13 @@ namespace Server.Engines.XmlSpawner2
 
 			string propstr = null;
 
-			List<XmlAttachment> plist = XmlAttach.FindAttachments(parent);
+			var plist = FindAttachments(parent);
 			if (plist != null && plist.Count > 0)
 			{
-				bool more=plist.Count>1;
-				for (int i = 0; i < plist.Count; i++)
+				var more = plist.Count > 1;
+				for (var i = 0; i < plist.Count; i++)
 				{
-					XmlAttachment a = plist[i];
+					var a = plist[i];
 
 					if (a != null && !a.Deleted)
 					{
@@ -2344,18 +2122,17 @@ namespace Server.Engines.XmlSpawner2
 						a.AddProperties(list);
 
 						// get any displayed properties on the attachment
-						string str = a.DisplayedProperties(null);
+						var str = a.DisplayedProperties(null);
 
 						if (str != null)
 						{
-							if(more && i>0)
-								propstr +="\n";
+							if (more && i > 0)
+								propstr += "\n";
 
 							propstr += str;
 							//the method below don't work well in some cases
 							//if (i < plist.Count - 1) propstr += "\n";
 						}
-
 					}
 				}
 			}
@@ -2366,55 +2143,45 @@ namespace Server.Engines.XmlSpawner2
 
 		public static void UseReq(NetState state, PacketReader pvSrc)
 		{
-			Mobile from = state.Mobile;
+			var from = state.Mobile;
 
 			if (from.AccessLevel >= AccessLevel.GameMaster || Core.TickCount >= from.NextActionTime)
 			{
-				Serial s = pvSrc.ReadSerial();
+				var s = pvSrc.ReadSerial();
 
 				if ((s & ~0x7FFFFFFF) != 0)
-				{
-					from.OnPaperdollRequest();
-				}
+					@from.OnPaperdollRequest();
 				else
 				{
-					bool blockdefaultonuse = false;
+					var blockdefaultonuse = false;
 
 					if (s.IsMobile)
 					{
-						Mobile m = World.FindMobile(s);
+						var m = World.FindMobile(s);
 
 						if (m != null && !m.Deleted)
 						{
 							// get attachments on the mobile doing the using
-							List<XmlAttachment> fromlist = FindAttachments(from);
+							var fromlist = FindAttachments(from);
 							if (fromlist != null)
-							{
-								foreach (XmlAttachment a in fromlist)
-								{
+								foreach (var a in fromlist)
 									if (a != null && !a.Deleted)
 									{
-										if (a.BlockDefaultOnUse(from, m))
+										if (a.BlockDefaultOnUse(@from, m))
 											blockdefaultonuse = true;
 										a.OnUser(m);
 									}
-								}
-							}
 
 							// get attachments on the mob
-							List<XmlAttachment> alist = FindAttachments(m);
+							var alist = FindAttachments(m);
 							if (alist != null)
-							{
-								foreach (XmlAttachment a in alist)
-								{
+								foreach (var a in alist)
 									if (a != null && !a.Deleted)
 									{
-										if (a.BlockDefaultOnUse(from, m))
+										if (a.BlockDefaultOnUse(@from, m))
 											blockdefaultonuse = true;
-										a.OnUse(from);
+										a.OnUse(@from);
 									}
-								}
-							}
 
 							if (!blockdefaultonuse)
 								from.Use(m);
@@ -2422,51 +2189,41 @@ namespace Server.Engines.XmlSpawner2
 					}
 					else if (s.IsItem)
 					{
-						Item item = World.FindItem(s);
+						var item = World.FindItem(s);
 
 						if (item != null && !item.Deleted)
 						{
 							// get attachments on the mobile doing the using
-							List<XmlAttachment> fromlist = FindAttachments(from);
+							var fromlist = FindAttachments(from);
 							if (fromlist != null)
-							{
-								foreach (XmlAttachment a in fromlist)
-								{
+								foreach (var a in fromlist)
 									if (a != null && !a.Deleted)
 									{
-										if (a.BlockDefaultOnUse(from, item))
+										if (a.BlockDefaultOnUse(@from, item))
 											blockdefaultonuse = true;
 										a.OnUser(item);
 									}
-								}
-							}
 
 							// get attachments on the mob
-							List<XmlAttachment> alist = FindAttachments(item);
+							var alist = FindAttachments(item);
 							if (alist != null)
-							{
-								foreach (XmlAttachment a in alist)
-								{
+								foreach (var a in alist)
 									if (a != null && !a.Deleted)
 									{
-										if (a.BlockDefaultOnUse(from, item))
+										if (a.BlockDefaultOnUse(@from, item))
 											blockdefaultonuse = true;
-										a.OnUse(from);
+										a.OnUse(@from);
 									}
-								}
-							}
+
 							// need to check the item again in case it was modified in the OnUse or OnUser method
 							if (!blockdefaultonuse)
 								from.Use(item);
 						}
 					}
 				}
-
 			}
 			else
-			{
-				from.SendActionMessage();
-			}
+				@from.SendActionMessage();
 		}
 
 		public static bool OnDragLift(Mobile from, Item item)
@@ -2474,16 +2231,12 @@ namespace Server.Engines.XmlSpawner2
 			// look for attachments on the item
 			if (item != null)
 			{
-				List<XmlAttachment> attachments = FindAttachments(item);
+				var attachments = FindAttachments(item);
 
 				if (attachments != null)
-				{
-					foreach (XmlAttachment a in attachments)
-					{
-						if (a != null && !a.Deleted && !a.OnDragLift(from, item))
+					foreach (var a in attachments)
+						if (a != null && !a.Deleted && !a.OnDragLift(@from, item))
 							return false;
-					}
-				}
 			}
 
 			// allow lifts by default
@@ -2508,6 +2261,7 @@ namespace Server.Engines.XmlSpawner2
 					Console.Write("Unable to send email.  Possible invalid email address.");
 					return;
 				}
+
 				message.Subject = "Automated XmlSpawner2 Attachment Error Report";
 
 				message.Body = "Automated XmlSpawner2 Attachment Report. See attachment for details.";
@@ -2554,8 +2308,8 @@ namespace Server.Engines.XmlSpawner2
 
 			private static void CopyFile(string rootOrigin, string rootBackup, string path)
 			{
-				string originPath = Combine(rootOrigin, path);
-				string backupPath = Combine(rootBackup, path);
+				var originPath = Combine(rootOrigin, path);
+				var backupPath = Combine(rootBackup, path);
 
 				try
 				{
@@ -2573,20 +2327,21 @@ namespace Server.Engines.XmlSpawner2
 
 				try
 				{
-					string timeStamp = GetTimeStamp();
-					string fileName = String.Format("Attachment Error {0}.log", timeStamp);
+					var timeStamp = GetTimeStamp();
+					var fileName = String.Format("Attachment Error {0}.log", timeStamp);
 
-					string root = GetRoot();
-					string filePath = Combine(root, fileName);
+					var root = GetRoot();
+					var filePath = Combine(root, fileName);
 
-					using (StreamWriter op = new StreamWriter(filePath))
+					using (var op = new StreamWriter(filePath))
 					{
-						Version ver = Core.Assembly.GetName().Version;
+						var ver = Core.Assembly.GetName().Version;
 
 						op.WriteLine("XmlSpawner2 Attachment Error Report");
 						op.WriteLine("===================");
 						op.WriteLine();
-						op.WriteLine("RunUO Version {0}.{1}.{3}, Build {2}", ver.Major, ver.Minor, ver.Revision, ver.Build);
+						op.WriteLine("RunUO Version {0}.{1}.{3}, Build {2}", ver.Major, ver.Minor, ver.Revision,
+							ver.Build);
 						op.WriteLine("Operating System: {0}", Environment.OSVersion);
 						op.WriteLine(".NET Framework: {0}", Environment.Version);
 						op.WriteLine("XmlSpawner2: {0}", XmlSpawner.Version);
@@ -2599,10 +2354,7 @@ namespace Server.Engines.XmlSpawner2
 
 						op.WriteLine();
 						op.WriteLine("Specific Attachment Errors:");
-						foreach (DeserErrorDetails s in XmlAttach.desererror)
-						{
-							op.WriteLine("{0} - {1}", s.Type, s.Details);
-						}
+						foreach (var s in desererror) op.WriteLine("{0} - {1}", s.Type, s.Details);
 					}
 
 					Console.WriteLine("done");
@@ -2618,7 +2370,7 @@ namespace Server.Engines.XmlSpawner2
 
 			private static string GetTimeStamp()
 			{
-				DateTime now = DateTime.Now;
+				var now = DateTime.Now;
 
 				return String.Format("{0}-{1}-{2}-{3}-{4}-{5}",
 					now.Day,
@@ -2627,7 +2379,7 @@ namespace Server.Engines.XmlSpawner2
 					now.Hour,
 					now.Minute,
 					now.Second
-					);
+				);
 			}
 		}
 	}

@@ -1,14 +1,4 @@
-using System;
-using Server;
-using Server.Gumps;
-using Server.Network;
 using Server.Mobiles;
-using System.IO;
-using System.Collections;
-using Server.Targeting;
-using Server.Engines.PartySystem;
-using System.Data;
-using System.Xml;
 
 /*
 ** XmlQuestMaker
@@ -20,54 +10,48 @@ using System.Xml;
 */
 namespace Server.Items
 {
-
 	public class XmlQuestMaker : Item
-    {
-
-        public XmlQuestMaker( Serial serial ) : base( serial )
-        {
-        }
-
-
-        [Constructable]
-        public XmlQuestMaker() : base(0xED4)
-        {
-            Name = "XmlQuestMaker";
-            Movable = false;
-            Visible = true;
-        }
+	{
+		public XmlQuestMaker(Serial serial) : base(serial)
+		{
+		}
 
 
-        public override void Serialize( GenericWriter writer )
-        {
-            base.Serialize( writer );
-            writer.Write( (int) 0 ); // version
+		[Constructable]
+		public XmlQuestMaker() : base(0xED4)
+		{
+			Name = "XmlQuestMaker";
+			Movable = false;
+			Visible = true;
+		}
 
-        }
 
-        public override void Deserialize( GenericReader reader )
-        {
-            base.Deserialize( reader );
+		public override void Serialize(GenericWriter writer)
+		{
+			base.Serialize(writer);
+			writer.Write((int)0); // version
+		}
 
-            int version = reader.ReadInt();
+		public override void Deserialize(GenericReader reader)
+		{
+			base.Deserialize(reader);
 
-        }
+			var version = reader.ReadInt();
+		}
 
-         public override void OnDoubleClick( Mobile from )
-        {
-            base.OnDoubleClick(from);
+		public override void OnDoubleClick(Mobile from)
+		{
+			base.OnDoubleClick(from);
 
-            if(!(from is PlayerMobile)) return;
+			if (!(from is PlayerMobile)) return;
 
-            // make a quest note
-            QuestHolder newquest = new QuestHolder();
-            newquest.PlayerMade = true;
-            newquest.Creator = from as PlayerMobile;
-            newquest.Hue = 500;
-            from.AddToBackpack(newquest);
-            from.SendMessage("A blank quest has been added to your pack!");
-
-        }
-
-    }
+			// make a quest note
+			var newquest = new QuestHolder();
+			newquest.PlayerMade = true;
+			newquest.Creator = from as PlayerMobile;
+			newquest.Hue = 500;
+			from.AddToBackpack(newquest);
+			from.SendMessage("A blank quest has been added to your pack!");
+		}
+	}
 }

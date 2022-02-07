@@ -1,18 +1,19 @@
 using System;
-using Server;
 using Server.Items;
-using Server.Network;
 using Server.Targeting;
-using Server.Mobiles;
 
 namespace Server.Engines.XmlSpawner2
 {
 	public class HandSiegeAttack : XmlAttachment
 	{
-		private const double DamageScaleFactor = 0.5; // multiplier of weapon min/max damage used to calculate siege damage.
-		private const double BaseWeaponDelay = 9.0;  // base delay in seconds between attacks.  Actual delay will be reduced by weapon speed.
+		private const double
+			DamageScaleFactor = 0.5; // multiplier of weapon min/max damage used to calculate siege damage.
 
-		private Item m_AttackTarget = null;    // target of the attack
+		private const double
+			BaseWeaponDelay =
+				9.0; // base delay in seconds between attacks.  Actual delay will be reduced by weapon speed.
+
+		private Item m_AttackTarget = null; // target of the attack
 		private Point3D m_currentloc;
 		private int m_currentdirection;
 		private Map m_currentmap;
@@ -23,37 +24,53 @@ namespace Server.Engines.XmlSpawner2
 		private InternalTimer m_Timer;
 
 		[CommandProperty(AccessLevel.GameMaster)]
-		public Item AttackTarget { 
-			get 
-			{ 
-				return m_AttackTarget; 
-			} 
-			set 
-			{ 
-			m_AttackTarget = value; 
+		public Item AttackTarget
+		{
+			get => m_AttackTarget;
+			set
+			{
+				m_AttackTarget = value;
 
-			if (m_AttackTarget != null) 
-			{ 
-				// immediate attack unless already attacking
-				DoTimer(TimeSpan.Zero, true); 
-			} 
-		} 
+				if (m_AttackTarget != null)
+					// immediate attack unless already attacking
+					DoTimer(TimeSpan.Zero, true);
+			}
 		}
 
 		[CommandProperty(AccessLevel.GameMaster)]
-		public int MaxDistance { get { return m_MaxDistance; } set { m_MaxDistance = value; } }
+		public int MaxDistance
+		{
+			get => m_MaxDistance;
+			set => m_MaxDistance = value;
+		}
 
 		[CommandProperty(AccessLevel.GameMaster)]
-		public Point3D CurrentLoc { get { return m_currentloc; } set { m_currentloc = value; } }
+		public Point3D CurrentLoc
+		{
+			get => m_currentloc;
+			set => m_currentloc = value;
+		}
 
 		[CommandProperty(AccessLevel.GameMaster)]
-		public Map CurrentMap { get { return m_currentmap; } set { m_currentmap = value; } }
+		public Map CurrentMap
+		{
+			get => m_currentmap;
+			set => m_currentmap = value;
+		}
 
 		[CommandProperty(AccessLevel.GameMaster)]
-		public Point3D TargetLoc { get { return m_targetloc; } set { m_targetloc = value; } }
+		public Point3D TargetLoc
+		{
+			get => m_targetloc;
+			set => m_targetloc = value;
+		}
 
 		[CommandProperty(AccessLevel.GameMaster)]
-		public Map TargetMap { get { return m_targetmap; } set { m_targetmap = value; } }
+		public Map TargetMap
+		{
+			get => m_targetmap;
+			set => m_targetmap = value;
+		}
 
 		// These are the various ways in which the message attachment can be constructed.  
 		// These can be called via the [addatt interface, via scripts, via the spawner ATTACH keyword.
@@ -76,13 +93,14 @@ namespace Server.Engines.XmlSpawner2
 
 			// does this weapon have a HandSiegeAttack attachment on it already?
 
-			HandSiegeAttack a = (HandSiegeAttack)XmlAttach.FindAttachment(weapon, typeof(HandSiegeAttack));
+			var a = (HandSiegeAttack)XmlAttach.FindAttachment(weapon, typeof(HandSiegeAttack));
 
 			if (a == null || a.Deleted)
 			{
 				a = new HandSiegeAttack();
 				XmlAttach.AttachTo(weapon, a);
 			}
+
 			from.Target = new HandSiegeTarget(weapon, a);
 		}
 
@@ -104,32 +122,29 @@ namespace Server.Engines.XmlSpawner2
 
 				if (targeted is StaticTarget)
 				{
-					int staticid = ((StaticTarget)targeted).ItemID;
-					int staticx = ((StaticTarget)targeted).Location.X;
-					int staticy = ((StaticTarget)targeted).Location.Y;
+					var staticid = ((StaticTarget)targeted).ItemID;
+					var staticx = ((StaticTarget)targeted).Location.X;
+					var staticy = ((StaticTarget)targeted).Location.Y;
 
 					Item multiitem = null;
-					Point3D tileloc = Point3D.Zero;
+					var tileloc = Point3D.Zero;
 
 					// find the possible multi owner of the static tile
-					foreach (Item item in from.Map.GetItemsInRange(((StaticTarget)targeted).Location, 50))
-					{
-
+					foreach (var item in from.Map.GetItemsInRange(((StaticTarget)targeted).Location, 50))
 						if (item is BaseMulti)
 						{
 							// search the component list for a match
-							MultiComponentList mcl = ((BaseMulti)item).Components;
-							bool found = false;
+							var mcl = ((BaseMulti)item).Components;
+							var found = false;
 							if (mcl != null && mcl.List != null)
-							{
-								for (int i = 0; i < mcl.List.Length; i++)
+								for (var i = 0; i < mcl.List.Length; i++)
 								{
-									MultiTileEntry t = mcl.List[i];
+									var t = mcl.List[i];
 
-									int x = t.m_OffsetX + item.X;
-									int y = t.m_OffsetY + item.Y;
-									int z = t.m_OffsetZ + item.Z;
-									int itemID = t.m_ItemID & 0x3FFF;
+									var x = t.m_OffsetX + item.X;
+									var y = t.m_OffsetY + item.Y;
+									var z = t.m_OffsetZ + item.Z;
+									var itemID = t.m_ItemID & 0x3FFF;
 
 									if (itemID == staticid && x == staticx && y == staticy)
 									{
@@ -137,9 +152,7 @@ namespace Server.Engines.XmlSpawner2
 										tileloc = new Point3D(x, y, z);
 										break;
 									}
-
 								}
-							}
 
 							if (found)
 							{
@@ -147,9 +160,8 @@ namespace Server.Engines.XmlSpawner2
 								break;
 							}
 						}
-					}
+
 					if (multiitem != null)
-					{
 						//Console.WriteLine("attacking {0} at {1}:{2}", multiitem, tileloc, ((StaticTarget)targeted).Location);
 						// may have to reconsider the use tileloc vs target loc
 						//m_cannon.AttackTarget(from, multiitem, ((StaticTarget)targeted).Location);
@@ -157,29 +169,20 @@ namespace Server.Engines.XmlSpawner2
 						//m_weapon.AttackTarget(from, multiitem, multiitem.Map.GetPoint(targeted, true), m_checklos);
 
 
-						m_attachment.BeginAttackTarget(from, multiitem, multiitem.Map.GetPoint(targeted, true));
-
-					}
+						m_attachment.BeginAttackTarget(@from, multiitem, multiitem.Map.GetPoint(targeted, true));
 				}
-				else
-					if (targeted is AddonComponent)
-					{
-						// if the addon doesnt have an xmlsiege attachment, then attack the addon
-						XmlSiege a = (XmlSiege)XmlAttach.FindAttachment(targeted, typeof(XmlSiege));
-						if (a == null || a.Deleted)
-						{
-							m_attachment.BeginAttackTarget(from, ((AddonComponent)targeted).Addon, ((Item)targeted).Location);
-						}
-						else
-						{
-							m_attachment.BeginAttackTarget(from, (Item)targeted, ((Item)targeted).Location);
-						}
-					} else
-					if (targeted is Item)
-					{
-						m_attachment.BeginAttackTarget(from, (Item)targeted, ((Item)targeted).Location);
-						
-					}
+				else if (targeted is AddonComponent)
+				{
+					// if the addon doesnt have an xmlsiege attachment, then attack the addon
+					var a = (XmlSiege)XmlAttach.FindAttachment(targeted, typeof(XmlSiege));
+					if (a == null || a.Deleted)
+						m_attachment.BeginAttackTarget(@from, ((AddonComponent)targeted).Addon,
+							((Item)targeted).Location);
+					else
+						m_attachment.BeginAttackTarget(@from, (Item)targeted, ((Item)targeted).Location);
+				}
+				else if (targeted is Item)
+					m_attachment.BeginAttackTarget(@from, (Item)targeted, ((Item)targeted).Location);
 			}
 		}
 
@@ -188,8 +191,8 @@ namespace Server.Engines.XmlSpawner2
 			if (from == null || target == null) return;
 
 			// check the target line of sight
-			Point3D adjustedloc = new Point3D(targetloc.X, targetloc.Y, targetloc.Z + target.ItemData.Height);
-			Point3D fromloc = new Point3D(from.Location.X, from.Location.Y, from.Location.Z + 14);
+			var adjustedloc = new Point3D(targetloc.X, targetloc.Y, targetloc.Z + target.ItemData.Height);
+			var fromloc = new Point3D(from.Location.X, from.Location.Y, from.Location.Z + 14);
 
 			if (!from.Map.LineOfSight(fromloc, adjustedloc))
 			{
@@ -197,7 +200,7 @@ namespace Server.Engines.XmlSpawner2
 				return;
 			}
 
-			int distance = (int)XmlSiege.GetDistance(from.Location, targetloc);
+			var distance = (int)XmlSiege.GetDistance(from.Location, targetloc);
 
 			if (distance <= MaxDistance)
 			{
@@ -209,10 +212,7 @@ namespace Server.Engines.XmlSpawner2
 				AttackTarget = target;
 			}
 			else
-			{
-				from.SendLocalizedMessage(500446); // That is too far away.
-			}
-
+				@from.SendLocalizedMessage(500446); // That is too far away.
 		}
 
 		public override void Serialize(GenericWriter writer)
@@ -221,27 +221,21 @@ namespace Server.Engines.XmlSpawner2
 
 			writer.Write((int)0);
 			// version 0
-
 		}
 
 		public override void Deserialize(GenericReader reader)
 		{
 			base.Deserialize(reader);
 
-			int version = reader.ReadInt();
+			var version = reader.ReadInt();
 			// version 0
-
 		}
 
 		public override void OnAttach()
 		{
 			base.OnAttach();
 
-			if (!(AttachedTo is Item))
-			{
-				Delete();
-			}
-				
+			if (!(AttachedTo is Item)) Delete();
 		}
 
 
@@ -281,8 +275,8 @@ namespace Server.Engines.XmlSpawner2
 			{
 				if (m_attachment == null) return;
 
-				Item weapon = m_attachment.AttachedTo as Item;
-				Item target = m_attachment.AttackTarget;
+				var weapon = m_attachment.AttachedTo as Item;
+				var target = m_attachment.AttackTarget;
 
 				if (weapon == null || weapon.Deleted || target == null || target.Deleted)
 				{
@@ -291,7 +285,7 @@ namespace Server.Engines.XmlSpawner2
 				}
 
 				// the weapon must be equipped
-				Mobile attacker = weapon.Parent as Mobile;
+				var attacker = weapon.Parent as Mobile;
 
 				if (attacker == null || attacker.Deleted)
 				{
@@ -300,7 +294,7 @@ namespace Server.Engines.XmlSpawner2
 				}
 
 				// the attacker cannot be fighting
-				
+
 				if (attacker.Combatant != null)
 				{
 					attacker.SendMessage("Cannot siege while fighting.");
@@ -310,19 +304,20 @@ namespace Server.Engines.XmlSpawner2
 
 				// get the location of the attacker
 
-				Point3D attackerloc = attacker.Location;
-				Map attackermap = attacker.Map;
+				var attackerloc = attacker.Location;
+				var attackermap = attacker.Map;
 
-				Point3D targetloc = target.Location;
-				Map targetmap = target.Map;
+				var targetloc = target.Location;
+				var targetmap = target.Map;
 
-				if (targetmap == null || targetmap == Map.Internal || attackermap == null || attackermap == Map.Internal || targetmap != attackermap)
+				if (targetmap == null || targetmap == Map.Internal || attackermap == null ||
+				    attackermap == Map.Internal || targetmap != attackermap)
 				{
 					// if the attacker or target has an invalid map, then stop
 					Stop();
 					return;
 				}
-				
+
 				// compare it against previous locations.  If they have moved then break off the attack
 				if (attackerloc != m_attachment.CurrentLoc || attackermap != m_attachment.CurrentMap)
 				{
@@ -331,31 +326,26 @@ namespace Server.Engines.XmlSpawner2
 				}
 
 
-
 				// attack the target
 				// Animate( int action, int frameCount, int repeatCount, bool forward, bool repeat, int delay )
-				int action = 26; // 1-H bash animation, 29=2-H mounted
+				var action = 26; // 1-H bash animation, 29=2-H mounted
 
-				
 
 				// get the layer
 				switch (weapon.Layer)
 				{
 					case Layer.OneHanded:
-						
+
 						if (attacker.Mount == null)
-						{
 							// unmounted animation
 							action = 9;
-						} else
+						else
 							action = 26;
 						break;
 					case Layer.TwoHanded:
 						if (attacker.Mount == null)
-						{
 							// unmounted animation
 							action = 12;
-						}
 						else
 							action = 29;
 						break;
@@ -364,16 +354,16 @@ namespace Server.Engines.XmlSpawner2
 				// attack animation
 				attacker.Animate(action, 7, 1, true, false, 0);
 
-				int basedamage = 1;
-				double basedelay = BaseWeaponDelay;
+				var basedamage = 1;
+				var basedelay = BaseWeaponDelay;
 
 				if (weapon is BaseWeapon)
 				{
-					BaseWeapon b = (BaseWeapon)weapon;
+					var b = (BaseWeapon)weapon;
 					// calculate the siege damage based on the weapon min/max damage and the overall damage scale factor
-					basedamage = (int)(Utility.RandomMinMax(b.MinDamage, b.MaxDamage)*DamageScaleFactor);
+					basedamage = (int)(Utility.RandomMinMax(b.MinDamage, b.MaxDamage) * DamageScaleFactor);
 					// reduce the actual delay by the weapon speed
-					basedelay -= b.Speed/10;
+					basedelay -= b.Speed / 10;
 				}
 
 				if (basedelay < 1) basedelay = 1;
@@ -384,7 +374,6 @@ namespace Server.Engines.XmlSpawner2
 
 				// prepare for the next attack
 				m_attachment.DoTimer(TimeSpan.FromSeconds(basedelay), false);
-
 			}
 		}
 	}

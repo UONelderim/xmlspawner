@@ -1,11 +1,7 @@
-using System;
-using Server;
-
 namespace Server.Items
 {
 	public class SingleUseSwitch : SimpleSwitch
 	{
-
 		[Constructable]
 		public SingleUseSwitch()
 		{
@@ -43,7 +39,7 @@ namespace Server.Items
 		{
 			base.Deserialize(reader);
 
-			int version = reader.ReadInt();
+			var version = reader.ReadInt();
 		}
 	}
 }

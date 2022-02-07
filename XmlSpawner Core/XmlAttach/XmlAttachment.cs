@@ -1,11 +1,4 @@
 using System;
-using System.Text;
-using Server;
-using Server.Commands;
-using Server.Network;
-using System.Collections.Generic;
-using Server.Mobiles;
-using Server.Targeting;
 using Server.Items;
 
 namespace Server.Engines.XmlSpawner2
@@ -126,26 +119,37 @@ namespace Server.Engines.XmlSpawner2
 
 		private AttachmentTimer m_ExpirationTimer;
 
-		private TimeSpan m_Expiration = TimeSpan.Zero;     // no expiration by default
+		private TimeSpan m_Expiration = TimeSpan.Zero; // no expiration by default
 
 		private DateTime m_ExpirationEnd;
 
-		private DateTime m_CreationTime;                   // when the attachment was made
+		private DateTime m_CreationTime; // when the attachment was made
 
 		// ----------------------------------------------
 		// Public properties
 		// ----------------------------------------------
 		[CommandProperty(AccessLevel.GameMaster)]
-		public DateTime CreationTime { get { return m_CreationTime; } }
+		public DateTime CreationTime => m_CreationTime;
 
-		public bool Deleted { get { return m_Deleted; } }
+		public bool Deleted => m_Deleted;
 
-		public bool DoDelete { get { return false; } set { if (value == true) Delete(); } }
+		public bool DoDelete
+		{
+			get => false;
+			set
+			{
+				if (value == true) Delete();
+			}
+		}
 
 		[CommandProperty(AccessLevel.GameMaster)]
-		public int SerialValue { get { return m_Serial.Value; } }
+		public int SerialValue => m_Serial.Value;
 
-		public ASerial Serial { get { return m_Serial; } set { m_Serial = value; } }
+		public ASerial Serial
+		{
+			get => m_Serial;
+			set => m_Serial = value;
+		}
 
 		[CommandProperty(AccessLevel.GameMaster)]
 		public TimeSpan Expiration
@@ -154,9 +158,7 @@ namespace Server.Engines.XmlSpawner2
 			{
 				// if the expiration timer is running then return the remaining time
 				if (m_ExpirationTimer != null)
-				{
 					return m_ExpirationEnd - DateTime.Now;
-				}
 				else
 					return m_Expiration;
 			}
@@ -164,38 +166,32 @@ namespace Server.Engines.XmlSpawner2
 			{
 				m_Expiration = value;
 				// if it is already attached to something then set the expiration timer
-				if (m_AttachedTo != null)
-				{
-					DoTimer(m_Expiration);
-				}
+				if (m_AttachedTo != null) DoTimer(m_Expiration);
 			}
 		}
 
-		public DateTime ExpirationEnd
-		{
-			get { return m_ExpirationEnd; }
-		}
+		public DateTime ExpirationEnd => m_ExpirationEnd;
 
 		[CommandProperty(AccessLevel.GameMaster)]
-		public virtual bool CanActivateInBackpack { get { return true; } }
+		public virtual bool CanActivateInBackpack => true;
 
 		[CommandProperty(AccessLevel.GameMaster)]
-		public virtual bool CanActivateEquipped { get { return true; } }
+		public virtual bool CanActivateEquipped => true;
 
 		[CommandProperty(AccessLevel.GameMaster)]
-		public virtual bool CanActivateInWorld { get { return true; } }
+		public virtual bool CanActivateInWorld => true;
 
 		[CommandProperty(AccessLevel.GameMaster)]
-		public virtual bool HandlesOnSpeech { get { return false; } }
+		public virtual bool HandlesOnSpeech => false;
 
 		[CommandProperty(AccessLevel.GameMaster)]
-		public virtual bool HandlesOnMovement { get { return false; } }
+		public virtual bool HandlesOnMovement => false;
 
 		[CommandProperty(AccessLevel.GameMaster)]
-		public virtual bool HandlesOnKill { get { return false; } }
+		public virtual bool HandlesOnKill => false;
 
 		[CommandProperty(AccessLevel.GameMaster)]
-		public virtual bool HandlesOnKilled { get { return false; } }
+		public virtual bool HandlesOnKilled => false;
 
 		/*
 		[CommandProperty( AccessLevel.GameMaster )]
@@ -203,20 +199,32 @@ namespace Server.Engines.XmlSpawner2
 		*/
 
 		[CommandProperty(AccessLevel.GameMaster)]
-		public virtual string Name { get { return m_Name; } set { m_Name = value; } }
+		public virtual string Name
+		{
+			get => m_Name;
+			set => m_Name = value;
+		}
 
 		[CommandProperty(AccessLevel.GameMaster)]
-		public virtual object Attached { get { return m_AttachedTo; } }
+		public virtual object Attached => m_AttachedTo;
 
-		public virtual object AttachedTo { get { return m_AttachedTo; } set { m_AttachedTo = value; } }
+		public virtual object AttachedTo
+		{
+			get => m_AttachedTo;
+			set => m_AttachedTo = value;
+		}
 
 		[CommandProperty(AccessLevel.GameMaster)]
-		public virtual string AttachedBy { get { return m_AttachedBy; } }
+		public virtual string AttachedBy => m_AttachedBy;
 
-		public virtual object OwnedBy { get { return m_OwnedBy; } set { m_OwnedBy = value; } }
+		public virtual object OwnedBy
+		{
+			get => m_OwnedBy;
+			set => m_OwnedBy = value;
+		}
 
 		[CommandProperty(AccessLevel.GameMaster)]
-		public virtual object Owner { get { return m_OwnedBy; } }
+		public virtual object Owner => m_OwnedBy;
 
 		// ----------------------------------------------
 		// Private methods
@@ -365,7 +373,7 @@ namespace Server.Engines.XmlSpawner2
 		{
 			return 0;
 		}
-		
+
 		public virtual string OnIdentify(Mobile from)
 		{
 			return null;
@@ -383,48 +391,39 @@ namespace Server.Engines.XmlSpawner2
 
 		public void InvalidateParentProperties()
 		{
-			if (AttachedTo is Item)
-			{
-				((Item)AttachedTo).InvalidateProperties();
-			}
+			if (AttachedTo is Item) ((Item)AttachedTo).InvalidateProperties();
 		}
 
 		public void SafeItemDelete(Item item)
 		{
 			Timer.DelayCall(TimeSpan.Zero, new TimerStateCallback(DeleteItemCallback), new object[] { item });
-
 		}
 
 		public void DeleteItemCallback(object state)
 		{
-			object[] args = (object[])state;
+			var args = (object[])state;
 
-			Item item = args[0] as Item;
+			var item = args[0] as Item;
 
 			if (item != null)
-			{
 				// delete the item
 				item.Delete();
-			}
 		}
 
 		public void SafeMobileDelete(Mobile mob)
 		{
 			Timer.DelayCall(TimeSpan.Zero, new TimerStateCallback(DeleteMobileCallback), new object[] { mob });
-
 		}
 
 		public void DeleteMobileCallback(object state)
 		{
-			object[] args = (object[])state;
+			var args = (object[])state;
 
-			Mobile mob = args[0] as Mobile;
+			var mob = args[0] as Mobile;
 
 			if (mob != null)
-			{
 				// delete the mobile
 				mob.Delete();
-			}
 		}
 
 		public void Delete()
@@ -462,33 +461,28 @@ namespace Server.Engines.XmlSpawner2
 				writer.Write((int)0);
 				writer.Write((Item)OwnedBy);
 			}
+			else if (OwnedBy is Mobile)
+			{
+				writer.Write((int)1);
+				writer.Write((Mobile)OwnedBy);
+			}
 			else
-				if (OwnedBy is Mobile)
-				{
-					writer.Write((int)1);
-					writer.Write((Mobile)OwnedBy);
-				}
-				else
-					writer.Write((int)-1);
+				writer.Write((int)-1);
 
 			// version 0
 			writer.Write(Name);
 			// if there are any active timers, then serialize
 			writer.Write(m_Expiration);
 			if (m_ExpirationTimer != null)
-			{
 				writer.Write(m_ExpirationEnd - DateTime.Now);
-			}
 			else
-			{
 				writer.Write(TimeSpan.Zero);
-			}
 			writer.Write(m_CreationTime);
 		}
 
 		public virtual void Deserialize(GenericReader reader)
 		{
-			int version = reader.ReadInt();
+			var version = reader.ReadInt();
 
 			switch (version)
 			{
@@ -496,25 +490,20 @@ namespace Server.Engines.XmlSpawner2
 					m_AttachedBy = reader.ReadString();
 					goto case 1;
 				case 1:
-					int owned = reader.ReadInt();
+					var owned = reader.ReadInt();
 					if (owned == 0)
-					{
 						OwnedBy = reader.ReadItem();
-					}
+					else if (owned == 1)
+						OwnedBy = reader.ReadMobile();
 					else
-						if (owned == 1)
-						{
-							OwnedBy = reader.ReadMobile();
-						}
-						else
-							OwnedBy = null;
+						OwnedBy = null;
 
 					goto case 0;
 				case 0:
 					// version 0
 					Name = (string)reader.ReadString();
 					m_Expiration = reader.ReadTimeSpan();
-					TimeSpan remaining = (TimeSpan)reader.ReadTimeSpan();
+					var remaining = (TimeSpan)reader.ReadTimeSpan();
 
 					if (remaining > TimeSpan.Zero)
 						DoTimer(remaining);

@@ -20,6 +20,7 @@ using Server.Spells;
 using System.Text;
 using Server.Accounting;
 using System.Diagnostics;
+using Server.ContextMenus;
 using Server.Misc;
 using Server.Engines.XmlSpawner2;
 
@@ -487,12 +488,8 @@ namespace Server.Mobiles
 				// is this a region spawner?
 				if (m_Region != null)
 				{
-					List<Mobile> players = m_Region.GetPlayers();
-
-					if (players == null || players.Count == 0) return false;
-
 					// confirm that players with the proper access level are present
-					foreach (Mobile m in players)
+					foreach (Mobile m in m_Region.AllPlayers)
 					{
 						if (m != null && (m.AccessLevel <= SmartSpawnAccessLevel || !m.Hidden))
 						{
@@ -636,7 +633,7 @@ namespace Server.Mobiles
 				foreach (Sector s in sectorList)
 				{
 
-					if (s != null && s.Active && s.Players != null && s.Players.Count > 0)
+					if (s != null && s.Active && s.Players != null)
 					{
 
 						// confirm that players with the proper access level are present
@@ -1959,6 +1956,9 @@ namespace Server.Mobiles
 		public bool UnlinkOnTaming { get { return true; } }
 		public Point3D HomeLocation { get { return this.Location; } }
 		public int Range { get { return HomeRange; } }
+
+		public virtual void GetSpawnProperties(ISpawnable spawn, ObjectPropertyList list) { }
+		public virtual void GetSpawnContextEntries(ISpawnable spawn, Mobile m, List<ContextMenuEntry> list) { }
 
 		public void Remove(ISpawnable spawn)
 		{
@@ -9872,7 +9872,7 @@ public static void _TraceEnd(int index)
 
 							if (sernum > -1)
 							{
-								IEntity e = World.FindEntity(sernum);
+								IEntity e = World.FindEntity(new Serial(sernum));
 
 								if (e is WayPoint)
 									waypoint = e as WayPoint;
@@ -10093,13 +10093,9 @@ public static void _TraceEnd(int index)
 			}
 
 			Sector sector = map.GetSector(x, y);
-			List<Item> items = sector.Items;
-			List<Mobile> mobs = sector.Mobiles;
 
-			for (int i = 0; i < items.Count; ++i)
+			foreach (var item in sector.Items)
 			{
-				Item item = items[i];
-
 				if (item.ItemID < 0x4000 && item.AtWorldPoint(x, y))
 				{
 					ItemData id = item.ItemData;
@@ -10133,14 +10129,10 @@ public static void _TraceEnd(int index)
 
 			if (checkMobiles)
 			{
-				for (int i = 0; i < mobs.Count; ++i)
-				{
-					Mobile m = mobs[i];
-
+				foreach (var m in sector.Mobiles)
 					if (m.Location.X == x && m.Location.Y == y && (m.AccessLevel == AccessLevel.Player || !m.Hidden))
 						if ((m.Z + 16) > z && (z + height) > m.Z)
 							return false;
-				}
 			}
 
 			if (DebugThis)
@@ -10982,7 +10974,7 @@ public static void _TraceEnd(int index)
 		}
 
 
-		public void RemoveSpawnObjects(SpawnObject so)
+		public void RemoveSpawnObject(SpawnObject so)
 		{
 			if (so == null) return;
 
@@ -11633,8 +11625,8 @@ public static void _TraceEnd(int index)
 
 			// Version 26
 			writer.Write(m_SpawnOnTrigger);
-			writer.Write(m_FirstModified);
-			writer.Write(m_LastModified);
+			// writer.Write(m_FirstModified); //Version 32
+			// writer.Write(m_LastModified); //Version 32
 
 			// Version 25
 			// eliminated the textentrybook serialization (they autodelete on deser now)
@@ -11693,8 +11685,8 @@ public static void _TraceEnd(int index)
 			writer.Write(m_ConfigFile);
 			writer.Write(m_OnHold);
 			writer.Write(m_HoldSequence);
-			writer.Write(m_FirstModifiedBy);
-			writer.Write(m_LastModifiedBy);
+			// writer.Write(m_FirstModifiedBy); //Version 32
+			// writer.Write(m_LastModifiedBy); //Version 32
 			// compute the number of tags to save
 			int tagcount = 0;
 			for (int i = 0; i < m_KeywordTagList.Count; i++)
@@ -11884,6 +11876,7 @@ public static void _TraceEnd(int index)
 
 			switch (version)
 			{
+				case 32:
 				case 31:
 					{
 						m_DisableGlobalAutoReset = reader.ReadBool();
@@ -11940,8 +11933,12 @@ public static void _TraceEnd(int index)
 				case 26:
 					{
 						m_SpawnOnTrigger = reader.ReadBool();
-						m_FirstModified = reader.ReadDateTime();
-						m_LastModified = reader.ReadDateTime();
+						if (version < 32)
+						{
+							// Delete First & Last Modified
+							reader.ReadDateTime();
+							reader.ReadDateTime();
+						}
 						goto case 25;
 					}
 				case 25:
@@ -12017,8 +12014,12 @@ public static void _TraceEnd(int index)
 						m_ConfigFile = reader.ReadString();
 						m_OnHold = reader.ReadBool();
 						m_HoldSequence = reader.ReadBool();
-						m_FirstModifiedBy = reader.ReadString();
-						m_LastModifiedBy = reader.ReadString();
+						if (version < 32)
+						{
+							// Delete First & Last Modified
+							reader.ReadDateTime();
+							reader.ReadDateTime();
+						}
 						// deserialize the keyword tag list
 						int tagcount = reader.ReadInt();
 						m_KeywordTagList = new List<BaseXmlSpawner.KeywordTag>(tagcount);
@@ -12282,7 +12283,7 @@ public static void _TraceEnd(int index)
 
 							for (int x = 0; x < SpawnedCount; ++x)
 							{
-								int serial = reader.ReadInt();
+								Serial serial = reader.ReadSerial();
 								if (serial < -1)
 								{
 									// minusone is reserved for unknown types by default

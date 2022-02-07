@@ -1,5 +1,6 @@
 using System;
 using Server;
+using Server.Engines.Quests;
 using Server.Items;
 using Server.Mobiles;
 
@@ -357,7 +358,7 @@ namespace Server.Engines.XmlSpawner2
             if (!EnableParagon || bc == null)
                 return false;
 
-            if (bc is BaseChampion || bc is Harrower || bc is BaseVendor || bc is BaseEscortable || bc is Clone)
+            if (bc is BaseChampion || bc is Harrower || bc is BaseVendor || bc is BaseEscort || bc is Clone)
                 return false;
 
             int fame = bc.Fame;

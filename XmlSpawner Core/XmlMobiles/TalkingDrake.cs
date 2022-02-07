@@ -44,16 +44,16 @@ namespace Server.Mobiles
 			ControlSlots = 2;
 			MinTameSkill = 84.3;
 
-			PackReg( 3 );
+			SetSpecialAbility(SpecialAbility.DragonBreath);
 		}
 
 		public override void GenerateLoot()
 		{
 			AddLoot( LootPack.Rich );
 			AddLoot( LootPack.MedScrolls, 2 );
+			AddLoot( LootPack.MageryRegs, 3 );
 		}
 
-		public override bool HasBreath{ get{ return true; } } // fire breath enabled
 		public override int TreasureMapLevel{ get{ return 2; } }
 		public override int Meat{ get{ return 10; } }
 		public override int Hides{ get{ return 20; } }

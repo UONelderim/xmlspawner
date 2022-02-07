@@ -1103,7 +1103,7 @@ namespace Server.Mobiles
 						valstr = value.Substring(2, ispace - 2);
 					}
 
-					toSet = World.FindEntity(Convert.ToInt32(valstr, 16));
+					toSet = World.FindEntity(new Serial(Convert.ToInt32(valstr, 16)));
 
 					// now check to make sure the object returned is consistent with the type
 					if (!((toSet is Mobile && IsMobile(type)) || (toSet is Item && IsItem(type))))
@@ -2158,7 +2158,7 @@ namespace Server.Mobiles
 										if(!int.TryParse(value_keywordargs[1].Substring(2), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out serial))
 											serial=-1;
 										if (serial >= 0)
-											testitem = World.FindEntity(serial);
+											testitem = World.FindEntity(new Serial(serial));
 									}
 									else if(value_keywordargs[1]=="SETITEM" && spawner!=null && !spawner.Deleted && spawner.SetItem!=null)
 									{
@@ -3316,7 +3316,7 @@ namespace Server.Mobiles
 
 								if (effect >= 0 && hasloc && emap != Map.Internal)
 								{
-									Effects.SendPacket(eloc1, emap, new HuedEffect(EffectType.Moving, -1, -1, effect, eloc1, eloc2, speed, duration, false, false, 0, 0));
+									Effects.SendPacket(eloc1, emap, new HuedEffect(EffectType.Moving, Serial.MinusOne, Serial.MinusOne, effect, eloc1, eloc2, speed, duration, false, false, 0, 0));
 								}
 								else
 									if (effect >= 0 && refobject is IEntity && o is IEntity)
@@ -3896,14 +3896,7 @@ namespace Server.Mobiles
 										short flash=0;
 										if(short.TryParse(keywordargs[1], out flash) && flash>0 && flash<6)
 										{
-											ScreenEffect se = new ScreenEffect((ScreenEffectType)(flash-1));
-											if(se!=null)
-											{
-												Packet.Acquire(se);
-												m.Send(se);
-												
-											}
-											Packet.Release(se);
+											ScreenEffect.Send(m.NetState, (ScreenEffectType)(flash - 1));
 										}
 									}
 								}
@@ -4259,7 +4252,7 @@ namespace Server.Mobiles
 									serial=-1;
 
 								if (serial >= 0)
-									testitem = World.FindEntity(serial);
+									testitem = World.FindEntity(new Serial(serial));
 							}
 							else if(arglist[1]=="SETITEM" && spawner!=null && !spawner.Deleted && spawner.SetItem!=null)
 							{
@@ -4671,7 +4664,7 @@ namespace Server.Mobiles
 							// count nearby players
 							if(spawner!=null && spawner.SpawnRegion!=null && range<0)
 							{
-								foreach(Mobile p in spawner.SpawnRegion.GetPlayers())
+								foreach(Mobile p in spawner.SpawnRegion.AllPlayers)
 								{
 									if (p.AccessLevel <= spawner.TriggerAccessLevel) nplayers++;
 								}
@@ -6241,10 +6234,10 @@ namespace Server.Mobiles
 
 			if (name.StartsWith("0x"))
 			{
-				int serial = -1;
+				Serial serial = Serial.MinusOne;
 				try
 				{
-					serial = Convert.ToInt32(name, 16);
+					serial = new Serial(Convert.ToInt32(name, 16));
 				}
 				catch { }
 				return World.FindEntity(serial) as XmlSpawner;
@@ -7118,9 +7111,9 @@ namespace Server.Mobiles
 									// syntax is ITEM,serial
 									if (itemkeywordargs.Length == 2)
 									{
-										int serial = -1;
+										Serial serial = Serial.MinusOne;
 										bool converterror = false;
-										try { serial = Convert.ToInt32(itemkeywordargs[1], 16); }
+										try { serial = new Serial(Convert.ToInt32(itemkeywordargs[1], 16)); }
 										catch { status_str = "Invalid ITEM args : " + itemtypestr; converterror = true; }
 
 										if (converterror) return false;
@@ -7759,7 +7752,7 @@ namespace Server.Mobiles
 				Packet p = null;
 				Point3D worldLoc = item.GetWorldLocation();
 
-				IPooledEnumerable eable = item.Map.GetClientsInRange(worldLoc, item.GetMaxUpdateRange());
+				IPooledEnumerable eable = item.Map.GetClientsInRange(worldLoc);
 
 				foreach (NetState state in eable)
 				{
@@ -7815,7 +7808,7 @@ namespace Server.Mobiles
 			public XmlPlayMusic(short number)
 				: base(0x6D, 3)
 			{
-				UnderlyingStream.Write(number);
+				Stream.Write(number);
 			}
 		}
 
@@ -7827,148 +7820,89 @@ namespace Server.Mobiles
 		{
 			BaseCreature.Cap(ref minLevel, 0, 5);
 			BaseCreature.Cap(ref maxLevel, 0, 5);
-			if (Core.AOS)
-			{
-				Item item = Loot.RandomJewelry();
+			
+			Item item = Loot.RandomJewelry();
+			if (item == null)
+				return null;
 
-				if (item == null)
-					return null;
+			int attributeCount, min, max;
+			BaseCreature.GetRandomAOSStats(minLevel, maxLevel, out attributeCount, out min, out max);
 
-				int attributeCount, min, max;
-				BaseCreature.GetRandomAOSStats(minLevel, maxLevel, out attributeCount, out min, out max);
+			BaseRunicTool.ApplyAttributesTo((BaseJewel)item, attributeCount, min, max);
 
-				if (item is BaseJewel)
-					BaseRunicTool.ApplyAttributesTo((BaseJewel)item, attributeCount, min, max);
-
-				return item;
+			return item;
 			}
-			else
-			{
-				Item jewel = Loot.RandomJewelry();
-
-				return jewel;
-			}
-		}
 
 		public static Item MagicArmor(int minLevel, int maxLevel, bool jewel, bool shield)
 		{
 			BaseCreature.Cap(ref minLevel, 0, 5);
 			BaseCreature.Cap(ref maxLevel, 0, 5);
-			if (Core.AOS)
-			{
-				Item item = null;
-				if (jewel)
-					item = Loot.RandomArmorOrShieldOrJewelry();
-				else
-					if (shield)
-						item = Loot.RandomArmorOrShield();
-					else
-						item = Loot.RandomArmor();
-
-				if (item == null)
-					return null;
-
-				int attributeCount, min, max;
-
-				BaseCreature.GetRandomAOSStats(minLevel, maxLevel, out attributeCount, out min, out max);
-
-				if (item is BaseArmor)
-					BaseRunicTool.ApplyAttributesTo((BaseArmor)item, attributeCount, min, max);
-				else if (item is BaseJewel)
-					BaseRunicTool.ApplyAttributesTo((BaseJewel)item, attributeCount, min, max);
-
-				return item;
-			}
+			
+			Item item;
+			if (jewel)
+				item = Loot.RandomArmorOrShieldOrJewelry();
 			else
-			{
-			BaseArmor armor = Loot.RandomArmorOrShield();
+				if (shield)
+					item = Loot.RandomArmorOrShield();
+				else
+					item = Loot.RandomArmor();
 
-			if (armor == null)
+			if (item == null)
 				return null;
 
-			armor.ProtectionLevel = (ArmorProtectionLevel)BaseCreature.RandomMinMaxScaled(minLevel, maxLevel);
-			armor.Durability = (ArmorDurabilityLevel)BaseCreature.RandomMinMaxScaled(minLevel, maxLevel);
+			int attributeCount, min, max;
 
-			return armor;
-			}
+			BaseCreature.GetRandomAOSStats(minLevel, maxLevel, out attributeCount, out min, out max);
+
+			if (item is BaseArmor)
+				BaseRunicTool.ApplyAttributesTo((BaseArmor)item, attributeCount, min, max);
+			else if (item is BaseJewel)
+				BaseRunicTool.ApplyAttributesTo((BaseJewel)item, attributeCount, min, max);
+
+			return item;
 		}
 
 		public static Item MagicShield(int minLevel, int maxLevel)
 		{
 			BaseCreature.Cap(ref minLevel, 0, 5);
 			BaseCreature.Cap(ref maxLevel, 0, 5);
-			if (Core.AOS)
-			{
-				Item item = Loot.RandomShield();
 
-				if (item == null)
-					return null;
+			Item item = Loot.RandomShield();
 
-				int attributeCount, min, max;
-
-				BaseCreature.GetRandomAOSStats(minLevel, maxLevel, out attributeCount, out min, out max);
-
-				if (item is BaseArmor)
-					BaseRunicTool.ApplyAttributesTo((BaseArmor)item, attributeCount, min, max);
-
-				return item;
-			}
-			else
-			{
-			BaseArmor armor = Loot.RandomShield();
-
-			if (armor == null)
+			if (item == null)
 				return null;
 
-			armor.ProtectionLevel = (ArmorProtectionLevel)BaseCreature.RandomMinMaxScaled(minLevel, maxLevel);
-			armor.Durability = (ArmorDurabilityLevel)BaseCreature.RandomMinMaxScaled(minLevel, maxLevel);
+			int attributeCount, min, max;
 
-			return armor;
-			}
+			BaseCreature.GetRandomAOSStats(minLevel, maxLevel, out attributeCount, out min, out max);
+
+			BaseRunicTool.ApplyAttributesTo((BaseArmor)item, attributeCount, min, max);
+
+			return item;
 		}
 
 		public static Item MagicWeapon(int minLevel, int maxLevel, bool jewel)
 		{
 			BaseCreature.Cap(ref minLevel, 0, 5);
 			BaseCreature.Cap(ref maxLevel, 0, 5);
-			if (Core.AOS)
-			{
-				Item item = null;
-				if (jewel)
-					item = Loot.RandomWeaponOrJewelry();
-				else
-					item = Loot.RandomWeapon();
-
-				if (item == null)
-					return null;
-
-				int attributeCount, min, max;
-
-				BaseCreature.GetRandomAOSStats(minLevel, maxLevel, out attributeCount, out min, out max);
-
-				if (item is BaseWeapon)
-					BaseRunicTool.ApplyAttributesTo((BaseWeapon)item, attributeCount, min, max);
-				else if (item is BaseJewel)
-					BaseRunicTool.ApplyAttributesTo((BaseJewel)item, attributeCount, min, max);
-
-				return item;
-			}
+			
+			Item item;
+			if (jewel)
+				item = Loot.RandomWeaponOrJewelry();
 			else
-			{
-			BaseWeapon weapon = Loot.RandomWeapon();
+				item = Loot.RandomWeapon();
 
-			if (weapon == null)
+			if (item == null)
 				return null;
 
-			if (0.05 > Utility.RandomDouble())
-				weapon.Slayer = SlayerName.Silver;
+			BaseCreature.GetRandomAOSStats(minLevel, maxLevel, out var attributeCount, out var min, out var max);
 
-			weapon.DamageLevel = (WeaponDamageLevel)BaseCreature.RandomMinMaxScaled(minLevel, maxLevel);
-			weapon.AccuracyLevel = (WeaponAccuracyLevel)BaseCreature.RandomMinMaxScaled(minLevel, maxLevel);
-			weapon.DurabilityLevel = (WeaponDurabilityLevel)BaseCreature.RandomMinMaxScaled(minLevel, maxLevel);
+			if (item is BaseWeapon)
+				BaseRunicTool.ApplyAttributesTo((BaseWeapon)item, attributeCount, min, max);
+			else if (item is BaseJewel)
+				BaseRunicTool.ApplyAttributesTo((BaseJewel)item, attributeCount, min, max);
 
-			return weapon;
-			}
+			return item;
 		}
 
 
@@ -8026,7 +7960,7 @@ namespace Server.Mobiles
 							if (p != null)
 							{
 								// stop any ongoing music
-								p.Send(PlayMusic.InvalidInstance);
+								p.Send(PlayMusic.Invalid);
 								// and play the new music
 								short musicnumber = -1;
 								if(!short.TryParse(musicstr[1], out musicnumber))
@@ -8034,13 +7968,8 @@ namespace Server.Mobiles
 
 								if (musicnumber == -1)
 								{
-									MusicName music;
-#if Framework_4_0
-									if(Enum.TryParse(musicstr[1], true, out music))
-#else
-									if(TryParse(musicstr[1], true, out music))
-#endif
-										p.Send(PlayMusic.GetInstance(music));
+									if (Enum.TryParse(musicstr[1], true, out MusicName music))
+										PlayMusic.Send(p, music);
 								}
 								else
 								{
@@ -8056,7 +7985,7 @@ namespace Server.Mobiles
 					// just send it to the mob who triggered
 					// stop any ongoing music
 
-					triggermob.Send(PlayMusic.InvalidInstance);
+					triggermob.Send(PlayMusic.Invalid);
 					// and play the new music
 					//triggermob.Send(PlayMusic.GetInstance((MusicName)Enum.Parse(typeof(MusicName), musicstr[1], true)));
 					//m_mob_who_triggered.Region.Music = (MusicName)Enum.Parse(typeof(MusicName), musicstr[1]);
@@ -8067,13 +7996,8 @@ namespace Server.Mobiles
 
 					if (musicnumber == -1)
 					{
-						MusicName music;
-#if Framework_4_0
-						if(Enum.TryParse(musicstr[1], true, out music))
-#else
-						if(TryParse(musicstr[1], true, out music))
-#endif
-							triggermob.Send(PlayMusic.GetInstance(music));
+						if (Enum.TryParse(musicstr[1], true, out MusicName music))
+							PlayMusic.Send(triggermob.NetState, music);
 					}
 					else
 					{
@@ -8702,10 +8626,10 @@ namespace Server.Mobiles
 								object setitem = null;
 								if (keywordargs[1].StartsWith("0x"))
 								{
-									int serial = -1;
+									Serial serial = Serial.MinusOne;
 									try
 									{
-										serial = Convert.ToInt32(keywordargs[1], 16);
+										serial = new Serial(Convert.ToInt32(keywordargs[1], 16));
 									}
 									catch { }
 									if (serial >= 0)
@@ -8889,7 +8813,7 @@ namespace Server.Mobiles
 										{
 											if(spawner.SpawnRegion!=null && spawner.HasRegionPoints(spawner.SpawnRegion))
 											{
-												foreach(Mobile m in spawner.SpawnRegion.GetMobiles())
+												foreach(Mobile m in spawner.SpawnRegion.AllMobiles)
 												{
 													if(objecttype.IsAssignableFrom(m.GetType()) && CheckNameMatch(objectname, m.Name))
 														mobs.Add(m);
@@ -8897,13 +8821,16 @@ namespace Server.Mobiles
 											}
 											else
 											{
-												foreach(Mobile m in map.GetMobilesInBounds(spawner.SpawnerBounds))
+												var eable = map.GetMobilesInBounds(spawner.SpawnerBounds);
+												foreach(Mobile m in eable)
 												{
 													if(objecttype.IsAssignableFrom(m.GetType()) && CheckNameMatch(objectname, m.Name))
 													{
 														mobs.Add(m);
 													}
 												}
+
+												eable.Free();
 											}
 										}
 										else if(invoker!=null && invoker is IEntity)
@@ -10461,7 +10388,7 @@ namespace Server.Mobiles
 
 									if (effect >= 0 && emap != Map.Internal)
 									{
-										Effects.SendPacket(eloc1, emap, new HuedEffect(EffectType.Moving, -1, -1, effect, eloc1, eloc2, speed, duration, false, false, 0, 0));
+										Effects.SendPacket(eloc1, emap, new HuedEffect(EffectType.Moving, Serial.MinusOne, Serial.MinusOne, effect, eloc1, eloc2, speed, duration, false, false, 0, 0));
 									}
 								}
 								if (status_str != null)
@@ -11050,9 +10977,9 @@ namespace Server.Mobiles
 								// syntax is ITEM,serial
 								if (itemkeywordargs.Length == 2)
 								{
-									int serial = -1;
+									Serial serial = Serial.MinusOne;
 									bool converterror = false;
-									try { serial = Convert.ToInt32(itemkeywordargs[1], 16); }
+									try { serial = new Serial(Convert.ToInt32(itemkeywordargs[1], 16)); }
 									catch { status_str = "Invalid ITEM args : " + itemtypestr; converterror = true; }
 
 									if (converterror) return false;

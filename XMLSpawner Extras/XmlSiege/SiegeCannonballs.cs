@@ -40,16 +40,16 @@ namespace Server.Items
 		}
 	}
 
-	public class LightCannonball : SiegeCannonball
+	public class LightSiegeCannonball : SiegeCannonball
 	{
 		[Constructable]
-		public LightCannonball()
+		public LightSiegeCannonball()
 			: this(1)
 		{
 		}
 
 		[Constructable]
-		public LightCannonball(int amount)
+		public LightSiegeCannonball(int amount)
 			: base(amount)
 		{
 			Range = 17;
@@ -61,7 +61,7 @@ namespace Server.Items
 			Name = "Light Cannonball";
 		}
 
-		public LightCannonball(Serial serial)
+		public LightSiegeCannonball(Serial serial)
 			: base(serial)
 		{
 		}
@@ -79,26 +79,18 @@ namespace Server.Items
 
 			int version = reader.ReadInt();
 		}
-/*
-		public override Item Dupe(int amount)
-		{
-			LightCannonball s = new LightCannonball(amount);
-
-			return this.Dupe(s, amount);
-		}
- * */
 	}
 
-	public class IronCannonball : SiegeCannonball
+	public class IronSiegeCannonball : SiegeCannonball
 	{
 		[Constructable]
-		public IronCannonball()
+		public IronSiegeCannonball()
 			: this(1)
 		{
 		}
 
 		[Constructable]
-		public IronCannonball(int amount)
+		public IronSiegeCannonball(int amount)
 			: base(amount)
 		{
 			Range = 15;
@@ -110,7 +102,7 @@ namespace Server.Items
 			Name = "Iron Cannonball";
 		}
 
-		public IronCannonball(Serial serial)
+		public IronSiegeCannonball(Serial serial)
 			: base(serial)
 		{
 		}
@@ -128,26 +120,18 @@ namespace Server.Items
 
 			int version = reader.ReadInt();
 		}
-/*
-		public override Item Dupe(int amount)
-		{
-			IronCannonball s = new IronCannonball(amount);
-
-			return this.Dupe(s, amount);
-		}
- * */
 	}
 
-	public class ExplodingCannonball : SiegeCannonball
+	public class ExplodingSiegeCannonball : SiegeCannonball
 	{
 		[Constructable]
-		public ExplodingCannonball()
+		public ExplodingSiegeCannonball()
 			: this(1)
 		{
 		}
 
 		[Constructable]
-		public ExplodingCannonball(int amount)
+		public ExplodingSiegeCannonball(int amount)
 			: base(amount)
 		{
 			Range = 11;
@@ -160,7 +144,7 @@ namespace Server.Items
 			Name = "Exploding Cannonball";
 		}
 
-		public ExplodingCannonball(Serial serial)
+		public ExplodingSiegeCannonball(Serial serial)
 			: base(serial)
 		{
 		}
@@ -178,30 +162,21 @@ namespace Server.Items
 
 			int version = reader.ReadInt();
 		}
-/*
-		public override Item Dupe(int amount)
-		{
-			ExplodingCannonball s = new ExplodingCannonball(amount);
-
-			return this.Dupe(s, amount);
-		}
- * */
 	}
 
-	public class FieryCannonball : SiegeCannonball
+	public class FierySiegeCannonball : SiegeCannonball
 	{
-		// use a fireball animation when fired
 		public override int AnimationID { get { return 0x36D4; } }
 		public override int AnimationHue { get { return 0; } }
 
 		[Constructable]
-		public FieryCannonball()
+		public FierySiegeCannonball()
 			: this(1)
 		{
 		}
 
 		[Constructable]
-		public FieryCannonball(int amount)
+		public FierySiegeCannonball(int amount)
 			: base(amount)
 		{
 			Range = 8;
@@ -214,7 +189,7 @@ namespace Server.Items
 			Name = "Fiery Cannonball";
 		}
 
-		public FieryCannonball(Serial serial)
+		public FierySiegeCannonball(Serial serial)
 			: base(serial)
 		{
 		}
@@ -242,19 +217,19 @@ namespace Server.Items
  * */
 	}
 
-	public class GrapeShot : SiegeCannonball
+	public class SiegeGrapeShot : SiegeCannonball
 	{
 		// only does damage to mobiles
 		public override double StructureDamageMultiplier { get { return 0.0; } } //  damage multiplier for structures
 
 		[Constructable]
-		public GrapeShot()
+		public SiegeGrapeShot()
 			: this(1)
 		{
 		}
 
 		[Constructable]
-		public GrapeShot(int amount)
+		public SiegeGrapeShot(int amount)
 			: base(amount)
 		{
 			Range = 17;
@@ -266,7 +241,7 @@ namespace Server.Items
 			Name = "Grape Shot";
 		}
 
-		public GrapeShot(Serial serial)
+		public SiegeGrapeShot(Serial serial)
 			: base(serial)
 		{
 		}

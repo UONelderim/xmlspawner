@@ -1,5 +1,3 @@
-#define CLIENT6017
-
 using System;
 using System.IO;
 using System.Text;
@@ -44,17 +42,11 @@ namespace Server.Engines.XmlSpawner2
         public static void ContentChangeOverride()
         {
             PacketHandlers.Register(0x66, 0, true, new OnPacketReceive(XmlTextEntryBook.ContentChange));
-#if(CLIENT6017)
-            PacketHandlers.Register6017(0x66, 0, true, new OnPacketReceive(XmlTextEntryBook.ContentChange));
-#endif
         }
 
         public static void UseReqOverride()
         {
             PacketHandlers.Register(0x06, 5, true, new OnPacketReceive(XmlAttach.UseReq));
-#if(CLIENT6017)
-            PacketHandlers.Register6017(0x06, 5, true, new OnPacketReceive(XmlAttach.UseReq));
-#endif
         }
 
         public static void QuestButtonOverride()

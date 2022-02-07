@@ -23,7 +23,7 @@ namespace Server.Gumps
 		private Mobile m_Mobile;
 		private object m_Object;
 #if (NEWTIMERS)
-		private Stack<StackEntry> m_Stack;
+		private Stack<PropertiesGump.StackEntry> m_Stack;
 #else
 		private Stack m_Stack;
 #endif
@@ -94,7 +94,7 @@ namespace Server.Gumps
 		}
 
 #if(NEWTIMERS)
-		public XmlPropertiesGump( Mobile mobile, object o, Stack<StackEntry> stack, StackEntry parent ) : base( GumpOffsetX, GumpOffsetY )
+		public XmlPropertiesGump( Mobile mobile, object o, Stack<PropertiesGump.StackEntry> stack, PropertiesGump.StackEntry parent ) : base( GumpOffsetX, GumpOffsetY )
 #else
 		public XmlPropertiesGump( Mobile mobile, object o, Stack stack, object parent ) : base( GumpOffsetX, GumpOffsetY )
 #endif
@@ -108,7 +108,7 @@ namespace Server.Gumps
 			{
 				if ( m_Stack == null )
 #if(NEWTIMERS)
-					m_Stack = new Stack<StackEntry>();
+					m_Stack = new Stack<PropertiesGump.StackEntry>();
 #else
 					m_Stack = new Stack();
 #endif
@@ -120,7 +120,7 @@ namespace Server.Gumps
 		}
 
 #if (NEWTIMERS)
-		public XmlPropertiesGump( Mobile mobile, object o, Stack<StackEntry> stack, ArrayList list, int page ) : base( GumpOffsetX, GumpOffsetY )
+		public XmlPropertiesGump( Mobile mobile, object o, Stack<PropertiesGump.StackEntry> stack, ArrayList list, int page ) : base( GumpOffsetX, GumpOffsetY )
 #else
 		public XmlPropertiesGump( Mobile mobile, object o, Stack stack, ArrayList list, int page ) : base( GumpOffsetX, GumpOffsetY )
 #endif
@@ -260,7 +260,7 @@ namespace Server.Gumps
 					if ( m_Stack != null && m_Stack.Count > 0 )
 					{
 						#if (NEWTIMERS)
-						StackEntry entry = m_Stack.Pop();
+						PropertiesGump.StackEntry entry = m_Stack.Pop();
 
 						from.SendGump( new XmlPropertiesGump( from, entry.m_Object, m_Stack, null ) );
 						#else
@@ -337,7 +337,7 @@ namespace Server.Gumps
 							object obj = prop.GetValue( m_Object, null );
 
 							if ( obj != null )
-								from.SendGump( new XmlPropertiesGump( from, obj, m_Stack, new StackEntry( m_Object, prop ) ) );
+								from.SendGump( new XmlPropertiesGump( from, obj, m_Stack, new PropertiesGump.StackEntry( m_Object, prop ) ) );
 							else
 								from.SendGump( new XmlPropertiesGump( from, m_Object, m_Stack, m_List, m_Page ) );
 #else

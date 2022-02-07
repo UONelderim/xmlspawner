@@ -7,6 +7,7 @@ using Server.Network;
 using Server.ContextMenus;
 using EDI = Server.Mobiles.EscortDestinationInfo;
 using Server.Engines.XmlSpawner2;
+using Server.Services.Virtues;
 
 namespace Server.Mobiles
 {
@@ -92,7 +93,7 @@ namespace Server.Mobiles
 			SetDex( 90, 100 );
 			SetInt( 15, 25 );
 
-			Hue = Utility.RandomSkinHue();
+			Hue = Race.RandomSkinHue();
 			
 			switch(gender)
             {
@@ -121,11 +122,12 @@ namespace Server.Mobiles
 
 			switch ( Utility.Random( 4 ) )
 			{
-				case 0: AddItem( new ShortHair( Utility.RandomHairHue() ) ); break;
-				case 1: AddItem( new TwoPigTails( Utility.RandomHairHue() ) ); break;
-				case 2: AddItem( new ReceedingHair( Utility.RandomHairHue() ) ); break;
-				case 3: AddItem( new KrisnaHair( Utility.RandomHairHue() ) ); break;
+				case 0: HairItemID = Hair.Human.Short; break;
+				case 1: HairItemID = Hair.Human.PigTails; break;
+				case 2: HairItemID = Hair.Human.Receeding; break;
+				case 3: HairItemID = Hair.Human.Krisna; break;
 			}
+			HairHue = Race.RandomHairHue();
 
 			PackGold( 200, 250 );
 		}

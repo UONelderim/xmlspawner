@@ -1534,7 +1534,7 @@ namespace Server.Mobiles
 
 													// clear any current spawns on the disabled entry
 													if (m_Spawner.SpawnObjects[index].Disabled)
-														m_Spawner.RemoveSpawnObjects(m_Spawner.SpawnObjects[index]);
+														m_Spawner.RemoveSpawnObject(m_Spawner.SpawnObjects[index]);
 												}
 											}
 											else

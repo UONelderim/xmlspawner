@@ -1,4 +1,3 @@
-#define FACTIONS
 using System;
 using System.IO;
 using System.Xml;
@@ -15,6 +14,7 @@ using Server.Regions;
 using Server.Spells;
 using Server.Commands;
 using Server.Commands.Generic;
+using Server.Services.Virtues;
 
 namespace Server.Engines.XmlSpawner2
 {
@@ -737,12 +737,6 @@ namespace Server.Engines.XmlSpawner2
 
 					if(r.Killer.Guild != null) 
 						guildname = r.Killer.Guild.Abbreviation;
-#if(FACTIONS)
-					string factionname = null;
-
-					if(r.Killer is PlayerMobile && ((PlayerMobile)r.Killer).FactionPlayerState != null) 
-						factionname = ((PlayerMobile)r.Killer).FactionPlayerState.Faction.ToString();
-#endif
 					// check for any ranking change and update rank date
 					if(r.Rank != a.Rank)
 					{
@@ -767,11 +761,7 @@ namespace Server.Engines.XmlSpawner2
 					xf.WriteStartElement( "Guild" );
 					xf.WriteString( guildname );
 					xf.WriteEndElement();
-#if(FACTIONS)
-					xf.WriteStartElement( "Faction" );
-					xf.WriteString( factionname );
-					xf.WriteEndElement();
-#endif
+					
 					xf.WriteStartElement( "Points" );
 					xf.WriteString( a.Points.ToString() );
 					xf.WriteEndElement();
@@ -847,11 +837,7 @@ namespace Server.Engines.XmlSpawner2
 			}
 			sw.WriteLine("<TABLE border=\"1\" summary=\"This table gives leaderboard stats\"> ");
 			sw.WriteLine( "<CAPTION><B>Leaderboard</B></CAPTION>");
-#if(FACTIONS)
-			sw.WriteLine( "<TR><TH><TH>Player Name<TH>Guild<TH>Faction<TH>Points<TH>Kills<TH>Deaths<TH>Rank<TH>Change<TH>Time at current rank");
-#else
 			sw.WriteLine( "<TR><TH><TH>Player Name<TH>Guild<TH>Points<TH>Kills<TH>Deaths<TH>Rank<TH>Change<TH>Time at current rank");
-#endif
 			// go through the sorted list and display the top ranked players
 
 			for(int i= 0; i<RankList.Count;i++)
@@ -867,12 +853,7 @@ namespace Server.Engines.XmlSpawner2
 
 					if(r.Killer.Guild != null)
 						guildname = HtmlSpecialEncoding(r.Killer.Guild.Abbreviation);
-#if(FACTIONS)
-					string factionname = null;
-
-					if(r.Killer is PlayerMobile && ((PlayerMobile)r.Killer).FactionPlayerState != null) 
-						factionname = ((PlayerMobile)r.Killer).FactionPlayerState.Faction.ToString();
-#endif
+					
 					// check for any ranking change and update rank date
 					if(r.Rank != a.Rank)
 					{
@@ -918,20 +899,6 @@ namespace Server.Engines.XmlSpawner2
 					} 
 					catch{}
 
-#if(FACTIONS)
-					// write out the entry information
-					sw.WriteLine( "<TR><TH><TD>{0}<TD>{1}<TD>{2}<TD>{3}<TD>{4}<TD>{5}<TD>{6}<TD>{7}<TD>{8}",
-						r.Killer.Name,
-						guildname,
-						factionname,
-						a.Points,
-						kills,
-						deaths,
-						a.Rank,
-						a.DeltaRank,
-						timeranked
-						);
-#else
 					// write out the entry information
 					sw.WriteLine( "<TR><TH><TD>{0}<TD>{1}<TD>{2}<TD>{3}<TD>{4}<TD>{5}<TD>{6}<TD>{7}",
 					r.Killer.Name,
@@ -943,9 +910,6 @@ namespace Server.Engines.XmlSpawner2
 					a.DeltaRank,
 					timeranked
 					);
-
-#endif
-
 				}
 			}
 			sw.WriteLine( "</TABLE>");
@@ -2638,9 +2602,6 @@ namespace Server.Engines.XmlSpawner2
 				AddPage( 0 );
 
 				int width = 740;
-#if(FACTIONS)
-				width = 790;
-#endif
 
 				AddBackground( 0, 0, width, height, 5054 );
 				AddAlphaRegion( 0, 0, width, height );
@@ -2675,11 +2636,6 @@ namespace Server.Engines.XmlSpawner2
 				AddLabel( xloc, 20, 0, attachment.Text(200242) );  // "Name"
 				xloc += 177;
 				AddLabel( xloc, 20, 0, attachment.Text(200243) );  // "Guild"
-#if(FACTIONS)
-				xloc += 35;
-				AddLabel( xloc, 20, 0, attachment.Text(200640) );  // "Faction"
-				xloc += 15;
-#endif
 				xloc += 50;
 				AddLabel( xloc, 20, 0, attachment.Text(200244) );   // "Points"
 				xloc += 50;
@@ -2715,12 +2671,6 @@ namespace Server.Engines.XmlSpawner2
 
 						if(r.Killer.Guild != null) guildname = r.Killer.Guild.Abbreviation;
 
-#if(FACTIONS)
-						string factionname = null;
-	
-						if(r.Killer is PlayerMobile && ((PlayerMobile)r.Killer).FactionPlayerState != null) 
-							factionname = ((PlayerMobile)r.Killer).FactionPlayerState.Faction.ToString();
-#endif
 						// check for any ranking change and update rank date
 						if(r.Rank != a.Rank)
 						{
@@ -2798,11 +2748,6 @@ namespace Server.Engines.XmlSpawner2
 						AddLabel( xloc, y, 0, r.Killer.Name );
 						xloc += 177;
 						AddLabel( xloc, y, 0, guildname );
-#if(FACTIONS)
-						xloc += 35;
-						AddLabelCropped( xloc, y, 60, 21, 0, factionname );
-						xloc += 15;
-#endif
 						xloc += 50;
 						AddLabel( xloc, y, 0, a.Points.ToString() );
 						xloc += 50;
@@ -3161,7 +3106,7 @@ namespace Server.Engines.XmlSpawner2
 
 							// notify the challenger and set up noto
 							SendText(m_From, 100263, m_Target.Name);   // "{0} accepted your challenge!"
-							m_From.Send( new MobileMoving( m_Target, Notoriety.Compute( m_From, m_Target ) ) );
+							MobileMoving.Send(m_From.NetState, m_Target);
 
 							// update the points gump if it is open
 							if(m_From.HasGump(typeof(PointsGump)))
@@ -3173,7 +3118,7 @@ namespace Server.Engines.XmlSpawner2
 
 							// notify the challenged and set up noto
 							SendText(m_Target, 100264, m_From.Name);  // "You have accepted the challenge from {0}!"
-							m_Target.Send( new MobileMoving( m_From, Notoriety.Compute( m_Target, m_From ) ) );
+							MobileMoving.Send(m_Target.NetState, m_From);
 							
 							// update the points gump if it is open
 							if(m_Target.HasGump(typeof(PointsGump)))

@@ -2375,16 +2375,14 @@ namespace Server.Engines.XmlSpawner2
 			if (from.AccessLevel >= AccessLevel.GameMaster || DateTime.Now >= from.NextActionTime)
 #endif
 			{
-				int value = pvSrc.ReadInt32();
+				Serial s = pvSrc.ReadSerial();
 
-				if ((value & ~0x7FFFFFFF) != 0)
+				if ((s & ~0x7FFFFFFF) != 0)
 				{
 					from.OnPaperdollRequest();
 				}
 				else
 				{
-					Serial s = value;
-
 					bool blockdefaultonuse = false;
 
 					if (s.IsMobile)

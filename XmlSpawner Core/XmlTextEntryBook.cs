@@ -183,7 +183,7 @@ namespace Server.Items
 			string entryText = String.Empty;
 			Mobile from = state.Mobile;
 
-			int serial = pvSrc.ReadInt32();
+			var serial = pvSrc.ReadSerial();
 
             Item bookitem = World.FindItem(serial);
 

@@ -1,5 +1,3 @@
-#define CLIENT6017
-
 using System;
 using System.IO;
 using System.Collections.Generic;
@@ -371,15 +369,8 @@ namespace Server.Items
 			// add the reward item back into the container list for display
 			UnHideRewards();
 
-			to.Send(new ContainerDisplay(this));
-
-#if(CLIENT6017)
-            // add support for new client container packets
-			if (to.NetState != null && to.NetState.ContainerGridLines)
-				to.Send(new ContainerContent6017(to, this));
-			else
-#endif
-				to.Send(new ContainerContent(to, this));
+			ContainerDisplay.Send(to.NetState, this);
+			ContainerContent.Send(to.NetState, this);
 
 			if (ObjectPropertyList.Enabled)
 			{
@@ -411,7 +402,7 @@ namespace Server.Items
 			}
 		}
 
-		public override bool CheckHold(Mobile m, Item item, bool message, bool checkItems, int plusItems, int plusWeight)
+		public override bool CheckHold(Mobile m, Item item, bool message, bool checkItems, bool checkWeight, int plusItems, int plusWeight)
 		{
 			return false;
 		}

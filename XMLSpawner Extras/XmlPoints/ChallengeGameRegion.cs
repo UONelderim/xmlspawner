@@ -18,12 +18,12 @@ namespace Server.Engines.XmlSpawner2
 		{
 		}
 
-		public override bool AllowHarmful(Mobile from, Mobile target)
+		public override bool AllowHarmful(Mobile from, IDamageable target)
 		{
-			if (from == null || target == null) return false;
+			if (from == null || !(target is Mobile mTarget)) return false;
 
 			// during a challenge games or 1-on-1 duels, restrict harmful acts to opponents
-			return XmlPoints.AreChallengers(from, target);
+			return XmlPoints.AreChallengers(from, mTarget);
 		}
 
 

@@ -621,8 +621,9 @@ namespace Server.Mobiles
 								else if (i is Spawner)
 								{
 									// search the entries of the spawner
-									foreach (string so in ((Spawner)i).SpawnNames)
+									foreach (SpawnObject so in ((Spawner)i).SpawnObjects)
 									{
+										string spawnName = so.SpawnName;
 										if (criteria.Dosearchspawntype)
 										{
 											// search by entry type
@@ -630,7 +631,7 @@ namespace Server.Mobiles
 
 											if (so != null)
 											{
-												type = SpawnerType.GetType(so);
+												type = SpawnerType.GetType(spawnName);
 											}
 
 											if (type != null && (type == targetentrytype || type.IsSubclassOf(targetentrytype)))
@@ -641,7 +642,7 @@ namespace Server.Mobiles
 										}
 										else
 										{
-											if (so != null && so.ToLower().IndexOf(criteria.Searchspawnentry.ToLower()) >= 0)
+											if (so != null && spawnName.ToLower().IndexOf(criteria.Searchspawnentry.ToLower()) >= 0)
 											{
 												hasentry = true;
 												break;

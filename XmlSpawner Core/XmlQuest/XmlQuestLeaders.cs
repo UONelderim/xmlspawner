@@ -1,4 +1,3 @@
-#define FACTIONS
 using System;
 using System.IO;
 using System.Xml;
@@ -209,12 +208,7 @@ namespace Server.Engines.XmlSpawner2
 
 					if(r.Quester.Guild != null)
 						guildname = r.Quester.Guild.Abbreviation;
-#if(FACTIONS)
-					string factionname = null;
-
-					if(r.Quester is PlayerMobile && ((PlayerMobile)r.Quester).FactionPlayerState != null) 
-						factionname = ((PlayerMobile)r.Quester).FactionPlayerState.Faction.ToString();
-#endif
+					
 					// check for any ranking change and update rank date
 					if(r.Rank != a.Rank)
 					{
@@ -239,11 +233,7 @@ namespace Server.Engines.XmlSpawner2
 					xf.WriteStartElement( "Guild" );
 					xf.WriteString( guildname );
 					xf.WriteEndElement();
-#if(FACTIONS)
-					xf.WriteStartElement( "Faction" );
-					xf.WriteString( factionname );
-					xf.WriteEndElement();
-#endif
+
 					xf.WriteStartElement( "Points" );
 					xf.WriteString( a.Points.ToString() );
 					xf.WriteEndElement();
@@ -294,13 +284,9 @@ namespace Server.Engines.XmlSpawner2
 			}
 			sw.WriteLine("<TABLE border=\"1\" summary=\"This table gives quest leaderboard stats\"> ");
 			sw.WriteLine( "<CAPTION><B>Quest Leaderboard</B></CAPTION>");
-#if(FACTIONS)
-			sw.WriteLine( "<TR><TH><TH>Player Name<TH>Guild<TH>Faction<TH>Points<TH>Quests<TH>Rank<TH>Change<TH>Time at current rank");
-#else
             sw.WriteLine( "<TR><TH><TH>Player Name<TH>Guild<TH>Points<TH>Quests<TH>Rank<TH>Change<TH>Time at current rank");
-#endif
+            
 			// go through the sorted list and display the top ranked players
-
 			for(int i= 0; i<QuestRankList.Count;i++)
 			{
 				if(nranks > 0 && i >= nranks) break;
@@ -314,12 +300,7 @@ namespace Server.Engines.XmlSpawner2
 
 					if(r.Quester.Guild != null)
 						guildname = r.Quester.Guild.Abbreviation;
-#if(FACTIONS)
-					string factionname = null;
-
-					if(r.Quester is PlayerMobile && ((PlayerMobile)r.Quester).FactionPlayerState != null) 
-						factionname = ((PlayerMobile)r.Quester).FactionPlayerState.Faction.ToString();
-#endif
+					
 					// check for any ranking change and update rank date
 					if(r.Rank != a.Rank)
 					{
@@ -339,19 +320,6 @@ namespace Server.Engines.XmlSpawner2
 					}
 					catch{}
 
-#if(FACTIONS)
-					// write out the entry information
-					sw.WriteLine( "<TR><TH><TD>{0}<TD>{1}<TD>{2}<TD>{3}<TD>{4}<TD>{5}<TD>{6}<TD>{7}",
-						r.Quester.Name,
-						guildname,
-						factionname,
-						a.Points,
-						quests,
-						a.Rank,
-						a.DeltaRank,
-						timeranked
-						);
-#else
                     // write out the entry information
 					sw.WriteLine( "<TR><TH><TD>{0}<TD>{1}<TD>{2}<TD>{3}<TD>{4}<TD>{5}<TD>{6}",
 					r.Quester.Name,
@@ -362,9 +330,6 @@ namespace Server.Engines.XmlSpawner2
 					a.DeltaRank,
 					timeranked
 					);
-
-#endif
-
 				}
 			}
 			sw.WriteLine( "</TABLE>");
@@ -519,9 +484,6 @@ namespace Server.Engines.XmlSpawner2
 				AddPage( 0 );
 
 				int width = 740;
-#if(FACTIONS)
-				width = 790;
-#endif
 
 				AddBackground( 0, 0, width, height, 5054 );
 				AddAlphaRegion( 0, 0, width, height );
@@ -556,11 +518,6 @@ namespace Server.Engines.XmlSpawner2
 				AddLabel( xloc, 20, 0, "Name" );  
 				xloc += 177;
 				AddLabel( xloc, 20, 0, "Guild" );  
-#if(FACTIONS)
-				xloc += 35;
-				AddLabel( xloc, 20, 0, "Faction" );  
-				xloc += 15;
-#endif
 				xloc += 50;
 				AddLabel( xloc, 20, 0, "Points" );   
 				xloc += 50;
@@ -596,12 +553,6 @@ namespace Server.Engines.XmlSpawner2
 
 						if(r.Quester.Guild != null) guildname = r.Quester.Guild.Abbreviation;
 
-#if(FACTIONS)
-						string factionname = null;
-    
-						if(r.Quester is PlayerMobile && ((PlayerMobile)r.Quester).FactionPlayerState != null) 
-							factionname = ((PlayerMobile)r.Quester).FactionPlayerState.Faction.ToString();
-#endif
 						// check for any ranking change and update rank date
 						if(r.Rank != a.Rank)
 						{
@@ -672,11 +623,6 @@ namespace Server.Engines.XmlSpawner2
 						AddLabel( xloc, y, 0, r.Quester.Name );
 						xloc += 177;
 						AddLabel( xloc, y, 0, guildname );
-#if(FACTIONS)
-						xloc += 35;
-						AddLabelCropped( xloc, y, 60, 21, 0, factionname );
-						xloc += 15;
-#endif
 						xloc += 50;
 						AddLabel( xloc, y, 0, a.Points.ToString() );
 						xloc += 50;

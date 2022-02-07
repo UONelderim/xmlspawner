@@ -66,11 +66,12 @@ namespace Server.Mobiles
 
 			switch ( Utility.Random( 4 ) )
 			{
-				case 0: AddItem( new ShortHair( Utility.RandomHairHue() ) ); break;
-				case 1: AddItem( new TwoPigTails( Utility.RandomHairHue() ) ); break;
-				case 2: AddItem( new ReceedingHair( Utility.RandomHairHue() ) ); break;
-				case 3: AddItem( new KrisnaHair( Utility.RandomHairHue() ) ); break;
+				case 0: HairItemID = Hair.Human.Short; break;
+				case 1: HairItemID = Hair.Human.PigTails; break;
+				case 2: HairItemID = Hair.Human.Receeding; break;
+				case 3: HairItemID = Hair.Human.Krisna; break;
 			}
+			HairHue = Race.RandomHairHue();
 
 			PackGold( 100, 150 );
 		}

@@ -203,7 +203,7 @@ namespace Server.Engines.XmlSpawner2
                     // flee
                     if(attacker is BaseCreature)
                     {
-                    	((BaseCreature)attacker).BeginFlee(TimeSpan.FromSeconds(6));
+                    	((BaseCreature)attacker).ForceFleeUntil = DateTime.Now.AddSeconds(6);
                     }
                     // and become paralyzed
                     attacker.Freeze( TimeSpan.FromSeconds(damageGiven/10) );

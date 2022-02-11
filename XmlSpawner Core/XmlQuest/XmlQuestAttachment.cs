@@ -1,9 +1,4 @@
 using System;
-using Server;
-using Server.Items;
-using Server.Network;
-using Server.Mobiles;
-using System.IO;
 
 namespace Server.Engines.XmlSpawner2
 {
@@ -11,7 +6,11 @@ namespace Server.Engines.XmlSpawner2
 	{
 		private DateTime m_DataValue;
 
-		public DateTime Date { get { return m_DataValue; } set { m_DataValue = value; } }
+		public DateTime Date
+		{
+			get => m_DataValue;
+			set => m_DataValue = value;
+		}
 
 		// These are the various ways in which the message attachment can be constructed.  
 		// These can be called via the [addatt interface, via scripts, via the spawner ATTACH keyword.
@@ -36,7 +35,6 @@ namespace Server.Engines.XmlSpawner2
 			Name = name;
 			Date = DateTime.Now;
 			Expiration = TimeSpan.FromMinutes(expiresin);
-
 		}
 
 		[Attachable]
@@ -45,7 +43,6 @@ namespace Server.Engines.XmlSpawner2
 			Name = name;
 			Date = value;
 			Expiration = TimeSpan.FromMinutes(expiresin);
-
 		}
 
 
@@ -56,14 +53,13 @@ namespace Server.Engines.XmlSpawner2
 			writer.Write((int)0);
 			// version 0
 			writer.Write(m_DataValue);
-
 		}
 
 		public override void Deserialize(GenericReader reader)
 		{
 			base.Deserialize(reader);
 
-			int version = reader.ReadInt();
+			var version = reader.ReadInt();
 			// version 0
 			m_DataValue = reader.ReadDateTime();
 		}
@@ -73,13 +69,10 @@ namespace Server.Engines.XmlSpawner2
 			if (from.AccessLevel == AccessLevel.Player) return null;
 
 			if (Expiration > TimeSpan.Zero)
-			{
-				return String.Format("Quest '{2}' Completed {0} expires in {1} mins", Date, Expiration.TotalMinutes, Name);
-			}
+				return String.Format("Quest '{2}' Completed {0} expires in {1} mins", Date, Expiration.TotalMinutes,
+					Name);
 			else
-			{
 				return String.Format("Quest '{1}' Completed {0}", Date, Name);
-			}
 		}
 	}
 }

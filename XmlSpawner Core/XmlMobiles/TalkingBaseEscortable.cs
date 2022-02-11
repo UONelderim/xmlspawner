@@ -1,9 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Server;
 using Server.Items;
-using Server.Network;
 using Server.ContextMenus;
 using EDI = Server.Mobiles.EscortDestinationInfo;
 using Server.Engines.XmlSpawner2;
@@ -19,69 +17,64 @@ namespace Server.Mobiles
 		private DateTime m_DeleteTime;
 		private Timer m_DeleteTimer;
 
-		public override bool Commandable{ get{ return false; } } // Our master cannot boss us around!
+		public override bool Commandable => false; // Our master cannot boss us around!
 
-		[CommandProperty( AccessLevel.GameMaster )]
+		[CommandProperty(AccessLevel.GameMaster)]
 		public string Destination
 		{
-			get{ return m_Destination == null ? null : m_Destination.Name; }
-			set{ 
-                m_DestinationString = value;
-                m_Destination = EDI.Find( value );
-    
-                // if the destination cant be found in the current EDI list then try to add it
-                if(value == null || value.Length <= 0) return;
-                if(m_Destination == null)
-                {
-                	if (Region.Regions.Count == 0)	// after world load, before region load
-                		return;
-    
-                	foreach (Region region in Region.Regions)
-                	{
-                		if (string.Compare(region.Name, value, true) == 0)
-                		{
-                            EDI newedi = new EscortDestinationInfo(value, region);
-
-                            m_Destination = newedi;
-                            return;
-                		}
-                	}
-                }
-
-            }
-		}
-
-		private static string[] m_TownNames = new string[]
+			get => m_Destination == null ? null : m_Destination.Name;
+			set
 			{
-				"Cove", "Britain", "Jhelom",
-				"Minoc", "Ocllo", "Trinsic",
-				"Vesper", "Yew", "Skara Brae",
-				"Nujel'm", "Moonglow", "Magincia"
-			};
+				m_DestinationString = value;
+				m_Destination = EDI.Find(value);
 
-		public static new void Initialize()
-		{
-			foreach (Mobile m in World.Mobiles.Values)
-			{
-				if (m is TalkingBaseEscortable)
+				// if the destination cant be found in the current EDI list then try to add it
+				if (value == null || value.Length <= 0) return;
+				if (m_Destination == null)
 				{
-					// reestablish the DialogAttachment assignment
-					XmlDialog xa = (XmlDialog)XmlAttach.FindAttachment(m, typeof(XmlDialog));
-					((TalkingBaseCreature)m).DialogAttachment = xa;
+					if (Region.Regions.Count == 0) // after world load, before region load
+						return;
 
-					// initialize Destination after world load (now, regions are loaded)
-					TalkingBaseEscortable t = ((TalkingBaseEscortable)m);
-					t.Destination = t.m_DestinationString;
+					foreach (var region in Region.Regions)
+						if (String.Compare(region.Name, value, true) == 0)
+						{
+							var newedi = new EscortDestinationInfo(value, region);
+
+							m_Destination = newedi;
+							return;
+						}
 				}
 			}
 		}
-        [Constructable]
-		public TalkingBaseEscortable()  : this (-1)
+
+		private static string[] m_TownNames = new string[]
+		{
+			"Cove", "Britain", "Jhelom", "Minoc", "Ocllo", "Trinsic", "Vesper", "Yew", "Skara Brae", "Nujel'm",
+			"Moonglow", "Magincia"
+		};
+
+		new public static void Initialize()
+		{
+			foreach (var m in World.Mobiles.Values)
+				if (m is TalkingBaseEscortable)
+				{
+					// reestablish the DialogAttachment assignment
+					var xa = (XmlDialog)XmlAttach.FindAttachment(m, typeof(XmlDialog));
+					((TalkingBaseCreature)m).DialogAttachment = xa;
+
+					// initialize Destination after world load (now, regions are loaded)
+					var t = (TalkingBaseEscortable)m;
+					t.Destination = t.m_DestinationString;
+				}
+		}
+
+		[Constructable]
+		public TalkingBaseEscortable() : this(-1)
 		{
 		}
 
 		[Constructable]
-		public TalkingBaseEscortable(int gender) : base( AIType.AI_Melee, FightMode.Aggressor, 22, 1, 0.2, 1.0 )
+		public TalkingBaseEscortable(int gender) : base(AIType.AI_Melee, FightMode.Aggressor, 22, 1, 0.2, 1.0)
 		{
 			InitBody(gender);
 			InitOutfit();
@@ -89,66 +82,83 @@ namespace Server.Mobiles
 
 		public virtual void InitBody(int gender)
 		{
-			SetStr( 90, 100 );
-			SetDex( 90, 100 );
-			SetInt( 15, 25 );
+			SetStr(90, 100);
+			SetDex(90, 100);
+			SetInt(15, 25);
 
 			Hue = Race.RandomSkinHue();
-			
-			switch(gender)
-            {
-                case -1: this.Female = Utility.RandomBool(); break;
-                case 0: this.Female = false; break;
-                case 1: this.Female = true; break;
-            }
 
-			if ( Female )
+			switch (gender)
+			{
+				case -1:
+					Female = Utility.RandomBool();
+					break;
+				case 0:
+					Female = false;
+					break;
+				case 1:
+					Female = true;
+					break;
+			}
+
+			if (Female)
 			{
 				Body = 401;
-				Name = NameList.RandomName( "female" );
+				Name = NameList.RandomName("female");
 			}
 			else
 			{
 				Body = 400;
-				Name = NameList.RandomName( "male" );
+				Name = NameList.RandomName("male");
 			}
 		}
 
 		public virtual void InitOutfit()
 		{
-			AddItem( new FancyShirt( Utility.RandomNeutralHue() ) );
-			AddItem( new ShortPants( Utility.RandomNeutralHue() ) );
-			AddItem( new Boots( Utility.RandomNeutralHue() ) );
+			AddItem(new FancyShirt(Utility.RandomNeutralHue()));
+			AddItem(new ShortPants(Utility.RandomNeutralHue()));
+			AddItem(new Boots(Utility.RandomNeutralHue()));
 
-			switch ( Utility.Random( 4 ) )
+			switch (Utility.Random(4))
 			{
-				case 0: HairItemID = Hair.Human.Short; break;
-				case 1: HairItemID = Hair.Human.PigTails; break;
-				case 2: HairItemID = Hair.Human.Receeding; break;
-				case 3: HairItemID = Hair.Human.Krisna; break;
+				case 0:
+					HairItemID = Hair.Human.Short;
+					break;
+				case 1:
+					HairItemID = Hair.Human.PigTails;
+					break;
+				case 2:
+					HairItemID = Hair.Human.Receeding;
+					break;
+				case 3:
+					HairItemID = Hair.Human.Krisna;
+					break;
 			}
+
 			HairHue = Race.RandomHairHue();
 
-			PackGold( 200, 250 );
+			PackGold(200, 250);
 		}
 
-		public virtual bool SayDestinationTo( Mobile m )
+		public virtual bool SayDestinationTo(Mobile m)
 		{
-			EDI dest = GetDestination();
+			var dest = GetDestination();
 
-			if ( dest == null || !m.Alive )
+			if (dest == null || !m.Alive)
 				return false;
 
-			Mobile escorter = GetEscorter();
+			var escorter = GetEscorter();
 
-			if ( escorter == null )
+			if (escorter == null)
 			{
-				Say( "I am looking to go to {0}, will you take me?", (dest.Name == "Ocllo" && m.Map == Map.Trammel) ? "Haven" : dest.Name );
+				Say("I am looking to go to {0}, will you take me?",
+					dest.Name == "Ocllo" && m.Map == Map.Trammel ? "Haven" : dest.Name);
 				return true;
 			}
-			else if ( escorter == m )
+			else if (escorter == m)
 			{
-				Say( "Lead on! Payment will be made when we arrive in {0}.", (dest.Name == "Ocllo" && m.Map == Map.Trammel) ? "Haven" : dest.Name );
+				Say("Lead on! Payment will be made when we arrive in {0}.",
+					dest.Name == "Ocllo" && m.Map == Map.Trammel ? "Haven" : dest.Name);
 				return true;
 			}
 
@@ -157,47 +167,46 @@ namespace Server.Mobiles
 
 		private static Hashtable m_EscortTable = new Hashtable();
 
-		public static Hashtable EscortTable
+		public static Hashtable EscortTable => m_EscortTable;
+
+		private static TimeSpan m_EscortDelay = TimeSpan.FromMinutes(5.0);
+
+		public virtual bool AcceptEscorter(Mobile m)
 		{
-			get{ return m_EscortTable; }
-		}
+			var dest = GetDestination();
 
-		private static TimeSpan m_EscortDelay = TimeSpan.FromMinutes( 5.0 );
-
-		public virtual bool AcceptEscorter( Mobile m )
-		{
-			EDI dest = GetDestination();
-
-			if ( dest == null )
+			if (dest == null)
 				return false;
 
-			Mobile escorter = GetEscorter();
+			var escorter = GetEscorter();
 
-			if ( escorter != null || !m.Alive )
+			if (escorter != null || !m.Alive)
 				return false;
 
-			TalkingBaseEscortable escortable = (TalkingBaseEscortable)m_EscortTable[m];
+			var escortable = (TalkingBaseEscortable)m_EscortTable[m];
 
-			if ( escortable != null && !escortable.Deleted && escortable.GetEscorter() == m )
+			if (escortable != null && !escortable.Deleted && escortable.GetEscorter() == m)
 			{
-				Say( "I see you already have an escort." );
+				Say("I see you already have an escort.");
 				return false;
 			}
-			else if ( m is PlayerMobile && (((PlayerMobile)m).LastEscortTime + m_EscortDelay) >= DateTime.Now )
+			else if (m is PlayerMobile && ((PlayerMobile)m).LastEscortTime + m_EscortDelay >= DateTime.Now)
 			{
-				int minutes = (int)Math.Ceiling( ((((PlayerMobile)m).LastEscortTime + m_EscortDelay) - DateTime.Now).TotalMinutes );
+				var minutes =
+					(int)Math.Ceiling((((PlayerMobile)m).LastEscortTime + m_EscortDelay - DateTime.Now).TotalMinutes);
 
-				Say( "You must rest {0} minute{1} before we set out on this journey.", minutes, minutes == 1 ? "" : "s" );
+				Say("You must rest {0} minute{1} before we set out on this journey.", minutes, minutes == 1 ? "" : "s");
 				return false;
 			}
-			else if ( SetControlMaster( m ) )
+			else if (SetControlMaster(m))
 			{
 				m_LastSeenEscorter = DateTime.Now;
 
-				if ( m is PlayerMobile )
+				if (m is PlayerMobile)
 					((PlayerMobile)m).LastEscortTime = DateTime.Now;
 
-				Say( "Lead on! Payment will be made when we arrive in {0}.", (dest.Name == "Ocllo" && m.Map == Map.Trammel) ? "Haven" : dest.Name  );
+				Say("Lead on! Payment will be made when we arrive in {0}.",
+					dest.Name == "Ocllo" && m.Map == Map.Trammel ? "Haven" : dest.Name);
 				m_EscortTable[m] = this;
 				StartFollow();
 				return true;
@@ -206,32 +215,32 @@ namespace Server.Mobiles
 			return false;
 		}
 
-		public override bool HandlesOnSpeech( Mobile from )
+		public override bool HandlesOnSpeech(Mobile from)
 		{
-			if ( from.InRange( this.Location, 3 ) )
+			if (from.InRange(Location, 3))
 				return true;
 
-			return base.HandlesOnSpeech( from );
+			return base.HandlesOnSpeech(from);
 		}
 
-		public override void OnSpeech( SpeechEventArgs e )
+		public override void OnSpeech(SpeechEventArgs e)
 		{
-			base.OnSpeech( e );
+			base.OnSpeech(e);
 
-			EDI dest = GetDestination();
+			var dest = GetDestination();
 
-			if ( dest != null && !e.Handled && e.Mobile.InRange( this.Location, 3 ) )
+			if (dest != null && !e.Handled && e.Mobile.InRange(Location, 3))
 			{
-				if ( e.HasKeyword( 0x1D ) ) // *destination*
-					e.Handled = SayDestinationTo( e.Mobile );
-				else if ( e.HasKeyword( 0x1E ) ) // *i will take thee*
-					e.Handled = AcceptEscorter( e.Mobile );
+				if (e.HasKeyword(0x1D)) // *destination*
+					e.Handled = SayDestinationTo(e.Mobile);
+				else if (e.HasKeyword(0x1E)) // *i will take thee*
+					e.Handled = AcceptEscorter(e.Mobile);
 			}
 		}
 
 		public override void OnAfterDelete()
 		{
-			if ( m_DeleteTimer != null )
+			if (m_DeleteTimer != null)
 				m_DeleteTimer.Stop();
 
 			m_DeleteTimer = null;
@@ -245,9 +254,9 @@ namespace Server.Mobiles
 			CheckAtDestination();
 		}
 
-		protected override bool OnMove( Direction d )
+		protected override bool OnMove(Direction d)
 		{
-			if ( !base.OnMove( d ) )
+			if (!base.OnMove(d))
 				return false;
 
 			CheckAtDestination();
@@ -257,12 +266,12 @@ namespace Server.Mobiles
 
 		public virtual void StartFollow()
 		{
-			StartFollow( GetEscorter() );
+			StartFollow(GetEscorter());
 		}
 
-		public virtual void StartFollow( Mobile escorter )
+		public virtual void StartFollow(Mobile escorter)
 		{
-			if ( escorter == null )
+			if (escorter == null)
 				return;
 
 			ActiveSpeed = 0.1;
@@ -289,29 +298,29 @@ namespace Server.Mobiles
 
 		public virtual Mobile GetEscorter()
 		{
-			if ( !Controlled )
+			if (!Controlled)
 				return null;
 
-			Mobile master = ControlMaster;
+			var master = ControlMaster;
 
-			if ( master == null )
+			if (master == null)
 				return null;
 
-			if ( master.Deleted || master.Map != this.Map || !master.InRange( Location, 30 ) || !master.Alive )
+			if (master.Deleted || master.Map != Map || !master.InRange(Location, 30) || !master.Alive)
 			{
 				StopFollow();
 
-				TimeSpan lastSeenDelay = DateTime.Now - m_LastSeenEscorter;
+				var lastSeenDelay = DateTime.Now - m_LastSeenEscorter;
 
-				if ( lastSeenDelay >= TimeSpan.FromMinutes( 2.0 ) )
+				if (lastSeenDelay >= TimeSpan.FromMinutes(2.0))
 				{
-					master.SendLocalizedMessage( 1042473 ); // You have lost the person you were escorting.
-					Say( 1005653 ); // Hmmm.  I seem to have lost my master.
+					master.SendLocalizedMessage(1042473); // You have lost the person you were escorting.
+					Say(1005653); // Hmmm.  I seem to have lost my master.
 
-					SetControlMaster( null );
-					m_EscortTable.Remove( master );
+					SetControlMaster(null);
+					m_EscortTable.Remove(master);
 
-					Timer.DelayCall( TimeSpan.FromSeconds( 5.0 ), new TimerCallback( Delete ) );
+					Timer.DelayCall(TimeSpan.FromSeconds(5.0), new TimerCallback(Delete));
 					return null;
 				}
 				else
@@ -321,8 +330,8 @@ namespace Server.Mobiles
 				}
 			}
 
-			if ( ControlOrder != OrderType.Follow )
-				StartFollow( master );
+			if (ControlOrder != OrderType.Follow)
+				StartFollow(master);
 
 			m_LastSeenEscorter = DateTime.Now;
 			return master;
@@ -330,78 +339,78 @@ namespace Server.Mobiles
 
 		public virtual void BeginDelete()
 		{
-			if ( m_DeleteTimer != null )
+			if (m_DeleteTimer != null)
 				m_DeleteTimer.Stop();
 
-			m_DeleteTime = DateTime.Now + TimeSpan.FromSeconds( 30.0 );
+			m_DeleteTime = DateTime.Now + TimeSpan.FromSeconds(30.0);
 
-			m_DeleteTimer = new DeleteTimer( this, m_DeleteTime - DateTime.Now );
+			m_DeleteTimer = new DeleteTimer(this, m_DeleteTime - DateTime.Now);
 			m_DeleteTimer.Start();
 		}
 
 		public virtual bool CheckAtDestination()
 		{
-			EDI dest = GetDestination();
+			var dest = GetDestination();
 
-			if ( dest == null )
+			if (dest == null)
 				return false;
 
-			Mobile escorter = GetEscorter();
+			var escorter = GetEscorter();
 
-			if ( escorter == null )
+			if (escorter == null)
 				return false;
 
-			if ( dest.Contains( Location ) )
+			if (dest.Contains(Location))
 			{
-				Say( 1042809, escorter.Name ); // We have arrived! I thank thee, ~1_PLAYER_NAME~! I have no further need of thy services. Here is thy pay.
+				Say(1042809,
+					escorter.Name); // We have arrived! I thank thee, ~1_PLAYER_NAME~! I have no further need of thy services. Here is thy pay.
 
 
 				// not going anywhere
 				m_Destination = null;
 				m_DestinationString = null;
 
-				Container cont = escorter.Backpack;
+				var cont = escorter.Backpack;
 
-				if ( cont == null )
+				if (cont == null)
 					cont = escorter.BankBox;
 
-				Gold gold = new Gold( 500, 1000 );
+				var gold = new Gold(500, 1000);
 
-				if ( cont == null || !cont.TryDropItem( escorter, gold, false ) )
-					gold.MoveToWorld( escorter.Location, escorter.Map );
+				if (cont == null || !cont.TryDropItem(escorter, gold, false))
+					gold.MoveToWorld(escorter.Location, escorter.Map);
 
-				Misc.Titles.AwardFame( escorter, 10, true );
+				Misc.Titles.AwardFame(escorter, 10, true);
 
-				bool gainedPath = false;
+				var gainedPath = false;
 
-				PlayerMobile pm = escorter as PlayerMobile;
+				var pm = escorter as PlayerMobile;
 
-				if ( pm != null )
+				if (pm != null)
 				{
-					if ( pm.CompassionGains > 0 && DateTime.Now > pm.NextCompassionDay )
+					if (pm.CompassionGains > 0 && DateTime.Now > pm.NextCompassionDay)
 					{
 						pm.NextCompassionDay = DateTime.MinValue;
 						pm.CompassionGains = 0;
 					}
 
-					if ( pm.CompassionGains >= 5 ) // have already gained 5 points in one day, can gain no more
+					if (pm.CompassionGains >= 5) // have already gained 5 points in one day, can gain no more
+						pm.SendLocalizedMessage(
+							1053004); // You must wait about a day before you can gain in compassion again.
+					else if (VirtueHelper.Award(pm, VirtueName.Compassion, 1, ref gainedPath))
 					{
-						pm.SendLocalizedMessage( 1053004 ); // You must wait about a day before you can gain in compassion again.
-					}
-					else if ( VirtueHelper.Award( pm, VirtueName.Compassion, 1, ref gainedPath ) )
-					{
-						if ( gainedPath )
-							pm.SendLocalizedMessage( 1053005 ); // You have achieved a path in compassion!
+						if (gainedPath)
+							pm.SendLocalizedMessage(1053005); // You have achieved a path in compassion!
 						else
-							pm.SendLocalizedMessage( 1053002 ); // You have gained in compassion.
+							pm.SendLocalizedMessage(1053002); // You have gained in compassion.
 
-						pm.NextCompassionDay = DateTime.Now + TimeSpan.FromDays( 1.0 ); // in one day CompassionGains gets reset to 0
+						pm.NextCompassionDay =
+							DateTime.Now + TimeSpan.FromDays(1.0); // in one day CompassionGains gets reset to 0
 						++pm.CompassionGains;
 					}
 					else
-					{
-						pm.SendLocalizedMessage( 1053003 ); // You have achieved the highest path of compassion and can no longer gain any further.
-					}
+						pm.SendLocalizedMessage(
+							1053003); // You have achieved the highest path of compassion and can no longer gain any further.
 				}
 
 				XmlQuest.RegisterEscort(this, escorter);
@@ -417,69 +426,70 @@ namespace Server.Mobiles
 			return false;
 		}
 
-		public TalkingBaseEscortable( Serial serial ) : base( serial )
+		public TalkingBaseEscortable(Serial serial) : base(serial)
 		{
 		}
 
-		public override void Serialize( GenericWriter writer )
+		public override void Serialize(GenericWriter writer)
 		{
-			base.Serialize( writer );
+			base.Serialize(writer);
 
-			writer.Write( (int) 0 ); // version
+			writer.Write((int)0); // version
 
-			EDI dest = GetDestination();
+			var dest = GetDestination();
 
-			writer.Write( dest != null );
+			writer.Write(dest != null);
 
-			if ( dest != null )
-				writer.Write( dest.Name );
+			if (dest != null)
+				writer.Write(dest.Name);
 
-			writer.Write( m_DeleteTimer != null );
+			writer.Write(m_DeleteTimer != null);
 
-			if ( m_DeleteTimer != null )
-				writer.WriteDeltaTime( m_DeleteTime );
+			if (m_DeleteTimer != null)
+				writer.WriteDeltaTime(m_DeleteTime);
 		}
 
-		public override void Deserialize( GenericReader reader )
+		public override void Deserialize(GenericReader reader)
 		{
-			base.Deserialize( reader );
+			base.Deserialize(reader);
 
-			int version = reader.ReadInt();
+			var version = reader.ReadInt();
 
-			if ( reader.ReadBool() )
-				m_DestinationString = reader.ReadString(); // NOTE: We cannot EDI.Find here, regions have not yet been loaded :-(
+			if (reader.ReadBool())
+				m_DestinationString =
+					reader.ReadString(); // NOTE: We cannot EDI.Find here, regions have not yet been loaded :-(
 
-			if ( reader.ReadBool() )
+			if (reader.ReadBool())
 			{
 				m_DeleteTime = reader.ReadDeltaTime();
-				m_DeleteTimer = new DeleteTimer( this, m_DeleteTime - DateTime.Now );
+				m_DeleteTimer = new DeleteTimer(this, m_DeleteTime - DateTime.Now);
 				m_DeleteTimer.Start();
 			}
 		}
 
-		public override bool CanBeRenamedBy( Mobile from )
+		public override bool CanBeRenamedBy(Mobile from)
 		{
-			return ( from.AccessLevel >= AccessLevel.GameMaster );
+			return @from.AccessLevel >= AccessLevel.GameMaster;
 		}
 
 		public override void AddCustomContextEntries(Mobile from, List<ContextMenuEntry> list)
 		{
-			EDI dest = GetDestination();
+			var dest = GetDestination();
 
-			if ( dest != null && from.Alive )
+			if (dest != null && from.Alive)
 			{
-				Mobile escorter = GetEscorter();
+				var escorter = GetEscorter();
 
-				if ( escorter == null || escorter == from )
-					list.Add( new AskTalkingDestinationEntry( this, from ) );
+				if (escorter == null || escorter == from)
+					list.Add(new AskTalkingDestinationEntry(this, from));
 
-				if ( escorter == null )
-					list.Add( new AcceptTalkingEscortEntry( this, from ) );
-				else if ( escorter == from )
-					list.Add( new AbandonTalkingEscortEntry( this, from ) );
+				if (escorter == null)
+					list.Add(new AcceptTalkingEscortEntry(this, from));
+				else if (escorter == from)
+					list.Add(new AbandonTalkingEscortEntry(this, from));
 			}
 
-			base.AddCustomContextEntries( from, list );
+			base.AddCustomContextEntries(from, list);
 		}
 
 		public virtual string[] GetPossibleDestinations()
@@ -489,18 +499,18 @@ namespace Server.Mobiles
 
 		public virtual string PickRandomDestination()
 		{
-			if ( Map.Felucca.Regions.Count == 0 || Map == null || Map == Map.Internal || Location == Point3D.Zero )
+			if (Map.Felucca.Regions.Count == 0 || Map == null || Map == Map.Internal || Location == Point3D.Zero)
 				return null; // Not yet fully initialized
 
-			string[] possible = GetPossibleDestinations();
+			var possible = GetPossibleDestinations();
 			string picked = null;
 
-			while ( picked == null )
+			while (picked == null)
 			{
-				picked = possible[Utility.Random( possible.Length )];
-				EDI test = EDI.Find( picked );
+				picked = possible[Utility.Random(possible.Length)];
+				var test = EDI.Find(picked);
 
-				if ( test != null && test.Contains( Location ) )
+				if (test != null && test.Contains(Location))
 					picked = null;
 			}
 
@@ -509,23 +519,23 @@ namespace Server.Mobiles
 
 		public EDI GetDestination()
 		{
-			if ( m_DestinationString == null && m_DeleteTimer == null )
+			if (m_DestinationString == null && m_DeleteTimer == null)
 				m_DestinationString = PickRandomDestination();
 
-			if ( m_Destination != null && m_Destination.Name == m_DestinationString )
+			if (m_Destination != null && m_Destination.Name == m_DestinationString)
 				return m_Destination;
 
-			if ( Map.Felucca.Regions.Count > 0 )
-				return ( m_Destination = EDI.Find( m_DestinationString ) );
+			if (Map.Felucca.Regions.Count > 0)
+				return m_Destination = EDI.Find(m_DestinationString);
 
-			return ( m_Destination = null );
+			return m_Destination = null;
 		}
 
 		private class DeleteTimer : Timer
 		{
 			private Mobile m_Mobile;
 
-			public DeleteTimer( Mobile m, TimeSpan delay ) : base( delay )
+			public DeleteTimer(Mobile m, TimeSpan delay) : base(delay)
 			{
 				m_Mobile = m;
 
@@ -545,7 +555,7 @@ namespace Server.Mobiles
 		private TalkingBaseEscortable m_Mobile;
 		private Mobile m_From;
 
-		public AskTalkingDestinationEntry( TalkingBaseEscortable m, Mobile from ) : base( 6100, 3 )
+		public AskTalkingDestinationEntry(TalkingBaseEscortable m, Mobile from) : base(6100, 3)
 		{
 			m_Mobile = m;
 			m_From = from;
@@ -553,7 +563,7 @@ namespace Server.Mobiles
 
 		public override void OnClick()
 		{
-			m_Mobile.SayDestinationTo( m_From );
+			m_Mobile.SayDestinationTo(m_From);
 		}
 	}
 
@@ -562,7 +572,7 @@ namespace Server.Mobiles
 		private TalkingBaseEscortable m_Mobile;
 		private Mobile m_From;
 
-		public AcceptTalkingEscortEntry( TalkingBaseEscortable m, Mobile from ) : base( 6101, 3 )
+		public AcceptTalkingEscortEntry(TalkingBaseEscortable m, Mobile from) : base(6101, 3)
 		{
 			m_Mobile = m;
 			m_From = from;
@@ -570,7 +580,7 @@ namespace Server.Mobiles
 
 		public override void OnClick()
 		{
-			m_Mobile.AcceptEscorter( m_From );
+			m_Mobile.AcceptEscorter(m_From);
 		}
 	}
 
@@ -579,7 +589,7 @@ namespace Server.Mobiles
 		private TalkingBaseEscortable m_Mobile;
 		private Mobile m_From;
 
-		public AbandonTalkingEscortEntry( TalkingBaseEscortable m, Mobile from ) : base( 6102, 3 )
+		public AbandonTalkingEscortEntry(TalkingBaseEscortable m, Mobile from) : base(6102, 3)
 		{
 			m_Mobile = m;
 			m_From = from;

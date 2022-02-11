@@ -1,5 +1,3 @@
-using System;
-using Server;
 using Server.Items;
 using EDI = Server.Mobiles.EscortDestinationInfo;
 
@@ -8,11 +6,9 @@ namespace Server.Mobiles
 	public class TalkingSeekerOfAdventure : TalkingBaseEscortable
 	{
 		private static string[] m_Dungeons = new string[]
-			{
-				"Covetous", "Deceit", "Despise",
-				"Destard", "Hythloth", "Shame",
-				"Wrong"
-			};
+		{
+			"Covetous", "Deceit", "Despise", "Destard", "Hythloth", "Shame", "Wrong"
+		};
 
 		public override string[] GetPossibleDestinations()
 		{
@@ -25,11 +21,11 @@ namespace Server.Mobiles
 			Title = "the seeker of adventure";
 		}
 
-		public override bool ClickTitle{ get{ return false; } } // Do not display 'the seeker of adventure' when single-clicking
+		public override bool ClickTitle => false; // Do not display 'the seeker of adventure' when single-clicking
 
 		private static int GetRandomHue()
 		{
-			switch ( Utility.Random( 6 ) )
+			switch (Utility.Random(6))
 			{
 				default:
 				case 0: return 0;
@@ -43,55 +39,64 @@ namespace Server.Mobiles
 
 		public override void InitOutfit()
 		{
-			if ( Female )
-				AddItem( new FancyDress( GetRandomHue() ) );
+			if (Female)
+				AddItem(new FancyDress(GetRandomHue()));
 			else
-				AddItem( new FancyShirt( GetRandomHue() ) );
+				AddItem(new FancyShirt(GetRandomHue()));
 
-			int lowHue = GetRandomHue();
+			var lowHue = GetRandomHue();
 
-			AddItem( new ShortPants( lowHue ) );
+			AddItem(new ShortPants(lowHue));
 
-			if ( Female )
-				AddItem( new ThighBoots( lowHue ) );
+			if (Female)
+				AddItem(new ThighBoots(lowHue));
 			else
-				AddItem( new Boots( lowHue ) );
+				AddItem(new Boots(lowHue));
 
-			if ( !Female )
-				AddItem( new BodySash( lowHue ) );
+			if (!Female)
+				AddItem(new BodySash(lowHue));
 
-			AddItem( new Cloak( GetRandomHue() ) );
+			AddItem(new Cloak(GetRandomHue()));
 
-			AddItem( new Longsword() );
+			AddItem(new Longsword());
 
-			switch ( Utility.Random( 4 ) )
+			switch (Utility.Random(4))
 			{
-				case 0: HairItemID = Hair.Human.Short; break;
-				case 1: HairItemID = Hair.Human.PigTails; break;
-				case 2: HairItemID = Hair.Human.Receeding; break;
-				case 3: HairItemID = Hair.Human.Krisna; break;
+				case 0:
+					HairItemID = Hair.Human.Short;
+					break;
+				case 1:
+					HairItemID = Hair.Human.PigTails;
+					break;
+				case 2:
+					HairItemID = Hair.Human.Receeding;
+					break;
+				case 3:
+					HairItemID = Hair.Human.Krisna;
+					break;
 			}
+
 			HairHue = Race.RandomHairHue();
 
-			PackGold( 100, 150 );
+			PackGold(100, 150);
 		}
 
-		public TalkingSeekerOfAdventure( Serial serial ) : base( serial )
+		public TalkingSeekerOfAdventure(Serial serial) : base(serial)
 		{
 		}
 
-		public override void Serialize( GenericWriter writer )
+		public override void Serialize(GenericWriter writer)
 		{
-			base.Serialize( writer );
+			base.Serialize(writer);
 
-			writer.Write( (int) 0 ); // version
+			writer.Write((int)0); // version
 		}
 
-		public override void Deserialize( GenericReader reader )
+		public override void Deserialize(GenericReader reader)
 		{
-			base.Deserialize( reader );
+			base.Deserialize(reader);
 
-			int version = reader.ReadInt();
+			var version = reader.ReadInt();
 		}
 	}
 }

@@ -1,11 +1,8 @@
-using System;
 using System.Reflection;
 using System.Collections;
 using System.Collections.Generic;
-using Server;
 using Server.Network;
 using Server.Commands;
-using Server.Commands.Generic;
 
 namespace Server.Gumps
 {
@@ -14,11 +11,7 @@ namespace Server.Gumps
 		protected PropertyInfo m_Property;
 		protected Mobile m_Mobile;
 		protected object m_Object;
-#if (NEWTIMERS)
 		protected Stack<PropertiesGump.StackEntry> m_Stack;
-#else
-		protected Stack m_Stack;
-#endif
 		protected int m_Page;
 		protected ArrayList m_List;
 
@@ -73,11 +66,8 @@ namespace Server.Gumps
 
 		protected object[] m_Values;
 
-#if (NEWTIMERS)
-		public XmlSetListOptionGump( PropertyInfo prop, Mobile mobile, object o, Stack<PropertiesGump.StackEntry> stack, int propspage, ArrayList list, string[] names, object[] values ) : base( GumpOffsetX, GumpOffsetY )
-#else
-		public XmlSetListOptionGump( PropertyInfo prop, Mobile mobile, object o, Stack stack, int propspage, ArrayList list, string[] names, object[] values ) : base( GumpOffsetX, GumpOffsetY )
-#endif
+		public XmlSetListOptionGump(PropertyInfo prop, Mobile mobile, object o, Stack<PropertiesGump.StackEntry> stack,
+			int propspage, ArrayList list, string[] names, object[] values) : base(GumpOffsetX, GumpOffsetY)
 		{
 			m_Property = prop;
 			m_Mobile = mobile;
@@ -88,105 +78,107 @@ namespace Server.Gumps
 
 			m_Values = values;
 
-			int pages = (names.Length + EntryCount - 1) / EntryCount;
-			int index = 0;
+			var pages = (names.Length + EntryCount - 1) / EntryCount;
+			var index = 0;
 
-			for ( int page = 1; page <= pages; ++page )
+			for (var page = 1; page <= pages; ++page)
 			{
-				AddPage( page );
+				AddPage(page);
 
-				int start = (page - 1) * EntryCount;
-				int count = names.Length - start;
+				var start = (page - 1) * EntryCount;
+				var count = names.Length - start;
 
-				if ( count > EntryCount )
+				if (count > EntryCount)
 					count = EntryCount;
 
-				int totalHeight = OffsetSize + ((count + 2) * (EntryHeight + OffsetSize));
-				int backHeight = BorderSize + totalHeight + BorderSize;
+				var totalHeight = OffsetSize + (count + 2) * (EntryHeight + OffsetSize);
+				var backHeight = BorderSize + totalHeight + BorderSize;
 
-				AddBackground( 0, 0, BackWidth, backHeight, BackGumpID );
-				AddImageTiled( BorderSize, BorderSize, TotalWidth - (OldStyle ? SetWidth + OffsetSize : 0), totalHeight, OffsetGumpID );
+				AddBackground(0, 0, BackWidth, backHeight, BackGumpID);
+				AddImageTiled(BorderSize, BorderSize, TotalWidth - (OldStyle ? SetWidth + OffsetSize : 0), totalHeight,
+					OffsetGumpID);
 
 
+				var x = BorderSize + OffsetSize;
+				var y = BorderSize + OffsetSize;
 
-				int x = BorderSize + OffsetSize;
-				int y = BorderSize + OffsetSize;
+				var emptyWidth = TotalWidth - PrevWidth - NextWidth - OffsetSize * 4 -
+				                 (OldStyle ? SetWidth + OffsetSize : 0);
 
-				int emptyWidth = TotalWidth - PrevWidth - NextWidth - (OffsetSize * 4) - (OldStyle ? SetWidth + OffsetSize : 0);
+				AddImageTiled(x, y, PrevWidth, EntryHeight, HeaderGumpID);
 
-				AddImageTiled( x, y, PrevWidth, EntryHeight, HeaderGumpID );
-
-				if ( page > 1 )
+				if (page > 1)
 				{
-					AddButton( x + PrevOffsetX, y + PrevOffsetY, PrevButtonID1, PrevButtonID2, 0, GumpButtonType.Page, page - 1 );
+					AddButton(x + PrevOffsetX, y + PrevOffsetY, PrevButtonID1, PrevButtonID2, 0, GumpButtonType.Page,
+						page - 1);
 
-					if ( PrevLabel )
-						AddLabel( x + PrevLabelOffsetX, y + PrevLabelOffsetY, TextHue, "Previous" );
+					if (PrevLabel)
+						AddLabel(x + PrevLabelOffsetX, y + PrevLabelOffsetY, TextHue, "Previous");
 				}
 
 				x += PrevWidth + OffsetSize;
 
-				if ( !OldStyle )
-					AddImageTiled( x - (OldStyle ? OffsetSize : 0), y, emptyWidth + (OldStyle ? OffsetSize * 2 : 0), EntryHeight, HeaderGumpID );
+				if (!OldStyle)
+					AddImageTiled(x - (OldStyle ? OffsetSize : 0), y, emptyWidth + (OldStyle ? OffsetSize * 2 : 0),
+						EntryHeight, HeaderGumpID);
 
 				x += emptyWidth + OffsetSize;
 
-				if ( !OldStyle )
-					AddImageTiled( x, y, NextWidth, EntryHeight, HeaderGumpID );
+				if (!OldStyle)
+					AddImageTiled(x, y, NextWidth, EntryHeight, HeaderGumpID);
 
-				if ( page < pages )
+				if (page < pages)
 				{
-					AddButton( x + NextOffsetX, y + NextOffsetY, NextButtonID1, NextButtonID2, 0, GumpButtonType.Page, page + 1 );
+					AddButton(x + NextOffsetX, y + NextOffsetY, NextButtonID1, NextButtonID2, 0, GumpButtonType.Page,
+						page + 1);
 
-					if ( NextLabel )
-						AddLabel( x + NextLabelOffsetX, y + NextLabelOffsetY, TextHue, "Next" );
+					if (NextLabel)
+						AddLabel(x + NextLabelOffsetX, y + NextLabelOffsetY, TextHue, "Next");
 				}
 
 
+				AddRect(0, prop.Name, 0);
 
-				AddRect( 0, prop.Name, 0 );
-
-				for ( int i = 0; i < count; ++i )
-					AddRect( i + 1, names[index], ++index );
+				for (var i = 0; i < count; ++i)
+					AddRect(i + 1, names[index], ++index);
 			}
 		}
 
-		private void AddRect( int index, string str, int button )
+		private void AddRect(int index, string str, int button)
 		{
-			int x = BorderSize + OffsetSize;
-			int y = BorderSize + OffsetSize + ((index + 1) * (EntryHeight + OffsetSize));
+			var x = BorderSize + OffsetSize;
+			var y = BorderSize + OffsetSize + (index + 1) * (EntryHeight + OffsetSize);
 
-			AddImageTiled( x, y, EntryWidth, EntryHeight, EntryGumpID );
-			AddLabelCropped( x + TextOffsetX, y, EntryWidth - TextOffsetX, EntryHeight, TextHue, str );
+			AddImageTiled(x, y, EntryWidth, EntryHeight, EntryGumpID);
+			AddLabelCropped(x + TextOffsetX, y, EntryWidth - TextOffsetX, EntryHeight, TextHue, str);
 
 			x += EntryWidth + OffsetSize;
 
-			if ( SetGumpID != 0 )
-				AddImageTiled( x, y, SetWidth, EntryHeight, SetGumpID );
+			if (SetGumpID != 0)
+				AddImageTiled(x, y, SetWidth, EntryHeight, SetGumpID);
 
-			if ( button != 0 )
-				AddButton( x + SetOffsetX, y + SetOffsetY, SetButtonID1, SetButtonID2, button, GumpButtonType.Reply, 0 );
+			if (button != 0)
+				AddButton(x + SetOffsetX, y + SetOffsetY, SetButtonID1, SetButtonID2, button, GumpButtonType.Reply, 0);
 		}
 
-		public override void OnResponse( NetState sender, RelayInfo info )
+		public override void OnResponse(NetState sender, RelayInfo info)
 		{
-			int index = info.ButtonID - 1;
+			var index = info.ButtonID - 1;
 
-			if ( index >= 0 && index < m_Values.Length )
-			{
+			if (index >= 0 && index < m_Values.Length)
 				try
 				{
-					object toSet = m_Values[index];
-					CommandLogging.LogChangeProperty( m_Mobile, m_Object, m_Property.Name, (toSet == null ? "(-null-)" : toSet.ToString()) );
-					m_Property.SetValue( m_Object, toSet, null );
+					var toSet = m_Values[index];
+					CommandLogging.LogChangeProperty(m_Mobile, m_Object, m_Property.Name,
+						toSet == null ? "(-null-)" : toSet.ToString());
+					m_Property.SetValue(m_Object, toSet, null);
 				}
 				catch
 				{
-					m_Mobile.SendMessage( "An exception was caught. The property may not have changed." );
+					m_Mobile.SendMessage("An exception was caught. The property may not have changed.");
 				}
-			}
 
-			m_Mobile.SendGump( new XmlPropertiesGump( m_Mobile, m_Object, m_Stack, m_List, m_Page ) );
+			m_Mobile.SendGump(new XmlPropertiesGump(m_Mobile, m_Object, m_Stack, m_List, m_Page));
 		}
 	}
 }

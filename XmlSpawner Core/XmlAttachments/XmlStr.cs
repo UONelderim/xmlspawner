@@ -1,18 +1,18 @@
 using System;
-using Server;
-using Server.Items;
-using Server.Network;
-using Server.Mobiles;
 
 namespace Server.Engines.XmlSpawner2
 {
 	public class XmlStr : XmlAttachment
 	{
-		private TimeSpan m_Duration = TimeSpan.FromSeconds(30.0);       // default 30 sec duration
-		private int m_Value = 10;       // default value of 10
+		private TimeSpan m_Duration = TimeSpan.FromSeconds(30.0); // default 30 sec duration
+		private int m_Value = 10; // default value of 10
 
 		[CommandProperty(AccessLevel.GameMaster)]
-		public int Value { get { return m_Value; } set { m_Value = value; } }
+		public int Value
+		{
+			get => m_Value;
+			set => m_Value = value;
+		}
 
 		// These are the various ways in which the message attachment can be constructed.  
 		// These can be called via the [addatt interface, via scripts, via the spawner ATTACH keyword.
@@ -48,9 +48,7 @@ namespace Server.Engines.XmlSpawner2
 
 			// apply the mod
 			if (AttachedTo is Mobile)
-			{
 				((Mobile)AttachedTo).AddStatMod(new StatMod(StatType.Str, "XmlStr" + Name, m_Value, m_Duration));
-			}
 			// and then remove the attachment
 			Timer.DelayCall(TimeSpan.Zero, new TimerCallback(Delete));
 

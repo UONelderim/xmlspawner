@@ -1,8 +1,5 @@
-using System;
-using Server;
 using Server.Gumps;
-using Server.Network;
-using Server.Mobiles;
+
 /*
 ** QuestNote
 ** ArteGordon
@@ -12,7 +9,6 @@ namespace Server.Items
 {
 	public class QuestHolder : XmlQuestHolder
 	{
-
 		[Constructable]
 		public QuestHolder()
 			: base()
@@ -31,15 +27,13 @@ namespace Server.Items
 			base.Serialize(writer);
 
 			writer.Write((int)0); // version
-
 		}
 
 		public override void Deserialize(GenericReader reader)
 		{
 			base.Deserialize(reader);
 
-			int version = reader.ReadInt();
-
+			var version = reader.ReadInt();
 		}
 
 		public override void OnDoubleClick(Mobile from)
@@ -47,7 +41,7 @@ namespace Server.Items
 			base.OnDoubleClick(from);
 			from.CloseGump(typeof(XmlQuestStatusGump));
 
-			from.SendGump(new XmlQuestStatusGump(this, this.TitleString));
+			from.SendGump(new XmlQuestStatusGump(this, TitleString));
 		}
 
 		public override void OnSnoop(Mobile from)
@@ -56,9 +50,8 @@ namespace Server.Items
 			{
 				from.CloseGump(typeof(XmlQuestStatusGump));
 
-				from.SendGump(new XmlQuestStatusGump(this, this.TitleString));
+				from.SendGump(new XmlQuestStatusGump(this, TitleString));
 			}
 		}
-
 	}
 }

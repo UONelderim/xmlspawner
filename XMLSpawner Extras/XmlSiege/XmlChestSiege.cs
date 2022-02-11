@@ -1,17 +1,13 @@
-using System;
-using Server;
 using Server.Items;
-using Server.Network;
 using System.Collections;
-using Server.Mobiles;
 
 namespace Server.Engines.XmlSpawner2
 {
 	public class XmlChestSiege : XmlSiege
 	{
-		public override int LightDamageEffectID { get { return 14201; }  } // 14201 = sparkle
-		public override int MediumDamageEffectID { get { return 14201; } }
-		public override int HeavyDamageEffectID { get { return 14201; }  }
+		public override int LightDamageEffectID => 14201; // 14201 = sparkle
+		public override int MediumDamageEffectID => 14201;
+		public override int HeavyDamageEffectID => 14201;
 
 		// a serial constructor is REQUIRED
 		public XmlChestSiege(ASerial serial)
@@ -52,7 +48,7 @@ namespace Server.Engines.XmlSpawner2
 		{
 			base.Deserialize(reader);
 
-			int version = reader.ReadInt();
+			var version = reader.ReadInt();
 		}
 
 		public override void OnAttach()
@@ -60,30 +56,24 @@ namespace Server.Engines.XmlSpawner2
 			base.OnAttach();
 
 			// only allow attachment to containers
-			if (!(AttachedTo is Container))
-			{
-				Delete();
-			}
+			if (!(AttachedTo is Container)) Delete();
 		}
 
 		public override void OnDestroyed()
 		{
-			Container chest = AttachedTo as Container;
+			var chest = AttachedTo as Container;
 
 			if (chest != null && chest.Map != null && chest.Map != Map.Internal)
 			{
-				ArrayList movelist = new ArrayList(chest.Items);
+				var movelist = new ArrayList(chest.Items);
 
 				foreach (Item i in movelist)
-				{
 					// spill the contents out onto the ground
 					i.MoveToWorld(chest.Location, chest.Map);
-				}
 
 				// and permanently destroy the container
 				chest.Delete();
 			}
 		}
-
 	}
 }

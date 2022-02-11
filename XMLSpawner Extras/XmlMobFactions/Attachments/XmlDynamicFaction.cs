@@ -1,9 +1,4 @@
 using System;
-using Server;
-using Server.Items;
-using Server.Network;
-using Server.Mobiles;
-using System.Collections.Generic;
 using System.Text;
 
 namespace Server.Engines.XmlSpawner2
@@ -24,63 +19,55 @@ namespace Server.Engines.XmlSpawner2
 		{
 			Name = name;
 		}
-		
+
 		public static bool MatchFaction(Mobile o, string name)
 		{
-			if(o == null || name == null) return false;
+			if (o == null || name == null) return false;
 
 			// look for any attachments on the object that match this one
-			List<XmlAttachment> list = XmlAttach.FindAttachments(o, typeof(XmlDynamicFaction));
-			
-			if(list != null && list.Count > 0)
-			{
-				foreach( XmlAttachment a in list)
-				{
-					if(a.Name.ToLower() == name.ToLower()) return true;
-				}
-			}
+			var list = XmlAttach.FindAttachments(o, typeof(XmlDynamicFaction));
+
+			if (list != null && list.Count > 0)
+				foreach (var a in list)
+					if (a.Name.ToLower() == name.ToLower())
+						return true;
 			return false;
 		}
 
 		public static string Title(Mobile o)
 		{
-			if(o == null) return null;
-			
-			StringBuilder title = new StringBuilder();
+			if (o == null) return null;
+
+			var title = new StringBuilder();
 
 			// look for any attachments on the object that match this one
-			List<XmlAttachment> list = XmlAttach.FindAttachments(o, typeof(XmlDynamicFaction));
-			
-			if(list != null && list.Count > 0)
-			{
-				foreach( XmlAttachment a in list)
-				{
+			var list = XmlAttach.FindAttachments(o, typeof(XmlDynamicFaction));
+
+			if (list != null && list.Count > 0)
+				foreach (var a in list)
 					title.AppendFormat(" [{0}]", a.Name);
-				}
-			}
 			return title.ToString();
 		}
 
-		public override void Serialize( GenericWriter writer )
+		public override void Serialize(GenericWriter writer)
 		{
 			base.Serialize(writer);
 
-			writer.Write( (int) 0 );
+			writer.Write((int)0);
 			// version 0
-
 		}
 
 		public override void Deserialize(GenericReader reader)
 		{
 			base.Deserialize(reader);
 
-			int version = reader.ReadInt();
+			var version = reader.ReadInt();
 			// version 0
 		}
 
 		public override string OnIdentify(Mobile from)
 		{
-			return String.Format("Member of the '{0}' faction",Name);
+			return String.Format("Member of the '{0}' faction", Name);
 		}
 	}
 }

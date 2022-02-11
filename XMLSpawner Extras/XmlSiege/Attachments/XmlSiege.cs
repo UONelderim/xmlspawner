@@ -1,9 +1,7 @@
 using System;
-using Server;
 using Server.Items;
 using Server.Network;
 using System.Collections;
-using Server.Mobiles;
 
 namespace Server.Engines.XmlSpawner2
 {
@@ -14,34 +12,40 @@ namespace Server.Engines.XmlSpawner2
 		private const int HeavyDamageColor = 33; // color at 1-33% of hitsmax
 		private const int ShowSiegeColor = 0; // color used to flag items with siege attachments
 
-		public virtual int LightDamageEffectID { get { return 14732; } } // 14732 = flame effect
-		public virtual int MediumDamageEffectID { get { return 14732; } }
-		public virtual int HeavyDamageEffectID { get { return 14732; } }
+		public virtual int LightDamageEffectID => 14732; // 14732 = flame effect
+		public virtual int MediumDamageEffectID => 14732;
+		public virtual int HeavyDamageEffectID => 14732;
 
-		public virtual int DamagedItemEffectDuration { get { return 110; } }
+		public virtual int DamagedItemEffectDuration => 110;
 
-		public virtual bool UseEffectsDamageIndicator { get { return true; } }	// show damage using location effects
-		public virtual bool UseColorDamageIndicator { get { return false; } }	// show damage using item rehueing
+		public virtual bool UseEffectsDamageIndicator => true; // show damage using location effects
+		public virtual bool UseColorDamageIndicator => false; // show damage using item rehueing
 
-		public virtual int WhenToAutoRepair { get { return 0; } }  // 0=never, 1=after any damage, 2=after being destroyed
-		public virtual double AutoRepairFactor { get { return 0.1; } } // fraction of HitsMax to repair on each autorepair OnTick. A value of 1 will fully repair.
+		public virtual int WhenToAutoRepair => 0; // 0=never, 1=after any damage, 2=after being destroyed
 
-		private int m_Hits = 1000;		// current hits
-		private int m_HitsMax = 1000;	// max hits
-		private int m_ResistFire = 30;	// percentage resistance to fire attacks
-		private int m_ResistPhysical = 30;	// percentage resistance to physical attacks
-		private int m_Stone = 1;	// amount of stone required per repair
-		private int m_Iron = 20;	// amount of iron required per repair
-		private int m_Wood = 20;	// amount of wood required per repair
-		private int m_DestroyedItemID = 10984;	// itemid used when hits go to zero. 2322=dirt patch, 10984 pulsing pool.  Specifying a value of zero will cause the object to be permanently destroyed.
-		private TimeSpan m_AutoRepairTime = TimeSpan.Zero;  // autorepair disabled by default
+		public virtual double AutoRepairFactor =>
+			0.1; // fraction of HitsMax to repair on each autorepair OnTick. A value of 1 will fully repair.
+
+		private int m_Hits = 1000; // current hits
+		private int m_HitsMax = 1000; // max hits
+		private int m_ResistFire = 30; // percentage resistance to fire attacks
+		private int m_ResistPhysical = 30; // percentage resistance to physical attacks
+		private int m_Stone = 1; // amount of stone required per repair
+		private int m_Iron = 20; // amount of iron required per repair
+		private int m_Wood = 20; // amount of wood required per repair
+
+		private int
+			m_DestroyedItemID =
+				10984; // itemid used when hits go to zero. 2322=dirt patch, 10984 pulsing pool.  Specifying a value of zero will cause the object to be permanently destroyed.
+
+		private TimeSpan m_AutoRepairTime = TimeSpan.Zero; // autorepair disabled by default
 
 		private bool m_Enabled = true; // allows enabling/disabling siege damage and its effects
 		private DateTime m_AutoRepairEnd;
 		private AutoRepairTimer m_AutoRepairTimer;
 		public bool NeedsEffectsUpdate = true;
-		private ArrayList m_OriginalItemIDList = new ArrayList();		// original itemids of parent item
-		private ArrayList m_OriginalHueList = new ArrayList();		// original hues of parent item
+		private ArrayList m_OriginalItemIDList = new ArrayList(); // original itemids of parent item
+		private ArrayList m_OriginalHueList = new ArrayList(); // original hues of parent item
 		public bool BeingRepaired;
 		private EffectsTimer m_EffectsTimer;
 
@@ -61,7 +65,8 @@ namespace Server.Engines.XmlSpawner2
 			}
 		}
 
-		public static void SendMovingProjectileEffect(IEntity from, IEntity to, int itemID, Point3D fromPoint, Point3D toPoint, int speed, int duration, bool fixedDirection, bool explode, int hue)
+		public static void SendMovingProjectileEffect(IEntity from, IEntity to, int itemID, Point3D fromPoint,
+			Point3D toPoint, int speed, int duration, bool fixedDirection, bool explode, int hue)
 		{
 			if (from is Mobile)
 				((Mobile)from).ProcessDelta();
@@ -69,13 +74,17 @@ namespace Server.Engines.XmlSpawner2
 			if (to is Mobile)
 				((Mobile)to).ProcessDelta();
 
-			Effects.SendPacket(from.Location, from.Map, new MovingProjectileEffect(from, to, itemID, fromPoint, toPoint, speed, duration, fixedDirection, explode, hue));
+			Effects.SendPacket(from.Location, from.Map,
+				new MovingProjectileEffect(from, to, itemID, fromPoint, toPoint, speed, duration, fixedDirection,
+					explode, hue));
 		}
 
 		public class MovingProjectileEffect : HuedEffect
 		{
-			public MovingProjectileEffect(IEntity from, IEntity to, int itemID, Point3D fromPoint, Point3D toPoint, int speed, int duration, bool fixedDirection, bool explode, int hue)
-				: base(EffectType.Moving, from.Serial, to == null ? Server.Serial.MinusOne : to.Serial, itemID, fromPoint, toPoint, speed, duration, fixedDirection, explode, hue, 0)
+			public MovingProjectileEffect(IEntity from, IEntity to, int itemID, Point3D fromPoint, Point3D toPoint,
+				int speed, int duration, bool fixedDirection, bool explode, int hue)
+				: base(EffectType.Moving, from.Serial, to == null ? Server.Serial.MinusOne : to.Serial, itemID,
+					fromPoint, toPoint, speed, duration, fixedDirection, explode, hue, 0)
 			{
 			}
 		}
@@ -83,18 +92,17 @@ namespace Server.Engines.XmlSpawner2
 		[CommandProperty(AccessLevel.GameMaster)]
 		public TimeSpan AutoRepairTime
 		{
-			get { return m_AutoRepairTime; }
+			get => m_AutoRepairTime;
 			set
 			{
 				m_AutoRepairTime = value;
 
 				// see if the object is already destroyed
-				if ((Hits == 0 && WhenToAutoRepair == 2) || (Hits < HitsMax && WhenToAutoRepair == 1))
-				{
+				if (Hits == 0 && WhenToAutoRepair == 2 || Hits < HitsMax && WhenToAutoRepair == 1)
 					DoAutoRepairTimer(value);
-				}
 			}
 		}
+
 		[CommandProperty(AccessLevel.GameMaster)]
 		public TimeSpan NextAutoRepair
 		{
@@ -105,20 +113,16 @@ namespace Server.Engines.XmlSpawner2
 				else
 					return TimeSpan.FromSeconds(0);
 			}
-			set
-			{
-				DoAutoRepairTimer(value);
-			}
+			set => DoAutoRepairTimer(value);
 		}
 
 		[CommandProperty(AccessLevel.GameMaster)]
 		public virtual bool Enabled
 		{
-			get {
+			get =>
 				// disable outside of Felucca
 				//if (AttachedTo is Item && ((Item)AttachedTo).Map != Map.Felucca) return false;
-				return m_Enabled; 
-			}
+				m_Enabled;
 			set
 			{
 				m_Enabled = value;
@@ -130,7 +134,7 @@ namespace Server.Engines.XmlSpawner2
 		[CommandProperty(AccessLevel.GameMaster)]
 		public virtual int DestroyedItemID
 		{
-			get { return m_DestroyedItemID; }
+			get => m_DestroyedItemID;
 			set
 			{
 				if (value >= 0)
@@ -145,7 +149,7 @@ namespace Server.Engines.XmlSpawner2
 		[CommandProperty(AccessLevel.GameMaster)]
 		public virtual int Iron
 		{
-			get { return m_Iron; }
+			get => m_Iron;
 			set
 			{
 				if (value >= 0) m_Iron = value;
@@ -155,7 +159,7 @@ namespace Server.Engines.XmlSpawner2
 		[CommandProperty(AccessLevel.GameMaster)]
 		public virtual int Stone
 		{
-			get { return m_Stone; }
+			get => m_Stone;
 			set
 			{
 				if (value >= 0) m_Stone = value;
@@ -165,7 +169,7 @@ namespace Server.Engines.XmlSpawner2
 		[CommandProperty(AccessLevel.GameMaster)]
 		public virtual int Wood
 		{
-			get { return m_Wood; }
+			get => m_Wood;
 			set
 			{
 				if (value >= 0) m_Wood = value;
@@ -175,7 +179,7 @@ namespace Server.Engines.XmlSpawner2
 		[CommandProperty(AccessLevel.GameMaster)]
 		public virtual int ResistFire
 		{
-			get { return m_ResistFire; }
+			get => m_ResistFire;
 			set
 			{
 				if (value >= 0) m_ResistFire = value;
@@ -185,7 +189,7 @@ namespace Server.Engines.XmlSpawner2
 		[CommandProperty(AccessLevel.GameMaster)]
 		public virtual int ResistPhysical
 		{
-			get { return m_ResistPhysical; }
+			get => m_ResistPhysical;
 			set
 			{
 				if (value >= 0) m_ResistPhysical = value;
@@ -195,16 +199,13 @@ namespace Server.Engines.XmlSpawner2
 		[CommandProperty(AccessLevel.GameMaster)]
 		public virtual int HitsMax
 		{
-			get { return m_HitsMax; }
+			get => m_HitsMax;
 			set
 			{
 				if (value >= 0 && value != HitsMax)
 				{
 					m_HitsMax = value;
-					if (m_Hits > m_HitsMax)
-					{
-						Hits = m_HitsMax;
-					}
+					if (m_Hits > m_HitsMax) Hits = m_HitsMax;
 					// recalibrate damage indicators
 					UpdateDamageIndicators();
 				}
@@ -214,11 +215,11 @@ namespace Server.Engines.XmlSpawner2
 		[CommandProperty(AccessLevel.GameMaster)]
 		public virtual int Hits
 		{
-			get { return m_Hits; }
+			get => m_Hits;
 			set
 			{
-				int newvalue = value;
-				int oldvalue = m_Hits;
+				var newvalue = value;
+				var oldvalue = m_Hits;
 
 				if (newvalue > HitsMax) newvalue = HitsMax;
 				if (newvalue < 0) newvalue = 0;
@@ -229,31 +230,27 @@ namespace Server.Engines.XmlSpawner2
 
 					// it is being destroyed 
 					if (newvalue == 0)
-					{
 						OnDestroyed();
-					}
 					else
 						// it was destroyed and is being repaired
-						if (oldvalue == 0)
-						{
-							// if autorepair was active then stop it
-							if (m_AutoRepairTimer != null)
-								m_AutoRepairTimer.Stop();
+					if (oldvalue == 0)
+					{
+						// if autorepair was active then stop it
+						if (m_AutoRepairTimer != null)
+							m_AutoRepairTimer.Stop();
 
-							// restore the itemids from the destroyed state
-							AdjustItemID();
+						// restore the itemids from the destroyed state
+						AdjustItemID();
 
-							// it is being restored from destroyed state so also refresh nearby mobile locations
-							// which may have to be changed do to the new itemids
-							AdjustMobileLocations();
-						}
+						// it is being restored from destroyed state so also refresh nearby mobile locations
+						// which may have to be changed do to the new itemids
+						AdjustMobileLocations();
+					}
 
 					// if it has taken damage and the autorepair feature is set to repair on damage
 					// then start the autorepair timer
 					if (WhenToAutoRepair == 1 && AutoRepairTime > TimeSpan.Zero && m_Hits != HitsMax)
-					{
 						DoAutoRepairTimer(AutoRepairTime);
-					}
 
 					// adjust the damage indicators on change in hits
 					UpdateDamageIndicators();
@@ -288,7 +285,7 @@ namespace Server.Engines.XmlSpawner2
 				if (m_attachment != null && !m_attachment.Deleted)
 				{
 					// incrementally repair the object.  This will also restart the timer if not fully repaired and WhenToAutoRepair is set to repair on damage.
-					int repair = (int)(m_attachment.HitsMax * m_attachment.AutoRepairFactor);
+					var repair = (int)(m_attachment.HitsMax * m_attachment.AutoRepairFactor);
 					if (repair == 0) repair = 1;
 
 					m_attachment.Hits += repair;
@@ -298,7 +295,6 @@ namespace Server.Engines.XmlSpawner2
 
 		public void DoEffectsTimer(TimeSpan delay)
 		{
-
 			if (m_EffectsTimer != null)
 				m_EffectsTimer.Stop();
 
@@ -313,7 +309,6 @@ namespace Server.Engines.XmlSpawner2
 			public EffectsTimer(XmlSiege siege, TimeSpan delay)
 				: base(delay)
 			{
-
 				Priority = TimerPriority.OneSecond;
 
 				m_Siege = siege;
@@ -325,32 +320,24 @@ namespace Server.Engines.XmlSpawner2
 				{
 					m_Siege.AdjustDamageEffects();
 
-					int nplayers = 0;
+					var nplayers = 0;
 					if (m_Siege.AttachedTo is Item)
-					{
 						// check to see if anyone is around
 
-						foreach (Mobile p in ((Item)m_Siege.AttachedTo).GetMobilesInRange(24))
-						{
+						foreach (var p in ((Item)m_Siege.AttachedTo).GetMobilesInRange(24))
 							if (p.Player /*&& p.AccessLevel == AccessLevel.Player */)
 							{
 								nplayers++;
 								break;
 							}
-						}
-					}
 
 					// if not, the no need to update
-					if (nplayers == 0)
-					{
-						m_Siege.NeedsEffectsUpdate = false;
-					}
+					if (nplayers == 0) m_Siege.NeedsEffectsUpdate = false;
 				}
-
 			}
 		}
 
-		public override bool HandlesOnMovement { get { return (Hits != HitsMax) && Enabled; } }
+		public override bool HandlesOnMovement => Hits != HitsMax && Enabled;
 
 		public override void OnMovement(MovementEventArgs e)
 		{
@@ -362,34 +349,25 @@ namespace Server.Engines.XmlSpawner2
 
 				// if the effects timer is not running
 				if (m_EffectsTimer == null || !m_EffectsTimer.Running)
-				{
 					// then update effects damage display
 					AdjustDamageEffects();
-
-				}
 			}
 		}
 
 		public static void Attack(Mobile from, object target, int firedamage, int physicaldamage)
 		{
 			// find the XmlSiege attachment on the target
-			XmlSiege a = (XmlSiege)XmlAttach.FindAttachment(target, typeof(XmlSiege));
+			var a = (XmlSiege)XmlAttach.FindAttachment(target, typeof(XmlSiege));
 
-			if (a != null && !a.Deleted)
-			{
-				a.ApplyScaledDamage(from, firedamage, physicaldamage);
-			}
+			if (a != null && !a.Deleted) a.ApplyScaledDamage(@from, firedamage, physicaldamage);
 		}
 
 		public static int GetHits(object target)
 		{
 			// find the XmlSiege attachment on the target
-			XmlSiege a = (XmlSiege)XmlAttach.FindAttachment(target, typeof(XmlSiege));
+			var a = (XmlSiege)XmlAttach.FindAttachment(target, typeof(XmlSiege));
 
-			if (a != null && !a.Deleted)
-			{
-				return a.Hits;
-			}
+			if (a != null && !a.Deleted) return a.Hits;
 
 			return -1;
 		}
@@ -397,12 +375,9 @@ namespace Server.Engines.XmlSpawner2
 		public static int GetHitsMax(object target)
 		{
 			// find the XmlSiege attachment on the target
-			XmlSiege a = (XmlSiege)XmlAttach.FindAttachment(target, typeof(XmlSiege));
+			var a = (XmlSiege)XmlAttach.FindAttachment(target, typeof(XmlSiege));
 
-			if (a != null && !a.Deleted)
-			{
-				return a.HitsMax;
-			}
+			if (a != null && !a.Deleted) return a.HitsMax;
 
 			return -1;
 		}
@@ -411,43 +386,37 @@ namespace Server.Engines.XmlSpawner2
 		{
 			if (!Enabled || Hits == 0) return;
 
-			int firescale = 100 - ResistFire;
-			int physicalscale = 100 - ResistPhysical;
+			var firescale = 100 - ResistFire;
+			var physicalscale = 100 - ResistPhysical;
 			if (firescale < 0) firescale = 0;
 			if (physicalscale < 0) physicalscale = 0;
 
-			int scaleddamage = (firedamage * firescale + physicaldamage * physicalscale) / 100;
+			var scaleddamage = (firedamage * firescale + physicaldamage * physicalscale) / 100;
 
 			// subtract the scaled damage from the current hits
 			Hits -= scaleddamage;
 
-			Item i = AttachedTo as Item;
+			var i = AttachedTo as Item;
 
 			if (i != null)
 			{
 				// display the damage over the target
 
 				// if it is an addon and invisible, then try displaying over a visible component
-				if (i is BaseAddon && !i.Visible && ((BaseAddon)i).Components != null && ((BaseAddon)i).Components.Count > 0)
+				if (i is BaseAddon && !i.Visible && ((BaseAddon)i).Components != null &&
+				    ((BaseAddon)i).Components.Count > 0)
 				{
-					foreach (AddonComponent c in ((BaseAddon)i).Components)
-					{
+					foreach (var c in ((BaseAddon)i).Components)
 						if (c != null && c.Visible)
 						{
 							c.PublicOverheadMessage(MessageType.Regular, 33, true, String.Format("{0}", scaleddamage));
 							break;
 						}
-					}
 				}
 				else
-				{
 					i.PublicOverheadMessage(MessageType.Regular, 33, true, String.Format("{0}", scaleddamage));
-				}
 
-				if (from != null)
-				{
-					from.SendMessage("You deliver {0} siege damage.", scaleddamage);
-				}
+				if (from != null) @from.SendMessage("You deliver {0} siege damage.", scaleddamage);
 			}
 		}
 
@@ -457,23 +426,20 @@ namespace Server.Engines.XmlSpawner2
 			AdjustItemID();
 
 			// if autorepair is enabled, then start the autorepair timer
-			if (WhenToAutoRepair > 0 && AutoRepairTime > TimeSpan.Zero)
-			{
-				DoAutoRepairTimer(AutoRepairTime);
-			}
+			if (WhenToAutoRepair > 0 && AutoRepairTime > TimeSpan.Zero) DoAutoRepairTimer(AutoRepairTime);
 		}
 
 		public static double GetDistance(Point3D p1, Point3D p2)
 		{
-			int xDelta = p1.X - p2.X;
-			int yDelta = p1.Y - p2.Y;
+			var xDelta = p1.X - p2.X;
+			var yDelta = p1.Y - p2.Y;
 
-			return Math.Sqrt((xDelta * xDelta) + (yDelta * yDelta));
+			return Math.Sqrt(xDelta * xDelta + yDelta * yDelta);
 		}
 
 		private void AdjustItemID()
 		{
-			Item targetitem = AttachedTo as Item;
+			var targetitem = AttachedTo as Item;
 
 			if (targetitem == null || targetitem.Deleted) return;
 
@@ -491,36 +457,25 @@ namespace Server.Engines.XmlSpawner2
 				else
 				{
 					if (targetitem is BaseMulti)
-					{
 						// map it into a valid multi id
 						targetitem.ItemID = m_DestroyedItemID | 0x4000;
-					}
 					else
-					{
 						// change the target item id
 						targetitem.ItemID = m_DestroyedItemID;
-					}
 
 					// deal with addons
 					if (targetitem is BaseAddon)
 					{
-						BaseAddon addon = (BaseAddon)targetitem;
+						var addon = (BaseAddon)targetitem;
 						if (addon.Components != null)
-						{
 							// change the ids of all of the components
-							foreach (AddonComponent i in addon.Components)
-							{
+							foreach (var i in addon.Components)
 								i.ItemID = m_DestroyedItemID;
-							}
-						}
 					}
 				}
 			}
 			else
-			{
 				RestoreOriginalItemID(targetitem);
-			}
-
 		}
 
 		public void RestoreOriginalItemID(Item targetitem)
@@ -532,17 +487,13 @@ namespace Server.Engines.XmlSpawner2
 				targetitem.ItemID = (int)m_OriginalItemIDList[0];
 				if (targetitem is BaseAddon)
 				{
-					BaseAddon addon = (BaseAddon)targetitem;
+					var addon = (BaseAddon)targetitem;
 					if (addon.Components != null)
 					{
-						int j = 1;
-						foreach (AddonComponent i in addon.Components)
-						{
+						var j = 1;
+						foreach (var i in addon.Components)
 							if (j < m_OriginalItemIDList.Count)
-							{
 								i.ItemID = (int)m_OriginalItemIDList[j++];
-							}
-						}
 					}
 				}
 			}
@@ -558,14 +509,10 @@ namespace Server.Engines.XmlSpawner2
 
 			if (targetitem is BaseAddon)
 			{
-				BaseAddon addon = (BaseAddon)targetitem;
+				var addon = (BaseAddon)targetitem;
 				if (addon.Components != null)
-				{
-					foreach (AddonComponent i in addon.Components)
-					{
+					foreach (var i in addon.Components)
 						m_OriginalItemIDList.Add(i.ItemID);
-					}
-				}
 			}
 		}
 
@@ -579,18 +526,12 @@ namespace Server.Engines.XmlSpawner2
 			// deal with addons
 			if (targetitem is BaseAddon)
 			{
-				BaseAddon addon = (BaseAddon)targetitem;
+				var addon = (BaseAddon)targetitem;
 				if (addon.Components != null)
-				{
 					// change the ids of all of the components if they dont already have xmlsiege attachments
-					foreach (AddonComponent i in addon.Components)
-					{
+					foreach (var i in addon.Components)
 						if (XmlAttach.FindAttachment(i, typeof(XmlSiege)) == null)
-						{
 							i.Hue = hue;
-						}
-					}
-				}
 			}
 		}
 
@@ -601,67 +542,61 @@ namespace Server.Engines.XmlSpawner2
 			// deal with addons
 			if (targetitem is BaseAddon)
 			{
-				BaseAddon addon = (BaseAddon)targetitem;
+				var addon = (BaseAddon)targetitem;
 				if (addon.Components != null)
 				{
-					int count = 0;
+					var count = 0;
 					// change the ids of all of the components if they dont already have xmlsiege attachments
-					foreach (AddonComponent i in addon.Components)
-					{
+					foreach (var i in addon.Components)
 						if (XmlAttach.FindAttachment(i, typeof(XmlSiege)) == null)
-						{
 							// put the effect on a fraction of the components, but make sure you have at least one
 							if (Utility.Random(100) < fraction || count == 0)
 							{
-								Effects.SendLocationEffect(i.Location, i.Map, effectid, DamagedItemEffectDuration, hue, 0);
+								Effects.SendLocationEffect(i.Location, i.Map, effectid, DamagedItemEffectDuration, hue,
+									0);
 								//Effects.SendTargetEffect(i, DamagedItemEffectID, DamagedItemEffectDuration, hue, 0);
 								count++;
 							}
+				}
+			}
+			else if (targetitem is BaseMulti)
+			{
+				// place an effect at the location of the target item
+				Effects.SendLocationEffect(targetitem.Location, targetitem.Map, effectid, DamagedItemEffectDuration,
+					hue, 0);
+
+				var tilelist = new ArrayList();
+				// go through all of the multi components
+				var mcl = ((BaseMulti)targetitem).Components;
+				var count = 0;
+				if (mcl != null && mcl.List != null)
+				{
+					for (var i = 0; i < mcl.List.Length; i++)
+					{
+						var t = mcl.List[i];
+
+						var x = t.m_OffsetX + targetitem.X;
+						var y = t.m_OffsetY + targetitem.Y;
+						var z = t.m_OffsetZ + targetitem.Z;
+						var itemID = t.m_ItemID & 0x3FFF;
+
+						if (Utility.Random(100) < fraction || count == 0)
+						{
+							tilelist.Add(new TileEntry(itemID, x, y, z));
+							count++;
 						}
 					}
+
+					foreach (TileEntry s in tilelist)
+						Effects.SendLocationEffect(new Point3D(s.X, s.Y, s.Z), targetitem.Map, effectid,
+							DamagedItemEffectDuration, hue, 0);
 				}
 			}
 			else
-				if (targetitem is BaseMulti)
-				{
-					// place an effect at the location of the target item
-					Effects.SendLocationEffect(targetitem.Location, targetitem.Map, effectid, DamagedItemEffectDuration, hue, 0);
-
-					ArrayList tilelist = new ArrayList();
-					// go through all of the multi components
-					MultiComponentList mcl = ((BaseMulti)targetitem).Components;
-					int count = 0;
-					if (mcl != null && mcl.List != null)
-					{
-						for (int i = 0; i < mcl.List.Length; i++)
-						{
-							MultiTileEntry t = mcl.List[i];
-
-							int x = t.m_OffsetX + targetitem.X;
-							int y = t.m_OffsetY + targetitem.Y;
-							int z = t.m_OffsetZ + targetitem.Z;
-							int itemID = t.m_ItemID & 0x3FFF;
-
-							if (Utility.Random(100) < fraction || count == 0)
-							{
-								tilelist.Add(new TileEntry(itemID, x, y, z));
-								count++;
-							}
-						}
-
-						foreach (TileEntry s in tilelist)
-						{
-							Effects.SendLocationEffect(new Point3D(s.X, s.Y, s.Z), targetitem.Map, effectid, DamagedItemEffectDuration, hue, 0);
-						}
-
-					}
-				}
-				else
-				{
-					// place an effect at the location of the target item
-					Effects.SendLocationEffect(targetitem.Location, targetitem.Map, effectid, DamagedItemEffectDuration, hue, 0);
-					//Effects.SendTargetEffect(targetitem, DamagedItemEffectID, DamagedItemEffectDuration, hue, 0);
-				}
+				// place an effect at the location of the target item
+				Effects.SendLocationEffect(targetitem.Location, targetitem.Map, effectid, DamagedItemEffectDuration,
+					hue, 0);
+			//Effects.SendTargetEffect(targetitem, DamagedItemEffectID, DamagedItemEffectDuration, hue, 0);
 		}
 
 
@@ -674,17 +609,13 @@ namespace Server.Engines.XmlSpawner2
 				targetitem.Hue = (int)m_OriginalHueList[0];
 				if (targetitem is BaseAddon)
 				{
-					BaseAddon addon = (BaseAddon)targetitem;
+					var addon = (BaseAddon)targetitem;
 					if (addon.Components != null)
 					{
-						int j = 1;
-						foreach (AddonComponent i in addon.Components)
-						{
+						var j = 1;
+						foreach (var i in addon.Components)
 							if (j < m_OriginalHueList.Count)
-							{
 								i.Hue = (int)m_OriginalHueList[j++];
-							}
-						}
 					}
 				}
 			}
@@ -700,35 +631,25 @@ namespace Server.Engines.XmlSpawner2
 
 			if (targetitem is BaseAddon)
 			{
-				BaseAddon addon = (BaseAddon)targetitem;
+				var addon = (BaseAddon)targetitem;
 				if (addon.Components != null)
-				{
-					foreach (AddonComponent i in addon.Components)
-					{
+					foreach (var i in addon.Components)
 						m_OriginalHueList.Add(i.Hue);
-					}
-				}
 			}
 		}
 
 		public virtual void UpdateDamageIndicators()
 		{
 			// add colored effects at the item location to reflect damage
-			if (UseEffectsDamageIndicator)
-			{
-				AdjustDamageEffects();
-			}
+			if (UseEffectsDamageIndicator) AdjustDamageEffects();
 
 			// set the item hue to reflect damage
-			if (UseColorDamageIndicator)
-			{
-				AdjustDamageColor();
-			}
+			if (UseColorDamageIndicator) AdjustDamageColor();
 		}
 
 		public virtual void AdjustDamageEffects()
 		{
-			Item targetitem = AttachedTo as Item;
+			var targetitem = AttachedTo as Item;
 
 			if (targetitem == null) return;
 
@@ -746,155 +667,106 @@ namespace Server.Engines.XmlSpawner2
 
 
 					// linear scaling of effects density 1-30% based on damage
-					int density = 29 * (HitsMax - Hits) / HitsMax + 1;
+					var density = 29 * (HitsMax - Hits) / HitsMax + 1;
 
 					if (Hits < HitsMax && Hits > HitsMax * 0.66)
-					{
 						AssignItemEffect(targetitem, LightDamageEffectID, LightDamageColor, density);
-					}
-					else
-						if (Hits <= HitsMax * 0.66 && Hits > HitsMax * 0.33)
-						{
-							AssignItemEffect(targetitem, MediumDamageEffectID, MediumDamageColor, density);
-						}
-						else
-							if (Hits <= HitsMax * 0.33)
-							{
-								AssignItemEffect(targetitem, HeavyDamageEffectID, HeavyDamageColor, density);
-							}
+					else if (Hits <= HitsMax * 0.66 && Hits > HitsMax * 0.33)
+						AssignItemEffect(targetitem, MediumDamageEffectID, MediumDamageColor, density);
+					else if (Hits <= HitsMax * 0.33)
+						AssignItemEffect(targetitem, HeavyDamageEffectID, HeavyDamageColor, density);
 				}
 			}
-
 		}
 
 		public virtual void AdjustDamageColor()
 		{
-			Item targetitem = AttachedTo as Item;
+			var targetitem = AttachedTo as Item;
 
 			if (targetitem == null) return;
 
 			// set the color based on damage
 			if (Hits == HitsMax || !Enabled)
-			{
 				RestoreOriginalHue(targetitem);
-			}
-			else
-				if (Hits < HitsMax && Hits > HitsMax * 0.66)
-				{
-					AssignItemHue(targetitem, LightDamageColor);
-				}
-				else
-					if (Hits <= HitsMax * 0.66 && Hits > HitsMax * 0.33)
-					{
-						AssignItemHue(targetitem, MediumDamageColor);
-					}
-					else
-						if (Hits <= HitsMax * 0.33)
-						{
-							AssignItemHue(targetitem, HeavyDamageColor);
-						}
+			else if (Hits < HitsMax && Hits > HitsMax * 0.66)
+				AssignItemHue(targetitem, LightDamageColor);
+			else if (Hits <= HitsMax * 0.66 && Hits > HitsMax * 0.33)
+				AssignItemHue(targetitem, MediumDamageColor);
+			else if (Hits <= HitsMax * 0.33) AssignItemHue(targetitem, HeavyDamageColor);
 		}
 
 		private void AdjustMobileLocations()
 		{
-			Item targetitem = AttachedTo as Item;
+			var targetitem = AttachedTo as Item;
 
 			if (targetitem == null) return;
 
 			// make sure nearby mobiles are in valid locations
-			ArrayList mobilelist = new ArrayList();
-			foreach (Mobile p in targetitem.GetMobilesInRange(0))
-			{
-				mobilelist.Add(p);
-			}
+			var mobilelist = new ArrayList();
+			foreach (var p in targetitem.GetMobilesInRange(0)) mobilelist.Add(p);
 
 			if (targetitem is BaseAddon)
 			{
-				BaseAddon addon = (BaseAddon)targetitem;
+				var addon = (BaseAddon)targetitem;
 				if (addon.Components != null)
-				{
-					foreach (AddonComponent i in addon.Components)
-					{
+					foreach (var i in addon.Components)
 						if (i != null)
-						{
-							foreach (Mobile p in i.GetMobilesInRange(0))
-							{
+							foreach (var p in i.GetMobilesInRange(0))
 								if (!mobilelist.Contains(p))
 									mobilelist.Add(p);
-							}
-						}
-					}
-				}
 			}
 
 			if (targetitem is BaseMulti && targetitem.Map != null)
 			{
 				// check all locations covered by the multi
 				// go through all of the multi components
-				MultiComponentList mcl = ((BaseMulti)targetitem).Components;
+				var mcl = ((BaseMulti)targetitem).Components;
 
 				if (mcl != null && mcl.List != null)
-				{
-					for (int i = 0; i < mcl.List.Length; i++)
+					for (var i = 0; i < mcl.List.Length; i++)
 					{
-						MultiTileEntry t = mcl.List[i];
+						var t = mcl.List[i];
 
-						int x = t.m_OffsetX + targetitem.X;
-						int y = t.m_OffsetY + targetitem.Y;
-						int z = t.m_OffsetZ + targetitem.Z;
-						foreach (Mobile p in targetitem.Map.GetMobilesInRange(new Point3D(x, y, z), 0))
-						{
+						var x = t.m_OffsetX + targetitem.X;
+						var y = t.m_OffsetY + targetitem.Y;
+						var z = t.m_OffsetZ + targetitem.Z;
+						foreach (var p in targetitem.Map.GetMobilesInRange(new Point3D(x, y, z), 0))
 							if (!mobilelist.Contains(p))
 								mobilelist.Add(p);
-						}
-
 					}
-				}
 			}
 
 			// relocate all mobiles found
 			foreach (Mobile p in mobilelist)
-			{
 				if (p != null && p.Map != null)
 				{
-					int x = p.Location.X;
-					int y = p.Location.Y;
-					int z = p.Location.Z;
+					var x = p.Location.X;
+					var y = p.Location.Y;
+					var z = p.Location.Z;
 
 					// check the current location
 					if (!p.Map.CanFit(x, y, z, 16, true, false, true))
 					{
-						bool found = false;
+						var found = false;
 
 
-						for (int dx = 0; dx <= 10 && !found; dx++)
-						{
-							for (int dy = 0; dy <= 10 && !found; dy++)
+						for (var dx = 0; dx <= 10 && !found; dx++)
+						for (var dy = 0; dy <= 10 && !found; dy++)
+							// try moving it up in z to find a valid spot
+						for (var h = 1; h <= 39; h++)
+							if (p.Map.CanFit(x + dx, y + dy, z + h, 16, true, false, true))
 							{
-								// try moving it up in z to find a valid spot
-								for (int h = 1; h <= 39; h++)
-								{
-									if (p.Map.CanFit(x + dx, y + dy, z + h, 16, true, false, true))
-									{
-										z += h;
-										x += dx;
-										y += dy;
-										found = true;
-										break;
-									}
-								}
+								z += h;
+								x += dx;
+								y += dy;
+								found = true;
+								break;
 							}
-
-						}
 					}
 
 					// move them to the new location
 					p.MoveToWorld(new Point3D(x, y, z), p.Map);
-
 				}
-			}
-
-
 		}
 
 		// These are the various ways in which the message attachment can be constructed.  
@@ -959,7 +831,8 @@ namespace Server.Engines.XmlSpawner2
 		}
 
 		[Attachable]
-		public XmlSiege(int hitsmax, int resistfire, int resistphysical, int wood, int iron, int stone, int destroyeditemid)
+		public XmlSiege(int hitsmax, int resistfire, int resistphysical, int wood, int iron, int stone,
+			int destroyeditemid)
 		{
 			HitsMax = hitsmax;
 			m_Hits = HitsMax;
@@ -979,13 +852,9 @@ namespace Server.Engines.XmlSpawner2
 			// version 2
 			writer.Write(m_AutoRepairTime);
 			if (m_AutoRepairEnd > DateTime.Now)
-			{
 				writer.Write(m_AutoRepairEnd - DateTime.Now);
-			}
 			else
-			{
 				writer.Write(TimeSpan.Zero);
-			}
 			// version 1
 			writer.Write(m_Enabled);
 			// version 0
@@ -1000,44 +869,32 @@ namespace Server.Engines.XmlSpawner2
 			if (m_OriginalItemIDList != null)
 			{
 				writer.Write(m_OriginalItemIDList.Count);
-				for (int i = 0; i < m_OriginalItemIDList.Count; i++)
-				{
-					writer.Write((int)m_OriginalItemIDList[i]);
-				}
+				for (var i = 0; i < m_OriginalItemIDList.Count; i++) writer.Write((int)m_OriginalItemIDList[i]);
 			}
 			else
-			{
 				writer.Write((int)0);
-			}
+
 			if (m_OriginalHueList != null)
 			{
 				writer.Write(m_OriginalHueList.Count);
-				for (int i = 0; i < m_OriginalHueList.Count; i++)
-				{
-					writer.Write((int)m_OriginalHueList[i]);
-				}
+				for (var i = 0; i < m_OriginalHueList.Count; i++) writer.Write((int)m_OriginalHueList[i]);
 			}
 			else
-			{
 				writer.Write((int)0);
-			}
 		}
 
 		public override void Deserialize(GenericReader reader)
 		{
 			base.Deserialize(reader);
 
-			int version = reader.ReadInt();
+			var version = reader.ReadInt();
 
 			switch (version)
 			{
 				case 2:
 					m_AutoRepairTime = reader.ReadTimeSpan();
-					TimeSpan delay = reader.ReadTimeSpan();
-					if (delay > TimeSpan.Zero)
-					{
-						DoAutoRepairTimer(delay);
-					}
+					var delay = reader.ReadTimeSpan();
+					if (delay > TimeSpan.Zero) DoAutoRepairTimer(delay);
 					goto case 1;
 				case 1:
 					m_Enabled = reader.ReadBool();
@@ -1052,16 +909,10 @@ namespace Server.Engines.XmlSpawner2
 					m_Iron = reader.ReadInt();
 					m_Wood = reader.ReadInt();
 					m_DestroyedItemID = reader.ReadInt();
-					int count = reader.ReadInt();
-					for (int i = 0; i < count; i++)
-					{
-						m_OriginalItemIDList.Add(reader.ReadInt());
-					}
+					var count = reader.ReadInt();
+					for (var i = 0; i < count; i++) m_OriginalItemIDList.Add(reader.ReadInt());
 					count = reader.ReadInt();
-					for (int i = 0; i < count; i++)
-					{
-						m_OriginalHueList.Add(reader.ReadInt());
-					}
+					for (var i = 0; i < count; i++) m_OriginalHueList.Add(reader.ReadInt());
 					break;
 			}
 
@@ -1101,13 +952,9 @@ namespace Server.Engines.XmlSpawner2
 			if (from == null || from.AccessLevel == AccessLevel.Player) return null;
 
 			if (Expiration > TimeSpan.Zero)
-			{
 				return String.Format("XmlSiege: Hits {0} expires in {1} mins", Hits, Expiration.TotalMinutes);
-			}
 			else
-			{
 				return String.Format("XmlSiege: Hits {0} out of {1}", Hits, HitsMax);
-			}
 		}
 	}
 }

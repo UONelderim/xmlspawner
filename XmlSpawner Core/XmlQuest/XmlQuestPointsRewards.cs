@@ -1,5 +1,4 @@
 using System;
-using Server;
 using Server.Items;
 using Server.Mobiles;
 using System.Collections.Generic;
@@ -18,19 +17,20 @@ namespace Server.Engines.XmlSpawner2
 	public class XmlQuestPointsRewards
 	{
 		public int MinPoints;   // the minimum points requirement for the reward
-		public Type  RewardType;   // this will be used to create an instance of the reward
-		public string Name;         // used to describe the reward in the gump
+		public Type RewardType; // this will be used to create an instance of the reward
+		public string Name; // used to describe the reward in the gump
 		public int Cost;       // cost of the reward in credits
-		public int ItemID;     // used for display purposes
+		public int ItemID; // used for display purposes
 		public int ItemHue;
 		public int yOffset;
-		public object [] RewardArgs; // arguments passed to the reward constructor
+		public object[] RewardArgs; // arguments passed to the reward constructor
 
 		private static List<XmlQuestPointsRewards> PointsRewardList = new List<XmlQuestPointsRewards>();
 
-		public static List<XmlQuestPointsRewards> RewardsList { get { return PointsRewardList; } }
+		public static List<XmlQuestPointsRewards> RewardsList => PointsRewardList;
 
-		public XmlQuestPointsRewards(int minpoints, Type reward, string name, int cost, int id, int hue, int yoffset, object[] args)
+		public XmlQuestPointsRewards(int minpoints, Type reward, string name, int cost, int id, int hue, int yoffset,
+			object[] args)
 		{
 			MinPoints = minpoints;
 			RewardType = reward;
@@ -44,7 +44,7 @@ namespace Server.Engines.XmlSpawner2
 
 		public static void Initialize()
 		{
-            // these are items as rewards. Note that the args list must match a constructor for the reward type specified.
+			// these are items as rewards. Note that the args list must match a constructor for the reward type specified.
             PointsRewardList.Add( new XmlQuestPointsRewards( 350, typeof(MinorArtifactDeed), "zwoj z wybieralny artefaktem minor", 350, 0x14F0, 0x495, 5, null ));
             PointsRewardList.Add( new XmlQuestPointsRewards( 250, typeof(ParoxysmusSwampDragonStatuette), "smok bagienny przedwiecznego", 250, 0x2619, 0x851, 5,null ));
             PointsRewardList.Add( new XmlQuestPointsRewards( 200, typeof(ScrappersCompendium), "Kompedium Wszelkiej Wiedzy", 200, 0xEFA, 0x494, 5, null ));

@@ -2,14 +2,14 @@ namespace Server.Items
 {
 	public interface ISiegeWeapon : IEntity
 	{
-		int Facing { get; set;}
-		bool FixedFacing { get; set;}
-		Item Projectile { get; set;}
+		int Facing { get; set; }
+		bool FixedFacing { get; set; }
+		Item Projectile { get; set; }
 		void LoadWeapon(Mobile from, Item projectile);
 		void PlaceWeapon(Mobile from, Point3D location, Map map);
 		void StoreWeapon(Mobile from);
-		bool IsPackable { get; set;}
-		bool IsDraggable { get; set;}
+		bool IsPackable { get; set; }
+		bool IsDraggable { get; set; }
 		double WeaponDamageFactor { get; }
 	}
 

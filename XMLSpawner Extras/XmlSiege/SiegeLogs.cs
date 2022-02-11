@@ -1,16 +1,8 @@
-using System;
-using Server;
-using Server.Targeting;
-using Server.Network;
-using System.Collections;
-using Server.ContextMenus;
-using Server.Engines.XmlSpawner2;
-
 namespace Server.Items
 {
 	public abstract class SiegeLog : BaseSiegeProjectile
 	{
-		public override double MobDamageMultiplier { get { return 0.1; } } // default damage multiplier for creatures
+		public override double MobDamageMultiplier => 0.1; // default damage multiplier for creatures
 
 		public SiegeLog()
 			: this(1)
@@ -38,7 +30,7 @@ namespace Server.Items
 		{
 			base.Deserialize(reader);
 
-			int version = reader.ReadInt();
+			var version = reader.ReadInt();
 		}
 	}
 
@@ -79,7 +71,7 @@ namespace Server.Items
 		{
 			base.Deserialize(reader);
 
-			int version = reader.ReadInt();
+			var version = reader.ReadInt();
 		}
 		/*
 		public override Item Dupe(int amount)
@@ -128,7 +120,7 @@ namespace Server.Items
 		{
 			base.Deserialize(reader);
 
-			int version = reader.ReadInt();
+			var version = reader.ReadInt();
 		}
 		/*
 		public override Item Dupe(int amount)
@@ -178,7 +170,7 @@ namespace Server.Items
 		{
 			base.Deserialize(reader);
 
-			int version = reader.ReadInt();
+			var version = reader.ReadInt();
 		}
 		/*
 		public override Item Dupe(int amount)

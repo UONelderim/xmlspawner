@@ -1,15 +1,11 @@
 using System;
-using Server;
 using Server.Gumps;
 using Server.Network;
 using Server.Mobiles;
-using System.IO;
 using System.Globalization;
 using System.Collections.Generic;
 using Server.Targeting;
 using Server.Engines.PartySystem;
-using System.Data;
-using System.Xml;
 using Server.Engines.XmlSpawner2;
 
 
@@ -117,8 +113,7 @@ namespace Server.Items
 
 		List<XmlQuest.JournalEntry> Journal { get; set; }
 
-		string AddJournalEntry { set;}
-
+		string AddJournalEntry { set; }
 	}
 
 	public interface ITemporaryQuestAttachment
@@ -138,8 +133,17 @@ namespace Server.Items
 			private string m_EntryID;
 			private string m_EntryText;
 
-			public string EntryID { get { return m_EntryID; } set { m_EntryID = value; } }
-			public string EntryText { get { return m_EntryText; } set { m_EntryText = value; } }
+			public string EntryID
+			{
+				get => m_EntryID;
+				set => m_EntryID = value;
+			}
+
+			public string EntryText
+			{
+				get => m_EntryText;
+				set => m_EntryText = value;
+			}
 
 			public JournalEntry(string ID, string text)
 			{
@@ -150,18 +154,19 @@ namespace Server.Items
 
 		public class GetCollectTarget : Target
 		{
-			IXmlQuest m_quest;
+			private IXmlQuest m_quest;
 
 			public GetCollectTarget(IXmlQuest quest)
 				: base(30, false, TargetFlags.None)
 			{
 				m_quest = quest;
 			}
+
 			protected override void OnTarget(Mobile from, object targeted)
 			{
 				if (targeted is Item && m_quest != null && !m_quest.Deleted)
 				{
-					XmlQuest.Collect(from, (Item)targeted, m_quest);
+					Collect(from, (Item)targeted, m_quest);
 					from.CloseGump(typeof(XmlQuestStatusGump));
 					from.SendGump(new XmlQuestStatusGump(m_quest, m_quest.TitleString));
 				}
@@ -171,11 +176,11 @@ namespace Server.Items
 		public static void QuestButton(QuestGumpRequestArgs e)
 		{
 			if (e == null || e.Mobile == null) return;
-			Mobile from = e.Mobile;
+			var from = e.Mobile;
 
-            from.CloseGump(typeof(XMLQuestLogGump));
+			from.CloseGump(typeof(XMLQuestLogGump));
 			// bring up the quest status gump
-            from.SendGump(new XMLQuestLogGump(from));
+			from.SendGump(new XMLQuestLogGump(from));
 
 			// bring up the normal quest objectives gump
 			//NormalQuestButton(from as PlayerMobile);
@@ -185,11 +190,11 @@ namespace Server.Items
 		public static void QuestButton(NetState state, IEntity e, EncodedReader reader)
 		{
 			if (state == null || state.Mobile == null) return;
-			Mobile from = state.Mobile;
+			var from = state.Mobile;
 
-            from.CloseGump(typeof(XMLQuestLogGump));
+			from.CloseGump(typeof(XMLQuestLogGump));
 			// bring up the quest status gump
-            from.SendGump(new XMLQuestLogGump(from));
+			from.SendGump(new XMLQuestLogGump(from));
 
 			// bring up the normal quest objectives gump
 			//NormalQuestButton(from as PlayerMobile);
@@ -207,21 +212,15 @@ namespace Server.Items
 		{
 			// find all TemporaryQuestObject attachments associated with the owner with the given name, and delete them
 
-			List<XmlAttachment> list = new List<XmlAttachment>();
+			var list = new List<XmlAttachment>();
 
-			foreach (XmlAttachment i in XmlAttach.Values)
-			{
+			foreach (var i in XmlAttach.Values)
 				// check for type
-				if (i != null && !i.Deleted && i is ITemporaryQuestAttachment && ((ITemporaryQuestAttachment)i).QuestOwner == questowner && i.Name == questname)
-				{
+				if (i != null && !i.Deleted && i is ITemporaryQuestAttachment &&
+				    ((ITemporaryQuestAttachment)i).QuestOwner == questowner && i.Name == questname)
 					list.Add(i);
-				}
-			}
 
-			foreach (XmlAttachment i in list)
-			{
-				i.Delete();
-			}
+			foreach (var i in list) i.Delete();
 		}
 
 		private static void ReturnCollected(IXmlQuest quest, Item item)
@@ -231,39 +230,31 @@ namespace Server.Items
 			// if this was player made, then return the item to the creator
 			// dont allow players to return items to themselves.  This prevents possible exploits where quests are used as
 			// item transporters
-			if (quest != null && quest.PlayerMade && (quest.Creator != null) && !quest.Creator.Deleted && (quest.Creator != quest.Owner) && !item.QuestItem)
+			if (quest != null && quest.PlayerMade && quest.Creator != null && !quest.Creator.Deleted &&
+			    quest.Creator != quest.Owner && !item.QuestItem)
 			{
-				bool returned = false;
-				if ((quest.ReturnContainer != null) && !quest.ReturnContainer.Deleted)
-				{
+				var returned = false;
+				if (quest.ReturnContainer != null && !quest.ReturnContainer.Deleted)
 					returned = quest.ReturnContainer.TryDropItem(quest.Creator, item, false);
 
-					//ReturnContainer.DropItem(m_RewardItem);
-				}
-				if (!returned)
-				{
-					quest.Creator.AddToBackpack(item);
-				}
+				//ReturnContainer.DropItem(m_RewardItem);
+				if (!returned) quest.Creator.AddToBackpack(item);
 
-                quest.Creator.SendMessage("You receive {0} from quest {1}", item.GetType().Name, quest.Name);
+				quest.Creator.SendMessage("You receive {0} from quest {1}", item.GetType().Name, quest.Name);
 			}
 			else
-			{
 				// just delete it
 				item.Delete();
-			}
 		}
 
 		private static void TakeGiven(Mobile to, IXmlQuest quest, Item item)
 		{
 			if (item == null) return;
 
-			XmlSaveItem si = (XmlSaveItem)XmlAttach.FindAttachment(to, typeof(XmlSaveItem), "Given");
+			var si = (XmlSaveItem)XmlAttach.FindAttachment(to, typeof(XmlSaveItem), "Given");
 
 			if (si == null)
-			{
 				XmlAttach.AttachTo(to, new XmlSaveItem("Given", item, quest.Owner));
-			}
 			else
 			{
 				si.SavedItem = item;
@@ -281,70 +272,64 @@ namespace Server.Items
 
 			if (action == null || action.Length <= 0 || from == null) return null;
 
-			XmlSpawner.SpawnObject TheSpawn = new XmlSpawner.SpawnObject(null, 0);
+			var TheSpawn = new XmlSpawner.SpawnObject(null, 0);
 
 			//BaseXmlSpawner.ApplyObjectStringProperties(null, action, m_TargetItem, m, m_TargetItem, out status_str);
 
 			TheSpawn.TypeName = action;
-			string substitutedtypeName = BaseXmlSpawner.ApplySubstitution(null, null, null, action);
-			string typeName = BaseXmlSpawner.ParseObjectType(substitutedtypeName);
+			var substitutedtypeName = BaseXmlSpawner.ApplySubstitution(null, null, null, action);
+			var typeName = BaseXmlSpawner.ParseObjectType(substitutedtypeName);
 
 			if (BaseXmlSpawner.IsTypeOrItemKeyword(typeName))
-			{
-				BaseXmlSpawner.SpawnTypeKeyword(null, TheSpawn, typeName, substitutedtypeName, true, null, from.Location, Map.Internal, out status_str);
-			}
+				BaseXmlSpawner.SpawnTypeKeyword(null, TheSpawn, typeName, substitutedtypeName, true, null,
+					@from.Location, Map.Internal, out status_str);
 			else
 			{
 				// its a regular type descriptor so find out what it is
-				Type type = SpawnerType.GetType(typeName);
+				var type = SpawnerType.GetType(typeName);
 
 				// if a type restriction has been specified then test it
-				if (typerestrict != null && type != null && type != typerestrict && !type.IsSubclassOf(typerestrict))
-				{
-					return null;
-				}
+				if (typerestrict != null && type != null && type != typerestrict &&
+				    !type.IsSubclassOf(typerestrict)) return null;
 
 
 				try
 				{
-					string[] arglist = BaseXmlSpawner.ParseString(substitutedtypeName, 3, "/");
-					object o = XmlSpawner.CreateObject(type, arglist[0], true, true);
+					var arglist = BaseXmlSpawner.ParseString(substitutedtypeName, 3, "/");
+					var o = XmlSpawner.CreateObject(type, arglist[0], true, true);
 
 					if (o == null)
-					{
 						status_str = "invalid type specification: " + arglist[0];
-					}
 					else if (o is Mobile)
 					{
-						Mobile m = (Mobile)o;
+						var m = (Mobile)o;
 
 						// dont do mobiles as rewards at this point
 						m.Delete();
 					}
 					else if (o is Item)
 					{
-						Item item = (Item)o;
-						BaseXmlSpawner.AddSpawnItem(null, from, TheSpawn, item, from.Location, Map.Internal, null, false, substitutedtypeName, out status_str);
+						var item = (Item)o;
+						BaseXmlSpawner.AddSpawnItem(null, from, TheSpawn, item, from.Location, Map.Internal, null,
+							false, substitutedtypeName, out status_str);
 					}
 					else if (o is XmlAttachment)
 					{
-						BaseXmlSpawner.ApplyObjectStringProperties(null, substitutedtypeName, o, from as Mobile, o, out status_str);
+						BaseXmlSpawner.ApplyObjectStringProperties(null, substitutedtypeName, o, from as Mobile, o,
+							out status_str);
 						return o;
 					}
 				}
 				catch { }
 			}
+
 			if (TheSpawn.SpawnedObjects.Count > 0)
 			{
 				if (TheSpawn.SpawnedObjects[0] is Item)
-				{
-					return ((Item)TheSpawn.SpawnedObjects[0]);
-				}
+					return (Item)TheSpawn.SpawnedObjects[0];
 				else if (TheSpawn.SpawnedObjects[0] is Mobile)
-				{
 					// dont do mobiles as rewards at this point
-					((Mobile)(TheSpawn.SpawnedObjects[0])).Delete();
-				}
+					((Mobile)TheSpawn.SpawnedObjects[0]).Delete();
 			}
 
 			return null;
@@ -352,54 +337,46 @@ namespace Server.Items
 
 		public static List<Item> FindXmlQuest(PlayerMobile from)
 		{
-
 			if (from == null || from.Deleted) return null;
 
 			if (from.Backpack == null) return null;
 
-			List<Item> packlist = from.Backpack.Items;
+			var packlist = from.Backpack.Items;
 
 			if (packlist == null) return null;
 
-			List<Item> itemlist = new List<Item>();
+			var itemlist = new List<Item>();
 
-			for (int i = 0; i < packlist.Count; ++i)
+			for (var i = 0; i < packlist.Count; ++i)
 			{
-				Item item = packlist[i];
+				var item = packlist[i];
 
 				if (item != null && !item.Deleted && item is IXmlQuest)
-				{
 					//found it
 					// add the item to the list
 					itemlist.Add(item);
-
-				}
 				// is it an XmlQuestBook?
 				if (item is XmlQuestBook)
 				{
-					XmlQuestBook book = item as XmlQuestBook;
+					var book = item as XmlQuestBook;
 					// search the book
-					foreach (Item xi in book.Items)
-					{
+					foreach (var xi in book.Items)
 						if (xi != null && !xi.Deleted && xi is IXmlQuest)
-						{
 							itemlist.Add(xi);
-						}
-					}
 				}
 			}
+
 			// now check any item that might be held
-			Item held = from.Holding;
+			var held = from.Holding;
 			if (held != null && !held.Deleted && held is IXmlQuest)
-			{
 				//found it
 				// add the item to the list
 				itemlist.Add(held);
-			}
 			return itemlist;
 		}
 
-		public static void CheckArgList(string[] arglist, int argstart, object propobj, out string typestr, out int targetcount, out bool checkprop, out string status_str)
+		public static void CheckArgList(string[] arglist, int argstart, object propobj, out string typestr,
+			out int targetcount, out bool checkprop, out string status_str)
 		{
 			targetcount = 1;
 			checkprop = true;
@@ -407,31 +384,25 @@ namespace Server.Items
 			typestr = null;
 
 			if (arglist.Length > argstart)
-			{
 				// go through the remaining args and determine what they are
-				for (int i = argstart; i < arglist.Length; i++)
+				for (var i = argstart; i < arglist.Length; i++)
 				{
 					// is it a count arg or a prop arg
-					string[] propargs = BaseXmlSpawner.ParseString(arglist[i], 2, "<>=!");
+					var propargs = BaseXmlSpawner.ParseString(arglist[i], 2, "<>=!");
 					if (propargs.Length > 1)
-					{
 						// its a prop arg
 						checkprop = BaseXmlSpawner.CheckPropertyString(null, propobj, arglist[i], null, out status_str);
-					}
-					else if (arglist[i] != null && arglist[i].Length > 0 && arglist[i][0] >= '0' && arglist[i][0] <= '9')
+					else if (arglist[i] != null && arglist[i].Length > 0 && arglist[i][0] >= '0' &&
+					         arglist[i][0] <= '9')
 					{
 						// its a count arg
-						if(!int.TryParse(arglist[i], out targetcount))
-							targetcount=1;
+						if (!Int32.TryParse(arglist[i], out targetcount))
+							targetcount = 1;
 					}
 					else
-					{
 						// its a type arg
 						typestr = arglist[i];
-					}
-
 				}
-			}
 		}
 
 
@@ -439,41 +410,45 @@ namespace Server.Items
 		{
 			// check the quest objectives for special COLLECT keywords
 			string newstatestr;
-			bool collectstatus = false;
+			var collectstatus = false;
 
-			if (!quest.Completed1 && CheckCollectObjective(quest, target, quest.Objective1, quest.State1, out newstatestr, out collectstatus))
+			if (!quest.Completed1 && CheckCollectObjective(quest, target, quest.Objective1, quest.State1,
+				    out newstatestr, out collectstatus))
 			{
 				quest.State1 = newstatestr;
 				quest.Completed1 = collectstatus;
 			}
-			else if (!quest.Completed2 && CheckCollectObjective(quest, target, quest.Objective2, quest.State2, out newstatestr, out collectstatus))
+			else if (!quest.Completed2 && CheckCollectObjective(quest, target, quest.Objective2, quest.State2,
+				         out newstatestr, out collectstatus))
 			{
 				quest.State2 = newstatestr;
 				quest.Completed2 = collectstatus;
 			}
-			else if (!quest.Completed3 && CheckCollectObjective(quest, target, quest.Objective3, quest.State3, out newstatestr, out collectstatus))
+			else if (!quest.Completed3 && CheckCollectObjective(quest, target, quest.Objective3, quest.State3,
+				         out newstatestr, out collectstatus))
 			{
 				quest.State3 = newstatestr;
 				quest.Completed3 = collectstatus;
 			}
-			else if (!quest.Completed4 && CheckCollectObjective(quest, target, quest.Objective4, quest.State4, out newstatestr, out collectstatus))
+			else if (!quest.Completed4 && CheckCollectObjective(quest, target, quest.Objective4, quest.State4,
+				         out newstatestr, out collectstatus))
 			{
 				quest.State4 = newstatestr;
 				quest.Completed4 = collectstatus;
 			}
-			else if (!quest.Completed5 && CheckCollectObjective(quest, target, quest.Objective5, quest.State5, out newstatestr, out collectstatus))
+			else if (!quest.Completed5 && CheckCollectObjective(quest, target, quest.Objective5, quest.State5,
+				         out newstatestr, out collectstatus))
 			{
 				quest.State5 = newstatestr;
 				quest.Completed5 = collectstatus;
-
 			}
+
 			if (!quest.Deleted && quest.Owner != null && collectstatus)
 			{
 				quest.Owner.SendMessage("Quest objective completed.");
 
 				// check to see if the quest has been completed and there is a reward to be automatically handed out
 				quest.CheckAutoReward();
-
 			}
 		}
 
@@ -486,69 +461,60 @@ namespace Server.Items
 			{
 				// check for party collection
 				Party p = null;
-				if (m != null && !m.Deleted && m is PlayerMobile)
-				{
-					p = Party.Get(m);
-				}
+				if (m != null && !m.Deleted && m is PlayerMobile) p = Party.Get(m);
 
 				if (quest.PartyEnabled && p != null)
 				{
 					// go through all of the party members to find the equivalent quest items and apply the collected target item
 					// make a randomized order list
-					List<PartyMemberInfo> startlist = new List<PartyMemberInfo>();
-					List<PartyMemberInfo> randlist = new List<PartyMemberInfo>();
+					var startlist = new List<PartyMemberInfo>();
+					var randlist = new List<PartyMemberInfo>();
 
-					foreach (PartyMemberInfo mi in p.Members)
-					{
-						startlist.Add(mi);
-					}
+					foreach (var mi in p.Members) startlist.Add(mi);
 
 					while (randlist.Count < p.Members.Count)
 					{
 						// pick a random member from the start list
 						// then take them off the list
-						int randindex = Utility.Random(startlist.Count);
+						var randindex = Utility.Random(startlist.Count);
 
 						randlist.Add(startlist[randindex]);
 
 						startlist.RemoveAt(randindex);
 					}
 
-					foreach (PartyMemberInfo mi in randlist)
+					foreach (var mi in randlist)
 					{
-						Mobile member = mi.Mobile;
+						var member = mi.Mobile;
 
 						// see if the member is in range
 						if (quest.PartyRange < 0 || Utility.InRange(m.Location, member.Location, quest.PartyRange))
 						{
 							// find the quest item in their packs
-							Item questitem = BaseXmlSpawner.SearchMobileForItem(member, quest.Name, "IXmlQuest", false);
+							var questitem = BaseXmlSpawner.SearchMobileForItem(member, quest.Name, "IXmlQuest", false);
 
 							if (questitem != null && !questitem.Deleted && questitem is IXmlQuest)
-							{
 								ApplyCollected(target, (IXmlQuest)questitem);
-							}
 						}
 					}
 				}
 				else
-				{
 					ApplyCollected(target, quest);
-				}
 			}
 		}
 
-		public static bool CheckCollectObjective(IXmlQuest quest, Item item, string objectivestr, string statestr, out string newstatestr, out bool collectstatus)
+		public static bool CheckCollectObjective(IXmlQuest quest, Item item, string objectivestr, string statestr,
+			out string newstatestr, out bool collectstatus)
 		{
 			// format for the objective string will be COLLECT,itemtype[,count][,proptest] or COLLECTNAMED,itemname[,itemtype][,count][,proptest]
 			newstatestr = statestr;
 			collectstatus = false;
 			if (objectivestr == null) return false;
 
-			string[] arglist = BaseXmlSpawner.ParseString(objectivestr, 5, ",");
-			int targetcount = 1;
-			bool found = false;
-			bool checkprop = true;
+			var arglist = BaseXmlSpawner.ParseString(objectivestr, 5, ",");
+			var targetcount = 1;
+			var found = false;
+			var checkprop = true;
 			string status_str = null;
 
 			string typestr = null;
@@ -564,30 +530,26 @@ namespace Server.Items
 				{
 					//Type targettype = SpawnerType.GetType( arglist[1] );
 					// test the collect requirements against the the collected item
-					if (item != null && !item.Deleted && BaseXmlSpawner.CheckType(item, arglist[1])/*(item.GetType() == targettype)*/ && checkprop)
-					{
+					if (item != null && !item.Deleted &&
+					    BaseXmlSpawner.CheckType(item, arglist[1]) /*(item.GetType() == targettype)*/ && checkprop)
 						// found a match
 						found = true;
-					}
 				}
 				else if (arglist[0] == "COLLECTNAMED")
-				{
-					if (item != null && !item.Deleted && (arglist[1] == item.Name) && checkprop &&
-					(typestr == null || BaseXmlSpawner.CheckType(item, typestr))
-					)
-					{
+					if (item != null && !item.Deleted && arglist[1] == item.Name && checkprop &&
+					    (typestr == null || BaseXmlSpawner.CheckType(item, typestr))
+					   )
 						// found a match
 						found = true;
-					}
-				}
 			}
+
 			// update the objective state
 			if (found)
 			{
-				int current = 0;
-				int.TryParse(statestr, out current);
+				var current = 0;
+				Int32.TryParse(statestr, out current);
 				// get the current collect count and update it
-				int added = 0;
+				var added = 0;
 				if (item.Stackable)
 				{
 					if (targetcount - current < item.Amount)
@@ -596,7 +558,7 @@ namespace Server.Items
 
 						if (quest != null && quest.PlayerMade)
 						{
-							Item newitem = Mobile.LiftItemDupe(item, item.Amount - added);
+							var newitem = Mobile.LiftItemDupe(item, item.Amount - added);
 							//Item newitem = item.Dupe(added);
 							//if(newitem != null)
 							//newitem.Amount = added;
@@ -619,22 +581,18 @@ namespace Server.Items
 				else
 				{
 					if (targetcount - current > 0)
-					{
 						added = 1;
-						//item.Delete();
-					}
+					//item.Delete();
 					ReturnCollected(quest, item);
 				}
 
-				int collected = current + added;
+				var collected = current + added;
 
 				newstatestr = String.Format("{0}", collected);
 
 				if (collected >= targetcount)
-				{
 					// collecttask completed
 					collectstatus = true;
-				}
 				return true;
 			}
 			else
@@ -644,39 +602,43 @@ namespace Server.Items
 
 		public static bool ApplyGiven(Mobile mob, Item target, IXmlQuest quest)
 		{
-
 			if (mob == null) return false;
 
 			// check the quest objectives for special GIVE keywords
 			string newstatestr;
-			bool givestatus = false;
-			bool found = false;
+			var givestatus = false;
+			var found = false;
 
-			if (!quest.Completed1 && CheckGiveObjective(quest, mob, target, quest.Objective1, quest.State1, out newstatestr, out givestatus))
+			if (!quest.Completed1 && CheckGiveObjective(quest, mob, target, quest.Objective1, quest.State1,
+				    out newstatestr, out givestatus))
 			{
 				quest.State1 = newstatestr;
 				quest.Completed1 = givestatus;
 				found = true;
 			}
-			else if (!quest.Completed2 && CheckGiveObjective(quest, mob, target, quest.Objective2, quest.State2, out newstatestr, out givestatus))
+			else if (!quest.Completed2 && CheckGiveObjective(quest, mob, target, quest.Objective2, quest.State2,
+				         out newstatestr, out givestatus))
 			{
 				quest.State2 = newstatestr;
 				quest.Completed2 = givestatus;
 				found = true;
 			}
-			else if (!quest.Completed3 && CheckGiveObjective(quest, mob, target, quest.Objective3, quest.State3, out newstatestr, out givestatus))
+			else if (!quest.Completed3 && CheckGiveObjective(quest, mob, target, quest.Objective3, quest.State3,
+				         out newstatestr, out givestatus))
 			{
 				quest.State3 = newstatestr;
 				quest.Completed3 = givestatus;
 				found = true;
 			}
-			else if (!quest.Completed4 && CheckGiveObjective(quest, mob, target, quest.Objective4, quest.State4, out newstatestr, out givestatus))
+			else if (!quest.Completed4 && CheckGiveObjective(quest, mob, target, quest.Objective4, quest.State4,
+				         out newstatestr, out givestatus))
 			{
 				quest.State4 = newstatestr;
 				quest.Completed4 = givestatus;
 				found = true;
 			}
-			else if (!quest.Completed5 && CheckGiveObjective(quest, mob, target, quest.Objective5, quest.State5, out newstatestr, out givestatus))
+			else if (!quest.Completed5 && CheckGiveObjective(quest, mob, target, quest.Objective5, quest.State5,
+				         out newstatestr, out givestatus))
 			{
 				quest.State5 = newstatestr;
 				quest.Completed5 = givestatus;
@@ -693,10 +655,7 @@ namespace Server.Items
 			}
 			*/
 
-			if (quest.Owner != null && found)
-			{
-				quest.Owner.SendMessage("Quest item accepted.");
-			}
+			if (quest.Owner != null && found) quest.Owner.SendMessage("Quest item accepted.");
 
 			if (!quest.Deleted && quest.Owner != null && givestatus)
 			{
@@ -710,67 +669,54 @@ namespace Server.Items
 
 		public static bool Give(Mobile from, Mobile to, Item target, IXmlQuest quest)
 		{
-
 			if (quest == null || !quest.IsValid) return false;
 
-			bool found = false;
+			var found = false;
 
 			// check to see what was dropped onto this
 			if (target != null && !target.Deleted)
 			{
 				// check for party collection
 				Party p = null;
-				if (from != null && !from.Deleted && from is PlayerMobile)
-				{
-					p = Party.Get(from);
-				}
+				if (from != null && !from.Deleted && from is PlayerMobile) p = Party.Get(@from);
 
 				if (quest.PartyEnabled && p != null)
 				{
 					// go through all of the party members to find the equivalent quest items and apply the collected target item
 					// make a randomized order list
-					List<PartyMemberInfo> startlist = new List<PartyMemberInfo>();
-					List<PartyMemberInfo> randlist = new List<PartyMemberInfo>();
+					var startlist = new List<PartyMemberInfo>();
+					var randlist = new List<PartyMemberInfo>();
 
-					foreach (PartyMemberInfo mi in p.Members)
-					{
-						startlist.Add(mi);
-					}
+					foreach (var mi in p.Members) startlist.Add(mi);
 
 					while (randlist.Count < p.Members.Count)
 					{
 						// pick a random member from the start list
 						// then take them off the list
-						int randindex = Utility.Random(startlist.Count);
+						var randindex = Utility.Random(startlist.Count);
 
 						randlist.Add(startlist[randindex]);
 
 						startlist.RemoveAt(randindex);
 					}
 
-					foreach (PartyMemberInfo mi in randlist)
+					foreach (var mi in randlist)
 					{
-						Mobile member = mi.Mobile;
+						var member = mi.Mobile;
 						// see if the member is in range
 						if (quest.PartyRange < 0 || Utility.InRange(from.Location, member.Location, quest.PartyRange))
 						{
 							// find the quest item in their packs
-							Item questitem = BaseXmlSpawner.SearchMobileForItem(member, quest.Name, "IXmlQuest", false);
+							var questitem = BaseXmlSpawner.SearchMobileForItem(member, quest.Name, "IXmlQuest", false);
 
 							if (questitem != null && !questitem.Deleted && questitem is IXmlQuest)
-							{
 								if (ApplyGiven(to, target, (IXmlQuest)questitem))
-								{
 									found = true;
-								}
-							}
 						}
 					}
 				}
 				else
-				{
 					found = ApplyGiven(to, target, quest);
-				}
 			}
 
 			return found;
@@ -781,32 +727,25 @@ namespace Server.Items
 			// check to see if this is a quest item that is to be collected
 			// who is dropping it?
 
-			bool found = false;
+			var found = false;
 
 			if (item != null && !item.Deleted && from is PlayerMobile)
 			{
-				List<Item> questlist = FindXmlQuest((PlayerMobile)from);
+				var questlist = FindXmlQuest((PlayerMobile)from);
 				if (questlist != null)
-				{
 					// now go through the list and try to apply the dropped item
-					for (int i = 0; i < questlist.Count; i++)
-					{
+					for (var i = 0; i < questlist.Count; i++)
 						if (questlist[i] is IXmlQuest)
-						{
-							if (Give(from, to, item, (IXmlQuest)questlist[i]))
-							{
+							if (Give(@from, to, item, (IXmlQuest)questlist[i]))
 								found = true;
-							}
-						}
-					}
-				}
 			}
 
 			return found;
 		}
 
 
-		public static bool CheckGiveObjective(IXmlQuest quest, Mobile mob, Item item, string objectivestr, string statestr, out string newstatestr, out bool givestatus)
+		public static bool CheckGiveObjective(IXmlQuest quest, Mobile mob, Item item, string objectivestr,
+			string statestr, out string newstatestr, out bool givestatus)
 		{
 			// format for the objective string will be GIVE,mobname,itemtype[,count][,proptest] or GIVENAMED,mobname,itemname[,type][,count][,proptest]
 			newstatestr = statestr;
@@ -815,10 +754,10 @@ namespace Server.Items
 
 			if (mob == null || mob.Name == null) return false;
 
-			string[] arglist = BaseXmlSpawner.ParseString(objectivestr, 6, ",");
-			int targetcount = 1;
-			bool found = false;
-			bool checkprop = true;
+			var arglist = BaseXmlSpawner.ParseString(objectivestr, 6, ",");
+			var targetcount = 1;
+			var found = false;
+			var checkprop = true;
 			string status_str = null;
 			string typestr = null;
 
@@ -827,10 +766,9 @@ namespace Server.Items
 			if (status_str != null) quest.Status = status_str;
 
 			if (arglist.Length > 1)
-			{
 				// the name of the mob must match the specified mobname
-				if (mob.Name != arglist[1]) return false;
-			}
+				if (mob.Name != arglist[1])
+					return false;
 
 
 			if (arglist.Length > 2)
@@ -841,32 +779,27 @@ namespace Server.Items
 					//Type targettype = SpawnerType.GetType( arglist[2] );
 
 					// test the requirements against the the given item
-					if (item != null && !item.Deleted && BaseXmlSpawner.CheckType(item, arglist[2]) /*(item.GetType() == targettype)*/ && checkprop)
-					{
+					if (item != null && !item.Deleted &&
+					    BaseXmlSpawner.CheckType(item, arglist[2]) /*(item.GetType() == targettype)*/ && checkprop)
 						// found a match
 						found = true;
-					}
 				}
 				else if (arglist[0] == "GIVENAMED")
-				{
-					if (item != null && !item.Deleted && (arglist[2] == item.Name) && checkprop &&
-					(typestr == null || BaseXmlSpawner.CheckType(item, typestr))
-					)
-					{
+					if (item != null && !item.Deleted && arglist[2] == item.Name && checkprop &&
+					    (typestr == null || BaseXmlSpawner.CheckType(item, typestr))
+					   )
 						// found a match
 						found = true;
-					}
-				}
 			}
+
 			// update the objective state
 			if (found)
 			{
-
-				int current = 0;
-				int.TryParse(statestr, out current);
+				var current = 0;
+				Int32.TryParse(statestr, out current);
 
 				// get the current given count and update it
-				int added = 0;
+				var added = 0;
 
 				if (item.Stackable)
 				{
@@ -877,15 +810,13 @@ namespace Server.Items
 						if (quest != null && quest.PlayerMade)
 						{
 							//Item newitem = item.Dupe(added);
-							Item newitem = Mobile.LiftItemDupe(item, added);
+							var newitem = Mobile.LiftItemDupe(item, added);
 							//if(newitem != null)
 							//newitem.Amount = added;
 							TakeGiven(mob, quest, newitem);
 						}
 						else
-						{
 							item.Amount -= added;
-						}
 					}
 					else
 					{
@@ -904,37 +835,33 @@ namespace Server.Items
 					}
 				}
 
-				int collected = current + added;
+				var collected = current + added;
 
 				newstatestr = String.Format("{0}", collected);
 
 				if (collected >= targetcount)
-				{
 					// givetask completed
 					givestatus = true;
-				}
 
-				return (added > 0);
-
+				return added > 0;
 			}
 			else
-			{
 				// not a give task
 				return false;
-			}
 		}
 
-		public static bool CheckKillObjective(IXmlQuest quest, Mobile m_killed, Mobile m_killer, string objectivestr, string statestr, out string newstatestr, out bool killstatus)
+		public static bool CheckKillObjective(IXmlQuest quest, Mobile m_killed, Mobile m_killer, string objectivestr,
+			string statestr, out string newstatestr, out bool killstatus)
 		{
 			newstatestr = statestr;
 			killstatus = false;
 			if (objectivestr == null) return false;
 
 			// format for the objective string will be KILL,mobtype[,count][,proptest] or KILLNAMED,mobname[,type][,count][,proptest]
-			string[] arglist = BaseXmlSpawner.ParseString(objectivestr, 5, ",");
-			int targetcount = 1;
-			bool found = false;
-			bool checkprop = true;
+			var arglist = BaseXmlSpawner.ParseString(objectivestr, 5, ",");
+			var targetcount = 1;
+			var found = false;
+			var checkprop = true;
 			string status_str = null;
 
 			string typestr = null;
@@ -951,38 +878,37 @@ namespace Server.Items
 					//Type targettype = SpawnerType.GetType( arglist[1] );
 
 					// test the kill requirements against the the killed mobile
-					if (m_killed != null && !m_killed.Deleted && BaseXmlSpawner.CheckType(m_killed, arglist[1])/*(m_killed.GetType() == targettype)*/ && checkprop)
-					{
+					if (m_killed != null && !m_killed.Deleted &&
+					    BaseXmlSpawner.CheckType(m_killed, arglist[1]) /*(m_killed.GetType() == targettype)*/ &&
+					    checkprop)
 						// found a match
 						found = true;
-					}
 				}
 				else if (arglist[0] == "KILLNAMED")
-				{
-					if (m_killed != null && !m_killed.Deleted && (arglist[1] == m_killed.Name) && checkprop &&
-					(typestr == null || BaseXmlSpawner.CheckType(m_killed, typestr))
-					)
-					{
+					if (m_killed != null && !m_killed.Deleted && arglist[1] == m_killed.Name && checkprop &&
+					    (typestr == null || BaseXmlSpawner.CheckType(m_killed, typestr))
+					   )
 						// found a match
 						found = true;
-					}
-				}
 			}
+
 			// update the objective state
 			if (found)
 			{
 				// get the current kill count and update it
-				int current = 0;
-				int.TryParse(statestr, out current);
+				var current = 0;
+				Int32.TryParse(statestr, out current);
 
-				int killed = current + 1;
+				var killed = current + 1;
 				newstatestr = String.Format("{0}", killed);
 
 				if (killed >= targetcount)
 				{
 					// killtask completed
-					killstatus = true; ;
+					killstatus = true;
+					;
 				}
+
 				return true;
 			}
 			else
@@ -995,32 +921,38 @@ namespace Server.Items
 			if (quest == null || !quest.IsValid) return;
 
 			string newstatestr;
-			bool killstatus = false;
-			if (!quest.Completed1 && CheckKillObjective(quest, m_killed, m_killer, quest.Objective1, quest.State1, out newstatestr, out killstatus))
+			var killstatus = false;
+			if (!quest.Completed1 && CheckKillObjective(quest, m_killed, m_killer, quest.Objective1, quest.State1,
+				    out newstatestr, out killstatus))
 			{
 				quest.State1 = newstatestr;
 				quest.Completed1 = killstatus;
 			}
-			else if (!quest.Completed2 && CheckKillObjective(quest, m_killed, m_killer, quest.Objective2, quest.State2, out newstatestr, out killstatus))
+			else if (!quest.Completed2 && CheckKillObjective(quest, m_killed, m_killer, quest.Objective2, quest.State2,
+				         out newstatestr, out killstatus))
 			{
 				quest.State2 = newstatestr;
 				quest.Completed2 = killstatus;
 			}
-			else if (!quest.Completed3 && CheckKillObjective(quest, m_killed, m_killer, quest.Objective3, quest.State3, out newstatestr, out killstatus))
+			else if (!quest.Completed3 && CheckKillObjective(quest, m_killed, m_killer, quest.Objective3, quest.State3,
+				         out newstatestr, out killstatus))
 			{
 				quest.State3 = newstatestr;
 				quest.Completed3 = killstatus;
 			}
-			else if (!quest.Completed4 && CheckKillObjective(quest, m_killed, m_killer, quest.Objective4, quest.State4, out newstatestr, out killstatus))
+			else if (!quest.Completed4 && CheckKillObjective(quest, m_killed, m_killer, quest.Objective4, quest.State4,
+				         out newstatestr, out killstatus))
 			{
 				quest.State4 = newstatestr;
 				quest.Completed4 = killstatus;
 			}
-			else if (!quest.Completed5 && CheckKillObjective(quest, m_killed, m_killer, quest.Objective5, quest.State5, out newstatestr, out killstatus))
+			else if (!quest.Completed5 && CheckKillObjective(quest, m_killed, m_killer, quest.Objective5, quest.State5,
+				         out newstatestr, out killstatus))
 			{
 				quest.State5 = newstatestr;
 				quest.Completed5 = killstatus;
 			}
+
 			if (!quest.Deleted && quest.Owner != null && killstatus)
 			{
 				quest.Owner.SendMessage("Quest objective completed.");
@@ -1034,39 +966,31 @@ namespace Server.Items
 			if (!(member is PlayerMobile)) return;
 
 			// search the player for IXmlQuest objects
-			List<Item> mobitems = FindXmlQuest((PlayerMobile)member);
+			var mobitems = FindXmlQuest((PlayerMobile)member);
 
 			if (mobitems == null) return;
 
-			for (int i = 0; i < mobitems.Count; i++)
-			{
+			for (var i = 0; i < mobitems.Count; i++)
 				// search the objects for kill requirements
 				if (mobitems[i] is IXmlQuest)
 				{
-					IXmlQuest quest = (IXmlQuest)mobitems[i];
+					var quest = (IXmlQuest)mobitems[i];
 
 					if (quest != null && !quest.Deleted && quest.PartyEnabled)
 					{
 						if (member != null && !member.Deleted)
-						{
-							if (quest.PartyRange < 0 || Utility.InRange(m_killer.Location, member.Location, quest.PartyRange))
+							if (quest.PartyRange < 0 ||
+							    Utility.InRange(m_killer.Location, member.Location, quest.PartyRange))
 								ApplyKilled(m_killed, member, quest);
-						}
 					}
 					else if (member != null && !member.Deleted && member == m_killer && quest != null && !quest.Deleted)
-					{
 						ApplyKilled(m_killed, m_killer, quest);
-					}
 				}
-			}
 		}
-
-
 
 
 		public static void RegisterKill(Mobile m_killed, Mobile m_killer)
 		{
-
 			// check for any attachments that might support the OnBeforeKill method
 			XmlAttach.CheckOnBeforeKill(m_killed, m_killer);
 
@@ -1074,39 +998,29 @@ namespace Server.Items
 			XmlAttach.CheckOnKill(m_killed, m_killer);
 
 			// go through all of the party members to to try to fill killquest objectives
-			Party p = Party.Get(m_killer);
+			var p = Party.Get(m_killer);
 			if (p != null)
-			{
-				foreach (PartyMemberInfo mi in p.Members)
+				foreach (var mi in p.Members)
 				{
-					Mobile member = mi.Mobile;
+					var member = mi.Mobile;
 					if (member != null && member is PlayerMobile && ((PlayerMobile)member).GetFlag(CarriedXmlQuestFlag))
-					{
-
 						CheckKilled(m_killed, m_killer, member);
-
-					}
-
 				}
-			}
 			else
 			{
-				if (m_killer != null && m_killer is PlayerMobile && ((PlayerMobile)m_killer).GetFlag(CarriedXmlQuestFlag))
-				{
-					CheckKilled(m_killed, m_killer, m_killer);
-
-				}
-
+				if (m_killer != null && m_killer is PlayerMobile &&
+				    ((PlayerMobile)m_killer).GetFlag(CarriedXmlQuestFlag)) CheckKilled(m_killed, m_killer, m_killer);
 			}
 		}
 
-		public static bool CheckEscortObjective(IXmlQuest quest, Mobile m_escorted, Mobile m_escorter, string objectivestr, string statestr, out string newstatestr, out bool escortstatus)
+		public static bool CheckEscortObjective(IXmlQuest quest, Mobile m_escorted, Mobile m_escorter,
+			string objectivestr, string statestr, out string newstatestr, out bool escortstatus)
 		{
 			newstatestr = statestr;
 			escortstatus = false;
 			if (objectivestr == null) return false;
 			// format for the objective string will be ESCORT[,mobname][,proptest]
-			string[] arglist = BaseXmlSpawner.ParseString(objectivestr, 3, ",");
+			var arglist = BaseXmlSpawner.ParseString(objectivestr, 3, ",");
 
 			if (arglist.Length > 0)
 			{
@@ -1115,21 +1029,17 @@ namespace Server.Items
 					return false;
 			}
 			else
-			{
 				return false;
-			}
 
-			bool found = false;
+			var found = false;
 
-			int targetcount = 1;
+			var targetcount = 1;
 
-			bool checkprop = true;
+			var checkprop = true;
 			string status_str = null;
 
 			if (arglist.Length > 2)
-			{
 				checkprop = BaseXmlSpawner.CheckPropertyString(null, m_escorted, arglist[2], null, out status_str);
-			}
 
 			if (status_str != null) quest.Status = status_str;
 
@@ -1137,39 +1047,37 @@ namespace Server.Items
 			{
 				// check the mobname, allow for empty names to match any escort
 
-				if (m_escorted != null && !m_escorted.Deleted && (arglist[1] == m_escorted.Name || (arglist[1] == null || arglist[1] == String.Empty)) && checkprop)
-				{
+				if (m_escorted != null && !m_escorted.Deleted &&
+				    (arglist[1] == m_escorted.Name || arglist[1] == null || arglist[1] == String.Empty) && checkprop)
 					// found a match
 					found = true;
-				}
-
 			}
 			else
 			{
 				// no mobname so any escort will do
 				if (m_escorted != null && !m_escorted.Deleted && checkprop)
-				{
 					// found a match
 					found = true;
-				}
 			}
 
 			// update the objective state
 			if (found)
 			{
 				// get the current escort count and update it
-				int current = 0;
-				int.TryParse(statestr, out current);
+				var current = 0;
+				Int32.TryParse(statestr, out current);
 
-				int escorted = current + 1;
+				var escorted = current + 1;
 
 				newstatestr = String.Format("{0}", escorted);
 
 				if (escorted >= targetcount)
 				{
 					// escort completed
-					escortstatus = true; ;
+					escortstatus = true;
+					;
 				}
+
 				return true;
 			}
 			else
@@ -1182,32 +1090,38 @@ namespace Server.Items
 			if (quest == null || !quest.IsValid) return;
 
 			string newstatestr;
-			bool escortstatus = false;
-			if (!quest.Completed1 && CheckEscortObjective(quest, m_escorted, m_escorter, quest.Objective1, quest.State1, out newstatestr, out escortstatus))
+			var escortstatus = false;
+			if (!quest.Completed1 && CheckEscortObjective(quest, m_escorted, m_escorter, quest.Objective1, quest.State1,
+				    out newstatestr, out escortstatus))
 			{
 				quest.State1 = newstatestr;
 				quest.Completed1 = escortstatus;
 			}
-			else if (!quest.Completed2 && CheckEscortObjective(quest, m_escorted, m_escorter, quest.Objective2, quest.State2, out newstatestr, out escortstatus))
+			else if (!quest.Completed2 && CheckEscortObjective(quest, m_escorted, m_escorter, quest.Objective2,
+				         quest.State2, out newstatestr, out escortstatus))
 			{
 				quest.State2 = newstatestr;
 				quest.Completed2 = escortstatus;
 			}
-			else if (!quest.Completed3 && CheckEscortObjective(quest, m_escorted, m_escorter, quest.Objective3, quest.State3, out newstatestr, out escortstatus))
+			else if (!quest.Completed3 && CheckEscortObjective(quest, m_escorted, m_escorter, quest.Objective3,
+				         quest.State3, out newstatestr, out escortstatus))
 			{
 				quest.State3 = newstatestr;
 				quest.Completed3 = escortstatus;
 			}
-			else if (!quest.Completed4 && CheckEscortObjective(quest, m_escorted, m_escorter, quest.Objective4, quest.State4, out newstatestr, out escortstatus))
+			else if (!quest.Completed4 && CheckEscortObjective(quest, m_escorted, m_escorter, quest.Objective4,
+				         quest.State4, out newstatestr, out escortstatus))
 			{
 				quest.State4 = newstatestr;
 				quest.Completed4 = escortstatus;
 			}
-			else if (!quest.Completed5 && CheckEscortObjective(quest, m_escorted, m_escorter, quest.Objective5, quest.State5, out newstatestr, out escortstatus))
+			else if (!quest.Completed5 && CheckEscortObjective(quest, m_escorted, m_escorter, quest.Objective5,
+				         quest.State5, out newstatestr, out escortstatus))
 			{
 				quest.State5 = newstatestr;
 				quest.Completed5 = escortstatus;
 			}
+
 			if (!quest.Deleted && quest.Owner != null && escortstatus)
 			{
 				quest.Owner.SendMessage("Quest objective completed.");
@@ -1221,61 +1135,44 @@ namespace Server.Items
 			if (!(member is PlayerMobile)) return;
 
 			// search the player for IXmlQuest objects
-			List<Item> mobitems = FindXmlQuest((PlayerMobile)member);
+			var mobitems = FindXmlQuest((PlayerMobile)member);
 
 			if (mobitems == null) return;
 
-			for (int i = 0; i < mobitems.Count; i++)
-			{
-
+			for (var i = 0; i < mobitems.Count; i++)
 				if (mobitems[i] is IXmlQuest)
 				{
 					// search the objects for escort requirements
-					IXmlQuest quest = (IXmlQuest)mobitems[i];
+					var quest = (IXmlQuest)mobitems[i];
 
 					if (quest != null && !quest.Deleted && quest.PartyEnabled)
 					{
 						if (member != null && !member.Deleted)
-						{
-							if (quest.PartyRange < 0 || Utility.InRange(m_escorter.Location, member.Location, quest.PartyRange))
-							{
+							if (quest.PartyRange < 0 ||
+							    Utility.InRange(m_escorter.Location, member.Location, quest.PartyRange))
 								ApplyEscorted(m_escorted, member, quest);
-							}
-						}
 					}
-					else if (member != null && !member.Deleted && member == m_escorter && quest != null && !quest.Deleted)
-					{
-						ApplyEscorted(m_escorted, m_escorter, quest);
-					}
+					else if (member != null && !member.Deleted && member == m_escorter && quest != null &&
+					         !quest.Deleted) ApplyEscorted(m_escorted, m_escorter, quest);
 				}
-			}
 		}
 
 		public static void RegisterEscort(Mobile m_escorted, Mobile m_escorter)
 		{
-
 			// go through all of the party members to to try to fill escort objectives
-			Party p = Party.Get(m_escorter);
+			var p = Party.Get(m_escorter);
 			if (p != null)
-			{
-				foreach (PartyMemberInfo mi in p.Members)
+				foreach (var mi in p.Members)
 				{
-					Mobile member = mi.Mobile;
+					var member = mi.Mobile;
 					if (member != null && member is PlayerMobile && ((PlayerMobile)member).GetFlag(CarriedXmlQuestFlag))
-					{
-
 						CheckEscorted(m_escorted, m_escorter, member);
-					}
-
 				}
-			}
 			else
 			{
-				if (m_escorter != null && m_escorter is PlayerMobile && ((PlayerMobile)m_escorter).GetFlag(CarriedXmlQuestFlag))
-				{
+				if (m_escorter != null && m_escorter is PlayerMobile &&
+				    ((PlayerMobile)m_escorter).GetFlag(CarriedXmlQuestFlag))
 					CheckEscorted(m_escorted, m_escorter, m_escorter);
-				}
-
 			}
 		}
 
@@ -1303,7 +1200,8 @@ namespace Server.Items
 			}
 		}*/
 
-		public static bool CheckVisitObjective(IXmlQuest quest, PlayerMobile m_player, string objectivestr, string statestr, out string newstatestr, out bool visitstatus)
+		public static bool CheckVisitObjective(IXmlQuest quest, PlayerMobile m_player, string objectivestr,
+			string statestr, out string newstatestr, out bool visitstatus)
 		{
 			newstatestr = statestr;
 			visitstatus = false;
@@ -1311,42 +1209,38 @@ namespace Server.Items
 			if (objectivestr == null) return false;
 
 			// format for the objective string will be VISIT,x,y,range[,duration]
-			string[] arglist = BaseXmlSpawner.ParseString(objectivestr, 5, ",");
+			var arglist = BaseXmlSpawner.ParseString(objectivestr, 5, ",");
 
-			bool found = false;
+			var found = false;
 
-			int targetcount = 1;
+			var targetcount = 1;
 
 			string status_str = null;
 
 			if (status_str != null) quest.Status = status_str;
 
 			if (arglist.Length > 3)
-			{
 				// escort task objective
 				if (arglist[0] == "VISIT")
 				{
-
 					double duration = 0; // duration in minutes
 
 					// get the coords
-					int x = 0;
-					if(!int.TryParse(arglist[1], out x))
+					var x = 0;
+					if (!Int32.TryParse(arglist[1], out x))
 						status_str = "invalid VISIT x";
 
-					int y = 0;
-					if(!int.TryParse(arglist[2], out y))
+					var y = 0;
+					if (!Int32.TryParse(arglist[2], out y))
 						status_str = "invalid VISIT y";
 
-					int range = 0;
-					if(!int.TryParse(arglist[3], out range))
+					var range = 0;
+					if (!Int32.TryParse(arglist[3], out range))
 						status_str = "invalid VISIT range";
 
 					if (arglist.Length > 4)
-					{
-						if(!double.TryParse(arglist[4], NumberStyles.Any, CultureInfo.InvariantCulture, out duration))
+						if (!Double.TryParse(arglist[4], NumberStyles.Any, CultureInfo.InvariantCulture, out duration))
 							status_str = "invalid VISIT duration";
-					}
 
 					// check them against the players current location
 
@@ -1357,30 +1251,29 @@ namespace Server.Items
 							// is there already a timer started on the quest object?
 						}
 						else
-						{
 							found = true;
-						}
 						// if it is in range, then start the timer
 					}
 				}
-			}
 
 			// update the objective state
 			if (found)
 			{
 				// get the current visitation count and update it
-				int current = 0;
-				int.TryParse(statestr, out current);
+				var current = 0;
+				Int32.TryParse(statestr, out current);
 
-				int visited = current + 1;
+				var visited = current + 1;
 
 				newstatestr = String.Format("{0}", visited);
 
 				if (visited >= targetcount)
 				{
 					// visitation completed
-					visitstatus = true; ;
+					visitstatus = true;
+					;
 				}
+
 				return true;
 			}
 			else
@@ -1393,32 +1286,38 @@ namespace Server.Items
 			if (quest == null || !quest.IsValid) return;
 
 			string newstatestr;
-			bool visitstatus = false;
-			if (!quest.Completed1 && CheckVisitObjective(quest, m_player, quest.Objective1, quest.State1, out newstatestr, out visitstatus))
+			var visitstatus = false;
+			if (!quest.Completed1 && CheckVisitObjective(quest, m_player, quest.Objective1, quest.State1,
+				    out newstatestr, out visitstatus))
 			{
 				quest.State1 = newstatestr;
 				quest.Completed1 = visitstatus;
 			}
-			else if (!quest.Completed2 && CheckVisitObjective(quest, m_player, quest.Objective2, quest.State2, out newstatestr, out visitstatus))
+			else if (!quest.Completed2 && CheckVisitObjective(quest, m_player, quest.Objective2, quest.State2,
+				         out newstatestr, out visitstatus))
 			{
 				quest.State2 = newstatestr;
 				quest.Completed2 = visitstatus;
 			}
-			else if (!quest.Completed3 && CheckVisitObjective(quest, m_player, quest.Objective2, quest.State2, out newstatestr, out visitstatus))
+			else if (!quest.Completed3 && CheckVisitObjective(quest, m_player, quest.Objective2, quest.State2,
+				         out newstatestr, out visitstatus))
 			{
 				quest.State3 = newstatestr;
 				quest.Completed3 = visitstatus;
 			}
-			else if (!quest.Completed4 && CheckVisitObjective(quest, m_player, quest.Objective4, quest.State4, out newstatestr, out visitstatus))
+			else if (!quest.Completed4 && CheckVisitObjective(quest, m_player, quest.Objective4, quest.State4,
+				         out newstatestr, out visitstatus))
 			{
 				quest.State4 = newstatestr;
 				quest.Completed4 = visitstatus;
 			}
-			else if (!quest.Completed5 && CheckVisitObjective(quest, m_player, quest.Objective5, quest.State5, out newstatestr, out visitstatus))
+			else if (!quest.Completed5 && CheckVisitObjective(quest, m_player, quest.Objective5, quest.State5,
+				         out newstatestr, out visitstatus))
 			{
 				quest.State5 = newstatestr;
 				quest.Completed5 = visitstatus;
 			}
+
 			if (!quest.Deleted && quest.Owner != null && visitstatus)
 			{
 				quest.Owner.SendMessage("Quest objective completed.");
@@ -1429,26 +1328,19 @@ namespace Server.Items
 
 		public static void CheckVisited(PlayerMobile m_player)
 		{
-
 			// search the player for IXmlQuest objects
-			List<Item> mobitems = FindXmlQuest(m_player);
+			var mobitems = FindXmlQuest(m_player);
 
 			if (mobitems == null) return;
 
-			for (int i = 0; i < mobitems.Count; i++)
-			{
-
+			for (var i = 0; i < mobitems.Count; i++)
 				if (mobitems[i] is IXmlQuest)
 				{
 					// search the objects for visitation requirements
-					IXmlQuest quest = (IXmlQuest)mobitems[i];
+					var quest = (IXmlQuest)mobitems[i];
 
-					if (quest != null && !quest.Deleted)
-					{
-						ApplyVisited(m_player, quest);
-					}
+					if (quest != null && !quest.Deleted) ApplyVisited(m_player, quest);
 				}
-			}
 		}
 
 
@@ -1456,10 +1348,7 @@ namespace Server.Items
 		{
 			status_str = null;
 
-			if (arglist == null || arglist.Length < 1)
-			{
-				return true;
-			}
+			if (arglist == null || arglist.Length < 1) return true;
 
 			bool checkprop;
 			int targetcount;
@@ -1469,7 +1358,7 @@ namespace Server.Items
 			{
 				case "COLLECT":
 				case "KILL":
-					XmlQuest.CheckArgList(arglist, 2, null, out typestr, out targetcount, out checkprop, out status_str);
+					CheckArgList(arglist, 2, null, out typestr, out targetcount, out checkprop, out status_str);
 					if (arglist.Length > 1)
 					{
 						if (SpawnerType.GetType(arglist[1]) == null)
@@ -1483,26 +1372,29 @@ namespace Server.Items
 						status_str = arglist[0] + "missing args";
 						return false;
 					}
+
 					break;
 				case "COLLECTNAMED":
 				case "KILLNAMED":
-					XmlQuest.CheckArgList(arglist, 2, null, out typestr, out targetcount, out checkprop, out status_str);
+					CheckArgList(arglist, 2, null, out typestr, out targetcount, out checkprop, out status_str);
 					if (arglist.Length < 1)
 					{
 						status_str = arglist[0] + "missing args";
 						return false;
 					}
+
 					break;
 				case "GIVENAMED":
-					XmlQuest.CheckArgList(arglist, 3, null, out typestr, out targetcount, out checkprop, out status_str);
+					CheckArgList(arglist, 3, null, out typestr, out targetcount, out checkprop, out status_str);
 					if (arglist.Length < 1)
 					{
 						status_str = arglist[0] + "missing args";
 						return false;
 					}
+
 					break;
 				case "GIVE":
-					XmlQuest.CheckArgList(arglist, 3, null, out typestr, out targetcount, out checkprop, out status_str);
+					CheckArgList(arglist, 3, null, out typestr, out targetcount, out checkprop, out status_str);
 					if (arglist.Length > 2)
 					{
 						if (SpawnerType.GetType(arglist[2]) == null)
@@ -1516,19 +1408,18 @@ namespace Server.Items
 						status_str = arglist[0] + "missing args";
 						return false;
 					}
+
 					break;
 			}
 
 
 			// check the validity of the typestr
 			if (typestr != null)
-			{
 				if (SpawnerType.GetType(typestr) == null)
 				{
 					status_str = "Invalid type: " + typestr;
 					return false;
 				}
-			}
 
 			return true;
 		}
@@ -1548,7 +1439,6 @@ namespace Server.Items
 			if (status_str != null) quest.Status = status_str;
 			VerifyObjective(BaseXmlSpawner.ParseString(quest.Objective5, 6, ","), out status_str);
 			if (status_str != null) quest.Status = status_str;
-
 		}
 	}
 }

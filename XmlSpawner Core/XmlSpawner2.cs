@@ -11022,7 +11022,7 @@ public static void _TraceEnd(int index)
 		{
 			base.Serialize(writer);
 
-			writer.Write((int)31); // version
+			writer.Write((int)32); // version
 			// version 31
 			writer.Write(m_DisableGlobalAutoReset);
 			// Version 30

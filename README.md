@@ -6,5 +6,11 @@ Plan is to keep it working with ServUO p58 (or maybe even later versions) and po
 
 # How to install
 
-1. Remove original files of XmlSpawner from ServUO
-2. Put files from this repository somwehere in ServUO/Scripts directory
+1. Remove original files of XmlSpawner from ServUO (_Scripts/Services/XmlSpawner_)
+2. Put files from this repository somewhere in Scripts directory
+3. in file **Scripts/Misc/ItemFlags.cs** replace:
+>public static class ItemFlags
+
+with
+
+>public static partial class ItemFlags

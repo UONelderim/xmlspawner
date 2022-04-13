@@ -8255,10 +8255,14 @@ namespace Server.Mobiles
 													items.Add(i);
 										}
 										else
-											foreach (var i in map.GetItemsInBounds(spawner.SpawnerBounds))
+										{
+											var eable = map.GetItemsInBounds(spawner.SpawnerBounds);
+											foreach (var i in eable)
 												if (objecttype.IsAssignableFrom(i.GetType()) &&
 												    CheckNameMatch(objectname, i.Name))
 													items.Add(i);
+											eable.Free();
+										}
 									}
 									else if (invoker != null && invoker is IEntity)
 										foreach (var i in map.GetItemsInRange(((IEntity)invoker).Location, range))

@@ -1,3 +1,0 @@
-Basically you have to remove comment of the ServUO define (#define ServUO) in files:
-XmlSpawner Core\XmlAttach\XmlAttach.cs
-XmlSpawner Core\XmlAttachments\XmlFollow.cs

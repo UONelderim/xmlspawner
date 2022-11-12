@@ -1175,7 +1175,8 @@ namespace Server.Engines.XmlSpawner2
 
 				if (fs == null)
 				{
-					from.SendMessage("Unable to open {0} for loading", dirname);
+					if (from != null && !from.Deleted)
+						from.SendMessage("Unable to open {0} for loading", dirname);
 					return;
 				}
 

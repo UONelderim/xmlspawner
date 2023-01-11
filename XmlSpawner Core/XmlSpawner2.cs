@@ -11425,8 +11425,8 @@ public static void _TraceEnd(int index)
 					if (version < 32)
 					{
 						// Delete First & Last Modified
-						reader.ReadDateTime();
-						reader.ReadDateTime();
+						reader.ReadString();
+						reader.ReadString();
 					}
 
 					// deserialize the keyword tag list

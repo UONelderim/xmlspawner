@@ -887,43 +887,43 @@ namespace Server.Gumps
 						if (info.ButtonID >= 1000)
 						{
 							var team = info.ButtonID - 1000;
-							//state.Mobile.Target = new CTFBaseTarget(m_gauntlet, team);
+							state.Mobile.Target = new CTFBaseTarget(m_gauntlet, team);
 
 							//   for hardcoded base locations instead of manually placed
 							// comment out the Target line above  and uncomment the code below
 							//
 
-							var baseloc = Point3D.Zero;
-							switch (team)
-							{
-								// hardcode the base locations for as many teams as you would like
-								case 1:
-									baseloc = new Point3D(5450, 1150, 0);
-									break;
-								case 2:
-									baseloc = new Point3D(5500, 1150, 0);
-									break;
-								case 3:
-									baseloc = new Point3D(5450, 1150, 0);
-									break;
-								case 4:
-									baseloc = new Point3D(5500, 1150, 0);
-									break;
-							}
-
-							var newbase = m_gauntlet.FindBase(team);
-
-							if (baseloc != Point3D.Zero)
-							{
-								if (newbase == null)
-								{
-									newbase = new CTFBase(m_gauntlet, team);
-									// add the base to the gauntlet list
-									m_gauntlet.HomeBases.Add(newbase);
-								}
-
-								newbase.MoveToWorld(new Point3D(baseloc), state.Mobile.Map);
-							}
+							// var baseloc = Point3D.Zero;
+							// switch (team)
+							// {
+							// 	// hardcode the base locations for as many teams as you would like
+							// 	case 1:
+							// 		baseloc = new Point3D(5450, 1150, 0);
+							// 		break;
+							// 	case 2:
+							// 		baseloc = new Point3D(5500, 1150, 0);
+							// 		break;
+							// 	case 3:
+							// 		baseloc = new Point3D(5450, 1150, 0);
+							// 		break;
+							// 	case 4:
+							// 		baseloc = new Point3D(5500, 1150, 0);
+							// 		break;
+							// }
+							//
+							// var newbase = m_gauntlet.FindBase(team);
+							//
+							// if (baseloc != Point3D.Zero)
+							// {
+							// 	if (newbase == null)
+							// 	{
+							// 		newbase = new CTFBase(m_gauntlet, team);
+							// 		// add the base to the gauntlet list
+							// 		m_gauntlet.HomeBases.Add(newbase);
+							// 	}
+							//
+							// 	newbase.MoveToWorld(new Point3D(baseloc), state.Mobile.Map);
+							// }
 
 							state.Mobile.SendGump(new TeamsGump(m_gauntlet, state.Mobile));
 						}

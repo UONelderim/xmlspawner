@@ -52,7 +52,7 @@ namespace Server.Items
 			Movable = false;
 			Hue = BaseChallengeGame.TeamColor(team);
 			Team = team;
-			Name = String.Format("Team {0} Base", team);
+			Name = $"Baza druzyny {team}";
 			m_gauntlet = gauntlet;
 
 			// add the flag
@@ -197,7 +197,7 @@ namespace Server.Items
 		{
 			Hue = BaseChallengeGame.TeamColor(team);
 			;
-			Name = String.Format("Team {0} Flag", team);
+			Name = $"Flaga druzyny {team}";
 			HomeBase = homebase;
 		}
 

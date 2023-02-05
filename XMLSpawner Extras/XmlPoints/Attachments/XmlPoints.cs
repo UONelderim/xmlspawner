@@ -1920,12 +1920,15 @@ namespace Server.Engines.XmlSpawner2
 				// if there were nearby pets/mounts then tele those as well
 
 				var petlist = new ArrayList();
-				foreach (var m in killer.GetMobilesInRange(16))
+				var eable = killer.GetMobilesInRange(16);
+				foreach (var m in eable)
 					if (m is BaseCreature && ((BaseCreature)m).ControlMaster == killer)
 						petlist.Add(m);
-				foreach (var m in killed.GetMobilesInRange(16))
+				eable = killed.GetMobilesInRange(16);
+				foreach (var m in eable)
 					if (m is BaseCreature && ((BaseCreature)m).ControlMaster == killed)
 						petlist.Add(m);
+				eable.Free();
 
 				// port the pets
 				foreach (Mobile m in petlist) m.MoveToWorld(loc, map);

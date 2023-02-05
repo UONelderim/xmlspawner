@@ -362,7 +362,8 @@ namespace Server.Items
 			var elist = new ArrayList();
 
 			// who is currently on the hill
-			foreach (var p in GetMobilesInRange(0))
+			var eable = GetMobilesInRange(0);
+			foreach (var p in eable)
 			{
 				if (p == null) continue;
 
@@ -378,6 +379,7 @@ namespace Server.Items
 					// prepare to bump their score
 					elist.Add(entry);
 			}
+			eable.Free();
 
 			// move non-participants
 			foreach (Mobile p in mlist)

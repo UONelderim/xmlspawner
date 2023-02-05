@@ -354,9 +354,14 @@ namespace Server.Mobiles
 			{
 				var count = 0;
 				if (ProximityRange >= 0)
-					foreach (var m in GetMobilesInRange(ProximityRange))
+				{
+					var eable = GetMobilesInRange(ProximityRange);
+					foreach (var m in eable)
 						if (m != null && m.Player)
 							count++;
+					eable.Free();
+				}
+
 				return count;
 			}
 		}
@@ -8504,10 +8509,14 @@ public static void _TraceEnd(int index)
 
 				// check for proximity triggers without movement activation
 				if (m_ProximityRange >= 0 && CanSpawn)
+				{
 					// check all nearby players
-					foreach (var p in GetMobilesInRange(m_ProximityRange))
+					var eable = GetMobilesInRange(m_ProximityRange);
+					foreach (var p in eable)
 						if (ValidPlayerTrig(p))
 							CheckTriggers(p, null, true);
+					eable.Free();
+				}
 
 				if (m_Group)
 				{

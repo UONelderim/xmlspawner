@@ -322,14 +322,19 @@ namespace Server.Engines.XmlSpawner2
 
 					var nplayers = 0;
 					if (m_Siege.AttachedTo is Item)
+					{
 						// check to see if anyone is around
-
-						foreach (var p in ((Item)m_Siege.AttachedTo).GetMobilesInRange(24))
+						var eable = ((Item)m_Siege.AttachedTo).GetMobilesInRange(24);
+						foreach (var p in eable)
+						{
 							if (p.Player /*&& p.AccessLevel == AccessLevel.Player */)
 							{
 								nplayers++;
 								break;
 							}
+						}
+						eable.Free();
+					}
 
 					// if not, the no need to update
 					if (nplayers == 0) m_Siege.NeedsEffectsUpdate = false;
@@ -703,18 +708,25 @@ namespace Server.Engines.XmlSpawner2
 
 			// make sure nearby mobiles are in valid locations
 			var mobilelist = new ArrayList();
-			foreach (var p in targetitem.GetMobilesInRange(0)) mobilelist.Add(p);
-
+			var eable = targetitem.GetMobilesInRange(0);
+			foreach (var p in eable) 
+				mobilelist.Add(p);
+			
 			if (targetitem is BaseAddon)
 			{
 				var addon = (BaseAddon)targetitem;
 				if (addon.Components != null)
 					foreach (var i in addon.Components)
 						if (i != null)
-							foreach (var p in i.GetMobilesInRange(0))
+						{
+							eable = i.GetMobilesInRange(0);
+							foreach (var p in eable)
 								if (!mobilelist.Contains(p))
 									mobilelist.Add(p);
+							
+						}
 			}
+			eable.Free();
 
 			if (targetitem is BaseMulti && targetitem.Map != null)
 			{

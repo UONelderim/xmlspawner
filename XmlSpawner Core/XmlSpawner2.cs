@@ -10403,12 +10403,22 @@ public static void _TraceEnd(int index)
 					if (fit) return new Point3D(x, y, z);
 				}
 			}
+			if (SpawnersWithoutFit.ContainsKey(this))
+			{
+				SpawnersWithoutFit[this]++;
+			}
+			else
+			{
+				SpawnersWithoutFit[this] = 0;
+			}
 
 			if (packrange >= 0 && packcoord != Point3D.Zero)
 				return packcoord;
 			else
 				return Location;
 		}
+		
+		public static Dictionary<XmlSpawner, int> SpawnersWithoutFit = new();
 
 		public int GetCreatureMax(int index)
 		{

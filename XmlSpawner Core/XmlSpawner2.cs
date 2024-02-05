@@ -11020,7 +11020,7 @@ public static void _TraceEnd(int index)
 					if (LogSlow && LogTarget != null)
 					{
 						var diff = DateTime.Now - start;
-						if (diff > TimeSpan.FromMilliseconds(10))
+						if (diff > SlowThreshold)
 						{
 							LogTarget.SendMessage($"{m_Spawner.Serial} {m_Spawner.Name} {m_Spawner.Location} {diff.TotalMilliseconds}ms");
 						}

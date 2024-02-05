@@ -1,10 +1,11 @@
-﻿//#define TRACE
+﻿#define TRACE
 //#define RESTRICTCONSTRUCTABLE
 
 using System;
 using System.Data;
 using System.IO;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Server.Items;
 using Server.Network;
 using Server.Targeting;
@@ -10990,9 +10991,12 @@ public static void _TraceEnd(int index)
 			}
 		}
 
-		private class SpawnerTimer : Timer
+		public class SpawnerTimer : Timer
 		{
 			private XmlSpawner m_Spawner;
+			public static bool LogSlow = false;
+			public static TimeSpan SlowThreshold = TimeSpan.FromMilliseconds(1000);
+			public static Mobile? LogTarget;
 
 			public SpawnerTimer(XmlSpawner spawner, TimeSpan delay)
 				: base(delay)
@@ -11009,7 +11013,19 @@ public static void _TraceEnd(int index)
 
 			protected override void OnTick()
 			{
-				if (m_Spawner != null && !m_Spawner.Deleted) m_Spawner.OnTick();
+				if (m_Spawner != null && !m_Spawner.Deleted)
+				{
+					var start = DateTime.Now;
+					m_Spawner.OnTick();
+					if (LogSlow && LogTarget != null)
+					{
+						var diff = DateTime.Now - start;
+						if (diff > TimeSpan.FromMilliseconds(10))
+						{
+							LogTarget.SendMessage($"{m_Spawner.Serial} {m_Spawner.Name} {m_Spawner.Location} {diff.TotalMilliseconds}ms");
+						}
+					}
+				}
 			}
 		}
 

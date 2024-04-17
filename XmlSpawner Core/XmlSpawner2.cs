@@ -7796,8 +7796,7 @@ public static void _TraceEnd(int index)
 						var item = (Item)o;
 						var despawned = false;
 						// check to see if the despawn time has elapsed.  If so, then delete it if it hasnt been picked up or stolen.
-						if (DespawnTime.TotalHours > 0 && !item.Deleted &&
-						    item.LastMoved < DateTime.Now - DespawnTime && item.Parent == Parent
+						if (DespawnTime.TotalHours > 0 && !item.Deleted && item.LastMoved < DateTime.UtcNow - DespawnTime && item.Parent == Parent
 						    && (!ItemFlags.GetTaken(item) ||
 						        item.Parent != null &&
 						        item.Parent == Parent)) // can despawn if just moved within the same container
@@ -7856,7 +7855,7 @@ public static void _TraceEnd(int index)
 						 * */
 						var despawned = false;
 						// check to see if the despawn time has elapsed.  If so, and the sector is not active then delete it.
-						if (DespawnTime.TotalHours > 0 && !m.Deleted && m.CreationTime < DateTime.Now - DespawnTime
+						if (DespawnTime.TotalHours > 0 && !m.Deleted && m.CreationTime < DateTime.UtcNow - DespawnTime
 						    && m.Map != null && m.Map != Map.Internal && !m.Map.GetSector(m.Location).Active)
 						{
 							//m.Delete();

@@ -126,7 +126,7 @@ namespace Server.Gumps
 			if (count < 0)
 				count = 0;
 			else if (count > EntryCount)
-				count = EntryCount;
+				count = EntryCount + 1; //First is xmlspawner type, ignored by gump
 
 			var lastIndex = page * EntryCount + count - 1;
 

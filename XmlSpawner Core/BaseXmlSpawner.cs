@@ -6767,17 +6767,14 @@ namespace Server.Mobiles
 										return false;
 									}
 
-									if (Core.AOS)
+									var item = Loot.Construct(Loot.NecromancyScrollTypes, index);
+									if (item != null)
 									{
-										var item = Loot.Construct(Loot.NecromancyScrollTypes, index);
-										if (item != null)
-										{
-											pack.DropItem(item);
-											// could call applyobjectstringproperties on a nested propertylist here to set item attributes
-											if (itemargstring != null)
-												ApplyObjectStringProperties(spawner, itemargstring, item, trigmob,
-													refobject, out status_str);
-										}
+										pack.DropItem(item);
+										// could call applyobjectstringproperties on a nested propertylist here to set item attributes
+										if (itemargstring != null)
+											ApplyObjectStringProperties(spawner, itemargstring, item, trigmob,
+												refobject, out status_str);
 									}
 								}
 								else

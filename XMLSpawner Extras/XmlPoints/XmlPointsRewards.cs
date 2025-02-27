@@ -49,7 +49,7 @@ namespace Server.Engines.XmlSpawner2
 			PointsRewardList.Add(new XmlPointsRewards(500, typeof(AncientSmithyHammer),
 				"+20 Ancient Smithy Hammer, 50 uses", 500, 0x13E4, new object[] { 20, 50 }));
 			PointsRewardList.Add(
-				new XmlPointsRewards(1500, typeof(RewardScroll), "1 Reward Scroll", 1500, 0x2D51, null));
+				new XmlPointsRewards(1500, typeof(XmlRewardScroll), "1 Reward Scroll", 1500, 0x2D51, null));
 			PointsRewardList.Add(new XmlPointsRewards(200, typeof(ColoredAnvil), "Colored Anvil", 400, 0xFAF, null));
 			PointsRewardList.Add(new XmlPointsRewards(100, typeof(PowderOfTemperament),
 				"Powder Of Temperament, 10 uses", 300, 4102, new object[] { 10 }));

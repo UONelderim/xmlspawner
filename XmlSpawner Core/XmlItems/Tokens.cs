@@ -34,7 +34,7 @@ namespace Server.Items
 
 		public override void OnDoubleClick(Mobile from)
 		{
-			from.AddToBackpack(new RewardScroll());
+			from.AddToBackpack(new XmlRewardScroll());
 			Delete();
 		}
 
@@ -62,10 +62,10 @@ namespace Server.Items
 		}
 	}
 
-	public class RewardScroll : BaseRewardScroll
+	public class XmlRewardScroll : BaseRewardScroll
 	{
 		[Constructable]
-		public RewardScroll()
+		public XmlRewardScroll()
 		{
 			Stackable = true;
 			Name = "Reward Scroll";
@@ -73,7 +73,7 @@ namespace Server.Items
 			LootType = LootType.Blessed;
 		}
 
-		public RewardScroll(Serial serial) : base(serial) { }
+		public XmlRewardScroll(Serial serial) : base(serial) { }
 
 		public override void Serialize(GenericWriter writer)
 		{

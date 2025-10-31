@@ -70,7 +70,7 @@ namespace Server.Mobiles
 					new Point3D(Location.X + EOffset.X, Location.Y + EOffset.Y, Location.Z + EOffset.Z), Map, EItemID,
 					EDuration, EHue, 0);
 
-				lasteffect = DateTime.Now;
+				lasteffect = DateTime.UtcNow;
 			}
 		}
 
@@ -98,7 +98,7 @@ namespace Server.Mobiles
 		{
 			base.OnThink();
 
-			if (lasteffect + TimeSpan.FromSeconds(1) < DateTime.Now) DisplayHighlight();
+			if (lasteffect + TimeSpan.FromSeconds(1) < DateTime.UtcNow) DisplayHighlight();
 		}
 
 		public override bool Move(Direction d)
@@ -163,22 +163,22 @@ namespace Server.Mobiles
 				int minutes;
 
 				Clock.GetTime(Map, Location.X, Location.Y, out hours, out minutes);
-				return new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, hours, minutes, 0)
+				return new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.UtcNow.Day, hours, minutes, 0)
 					.TimeOfDay;
 			}
 		}
 
 		[CommandProperty(AccessLevel.GameMaster)]
-		public TimeSpan RealTOD => DateTime.Now.TimeOfDay;
+		public TimeSpan RealTOD => DateTime.UtcNow.TimeOfDay;
 
 		[CommandProperty(AccessLevel.GameMaster)]
-		public int RealDay => DateTime.Now.Day;
+		public int RealDay => DateTime.UtcNow.Day;
 
 		[CommandProperty(AccessLevel.GameMaster)]
-		public int RealMonth => DateTime.Now.Month;
+		public int RealMonth => DateTime.UtcNow.Month;
 
 		[CommandProperty(AccessLevel.GameMaster)]
-		public DayOfWeek RealDayOfWeek => DateTime.Now.DayOfWeek;
+		public DayOfWeek RealDayOfWeek => DateTime.UtcNow.DayOfWeek;
 
 
 		[CommandProperty(AccessLevel.GameMaster)]

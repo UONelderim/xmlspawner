@@ -381,18 +381,18 @@ namespace Server.Mobiles
 				int minutes;
 
 				Clock.GetTime(Map, Location.X, Location.Y, out hours, out minutes);
-				return new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, hours, minutes, 0)
+				return new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.UtcNow.Day, hours, minutes, 0)
 					.TimeOfDay;
 			}
 		}
 
-		public TimeSpan RealTOD => DateTime.Now.TimeOfDay;
+		public TimeSpan RealTOD => DateTime.UtcNow.TimeOfDay;
 
-		public int RealDay => DateTime.Now.Day;
+		public int RealDay => DateTime.UtcNow.Day;
 
-		public int RealMonth => DateTime.Now.Month;
+		public int RealMonth => DateTime.UtcNow.Month;
 
-		public DayOfWeek RealDayOfWeek => DateTime.Now.DayOfWeek;
+		public DayOfWeek RealDayOfWeek => DateTime.UtcNow.DayOfWeek;
 
 		public MoonPhase MoonPhase => Clock.GetMoonPhase(Map, Location.X, Location.Y);
 
@@ -611,7 +611,7 @@ namespace Server.Mobiles
 									using (var op = new StreamWriter("badspawn.log", true))
 									{
 										op.WriteLine("{0} SmartSpawning disabled at {1} {2} : Range too large.",
-											DateTime.Now, loc, Map);
+											DateTime.UtcNow, loc, Map);
 										op.WriteLine();
 									}
 								}
@@ -1356,7 +1356,7 @@ namespace Server.Mobiles
 			get
 			{
 				if (m_refractActivated)
-					return m_RefractEnd - DateTime.Now;
+					return m_RefractEnd - DateTime.UtcNow;
 				else
 					return TimeSpan.FromSeconds(0);
 			}
@@ -1487,11 +1487,11 @@ namespace Server.Mobiles
 					int hours;
 					int minutes;
 					Clock.GetTime(Map, Location.X, Location.Y, out hours, out minutes);
-					return new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, hours, minutes, 0)
+					return new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.UtcNow.Day, hours, minutes, 0)
 						.TimeOfDay;
 				}
 				else
-					return DateTime.Now.TimeOfDay;
+					return DateTime.UtcNow.TimeOfDay;
 			}
 		}
 
@@ -1518,11 +1518,11 @@ namespace Server.Mobiles
 					int hours;
 					int minutes;
 					Clock.GetTime(Map, Location.X, Location.Y, out hours, out minutes);
-					now = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, hours, minutes, 0);
+					now = new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.UtcNow.Day, hours, minutes, 0);
 				}
 				else
 					// calculate the time window
-					now = DateTime.Now;
+					now = DateTime.UtcNow;
 
 				day_start = new DateTime(now.Year, now.Month, now.Day);
 				// calculate the starting TOD window by adding the TODStart to day_start
@@ -1573,7 +1573,7 @@ namespace Server.Mobiles
 			get
 			{
 				if (m_durActivated)
-					return m_DurEnd - DateTime.Now;
+					return m_DurEnd - DateTime.UtcNow;
 				else
 					return TimeSpan.FromSeconds(0);
 			}
@@ -1709,7 +1709,7 @@ namespace Server.Mobiles
 			get
 			{
 				if (m_Running)
-					return m_End - DateTime.Now;
+					return m_End - DateTime.UtcNow;
 				else
 					return TimeSpan.FromSeconds(0);
 			}
@@ -1758,12 +1758,12 @@ namespace Server.Mobiles
 		{
 			get
 			{
-				if (m_Running && m_SeqEnd - DateTime.Now > TimeSpan.Zero)
-					return m_SeqEnd - DateTime.Now;
+				if (m_Running && m_SeqEnd - DateTime.UtcNow > TimeSpan.Zero)
+					return m_SeqEnd - DateTime.UtcNow;
 				else
 					return TimeSpan.FromSeconds(0);
 			}
-			set => m_SeqEnd = DateTime.Now + value;
+			set => m_SeqEnd = DateTime.UtcNow + value;
 		}
 
 		[CommandProperty(AccessLevel.GameMaster)]
@@ -1842,7 +1842,7 @@ namespace Server.Mobiles
 			set
 			{
 				m_FirstModifiedBy = value;
-				m_FirstModified = DateTime.Now;
+				m_FirstModified = DateTime.UtcNow;
 			}
 		}
 
@@ -1853,7 +1853,7 @@ namespace Server.Mobiles
 			set
 			{
 				m_LastModifiedBy = value;
-				m_LastModified = DateTime.Now;
+				m_LastModified = DateTime.UtcNow;
 			}
 		}
 
@@ -2777,20 +2777,20 @@ private static DateTime[] _traceStart = new DateTime[MaxTraces];
 public static TimeSpan[] _traceTotal = new TimeSpan[MaxTraces];
 public static string[] _traceName = new string[MaxTraces];
 public static int[] _traceCount = new int[MaxTraces];
-private static DateTime _traceStartTime = DateTime.Now;
+private static DateTime _traceStartTime = DateTime.UtcNow;
 private static double _startProcessTime = 0;
 
 public static void _TraceStart(int index)
 {
 	   if(index < MaxTraces){
-			_traceStart[index] = DateTime.Now;
+			_traceStart[index] = DateTime.UtcNow;
 			//_traceStart[index] =  Process.GetCurrentProcess().UserProcessorTime;
 		}
 }
 public static void _TraceEnd(int index)
 {
 	   if(index < MaxTraces){
-				XmlSpawner._traceTotal[index] = XmlSpawner._traceTotal[index].Add(DateTime.Now - _traceStart[index]);
+				XmlSpawner._traceTotal[index] = XmlSpawner._traceTotal[index].Add(DateTime.UtcNow - _traceStart[index]);
 				//XmlSpawner._traceTotal[index] = XmlSpawner._traceTotal[index].Add(Process.GetCurrentProcess().UserProcessorTime - _traceStart[index]);
 				XmlSpawner._traceCount[index]++;
 	   }
@@ -5634,7 +5634,7 @@ public static void _TraceEnd(int index)
 									using (var op = new StreamWriter("badimport.log", true))
 									{
 										op.WriteLine("{0} MSFImport Error; inconsistent entry count {1} {2}",
-											DateTime.Now, location, map);
+											DateTime.UtcNow, location, map);
 										op.WriteLine();
 									}
 								}
@@ -5655,7 +5655,7 @@ public static void _TraceEnd(int index)
 							{
 								op.WriteLine(
 									"{0} MSFImport: Individual entry setting differences listed above from spawner at {1} {2}",
-									DateTime.Now, location, map);
+									DateTime.UtcNow, location, map);
 								op.WriteLine();
 							}
 						}
@@ -6360,7 +6360,7 @@ public static void _TraceEnd(int index)
 								{
 									using (var op = new StreamWriter("badxml.log", true))
 									{
-										op.WriteLine("# Invalid spawner : {0}: Fileposition {1} {2}", DateTime.Now,
+										op.WriteLine("# Invalid spawner : {0}: Fileposition {1} {2}", DateTime.UtcNow,
 											fileposition, filename);
 										op.WriteLine();
 									}
@@ -6384,7 +6384,7 @@ public static void _TraceEnd(int index)
 									{
 										op.WriteLine(
 											"# Questionable spawner : {0}: Format: X Y Z Map SpawnerName Fileposition Xmlfile",
-											DateTime.Now);
+											DateTime.UtcNow);
 										op.WriteLine("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}", SpawnCentreX, SpawnCentreY,
 											SpawnCentreZ, XmlMapName, SpawnName, fileposition, filename);
 										op.WriteLine();
@@ -6588,7 +6588,7 @@ public static void _TraceEnd(int index)
 										{
 											op.WriteLine(
 												"# Failed SetItemProperty Object initialization : {0}: Format: ObjectName X Y Z Map SpawnerName Xmlfile",
-												DateTime.Now);
+												DateTime.UtcNow);
 											op.WriteLine("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}",
 												setObjectName, OldSpawner.Location.X, OldSpawner.Location.Y,
 												OldSpawner.Location.Z, OldSpawner.Map, OldSpawner.Name, filename);
@@ -6642,7 +6642,7 @@ public static void _TraceEnd(int index)
 										{
 											op.WriteLine(
 												"# Failed TriggerObject initialization : {0}: Format: ObjectName X Y Z Map SpawnerName Xmlfile",
-												DateTime.Now);
+												DateTime.UtcNow);
 											op.WriteLine("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}",
 												triggerObjectName, OldSpawner.Location.X, OldSpawner.Location.Y,
 												OldSpawner.Location.Z, OldSpawner.Map, OldSpawner.Name, filename);
@@ -7523,7 +7523,7 @@ public static void _TraceEnd(int index)
 		public static void XmlTrace_OnCommand( CommandEventArgs e )
 		{
 			Process currentprocess = Process.GetCurrentProcess();
-			TimeSpan runningtime = DateTime.Now - XmlSpawner._traceStartTime;
+			TimeSpan runningtime = DateTime.UtcNow - XmlSpawner._traceStartTime;
 			double processtime = currentprocess.UserProcessorTime.TotalMilliseconds - _startProcessTime;
 			double sysload = 0;
 
@@ -7564,7 +7564,7 @@ public static void _TraceEnd(int index)
 						XmlSpawner._traceCount[i] = 0;
 						XmlSpawner._traceTotal[i] = TimeSpan.Zero;
 				}
-				XmlSpawner._traceStartTime = DateTime.Now;
+				XmlSpawner._traceStartTime = DateTime.UtcNow;
 
 				Process currentprocess = Process.GetCurrentProcess();
 				_startProcessTime = currentprocess.UserProcessorTime.TotalMilliseconds;
@@ -7843,14 +7843,14 @@ public static void _TraceEnd(int index)
 						// doesnt work properly under RunUO 2.0 and also doesnt properly take spawn control keywords into consideration
 						// when repositioning, so disable this for now
 						/*
-						if (SpawnIdleTime > 0 && !m.Deleted && !(m is BaseVendor) && (m.CreationTime < DateTime.Now - TimeSpan.FromHours(SpawnIdleTime))
+						if (SpawnIdleTime > 0 && !m.Deleted && !(m is BaseVendor) && (m.CreationTime < DateTime.UtcNow - TimeSpan.FromHours(SpawnIdleTime))
 							&& m.Map != null && m.Map != Map.Internal && !m.Map.GetSector(m.Location).Active)
 						{
 							// determine whether the requiresurface flag is set
 							m.Location = GetSpawnPosition(so.RequireSurface, m);
 
 							// and reset the creation time (simulates respawning the identical mob at a new location)
-							//m.CreationTime = DateTime.Now;
+							//m.CreationTime = DateTime.UtcNow;
 						}
 						 * */
 						var despawned = false;
@@ -8802,7 +8802,7 @@ public static void _TraceEnd(int index)
 				if (TheSpawn.SpawnedThisTick && !ignoreloopprotection) return false;
 
 				// check the nextspawn time to see if it is available
-				if (TheSpawn.NextSpawn > DateTime.Now)
+				if (TheSpawn.NextSpawn > DateTime.UtcNow)
 					return false;
 
 				var CurrentCreatureMax = TheSpawn.MaxCount;
@@ -9471,7 +9471,7 @@ public static void _TraceEnd(int index)
 				{
 					var so = m_SpawnObjects[i];
 
-					so.NextSpawn = DateTime.Now;
+					so.NextSpawn = DateTime.UtcNow;
 				}
 		}
 
@@ -9482,12 +9482,12 @@ public static void _TraceEnd(int index)
 			var mind = (int)(so.MinDelay * 60);
 			var maxd = (int)(so.MaxDelay * 60);
 			if (mind < 0 || maxd < 0)
-				so.NextSpawn = DateTime.Now;
+				so.NextSpawn = DateTime.UtcNow;
 			else
 			{
 				var delay = TimeSpan.FromSeconds(Utility.RandomMinMax(mind, maxd));
 
-				so.NextSpawn = DateTime.Now + delay;
+				so.NextSpawn = DateTime.UtcNow + delay;
 			}
 		}
 
@@ -10896,7 +10896,7 @@ public static void _TraceEnd(int index)
 
 					using (var op = new StreamWriter("badspawn.log", true))
 					{
-						op.WriteLine("# Bad spawns : {0}", DateTime.Now);
+						op.WriteLine("# Bad spawns : {0}", DateTime.UtcNow);
 						op.WriteLine("# Format: X Y Z F Name");
 						op.WriteLine();
 
@@ -10931,7 +10931,7 @@ public static void _TraceEnd(int index)
 			if (!m_Running)
 				return;
 
-			m_End = DateTime.Now + delay;
+			m_End = DateTime.UtcNow + delay;
 
 			if (m_Timer != null)
 				m_Timer.Stop();
@@ -10942,7 +10942,7 @@ public static void _TraceEnd(int index)
 
 		public void DoTimer2(TimeSpan delay)
 		{
-			m_DurEnd = DateTime.Now + delay;
+			m_DurEnd = DateTime.UtcNow + delay;
 			if (m_Duration > TimeSpan.FromMinutes(0) || m_durActivated == true)
 			{
 				if (m_DurTimer != null)
@@ -10958,7 +10958,7 @@ public static void _TraceEnd(int index)
 			//            if ( !m_proximityActivated )
 			//                return;
 
-			m_RefractEnd = DateTime.Now + delay;
+			m_RefractEnd = DateTime.UtcNow + delay;
 			m_refractActivated = true;
 
 			if (m_RefractoryTimer != null)
@@ -11014,11 +11014,11 @@ public static void _TraceEnd(int index)
 			{
 				if (m_Spawner != null && !m_Spawner.Deleted)
 				{
-					var start = DateTime.Now;
+					var start = DateTime.UtcNow;
 					m_Spawner.OnTick();
 					if (LogSlow && LogTarget != null)
 					{
-						var diff = DateTime.Now - start;
+						var diff = DateTime.UtcNow - start;
 						if (diff > SlowThreshold)
 						{
 							LogTarget.SendMessage($"{m_Spawner.Serial} {m_Spawner.Name} {m_Spawner.Location} {diff.TotalMilliseconds}ms");
@@ -11231,9 +11231,9 @@ public static void _TraceEnd(int index)
 			writer.Write(m_MinRefractory);
 			writer.Write(m_MaxRefractory);
 			if (m_refractActivated)
-				writer.Write(m_RefractEnd - DateTime.Now);
+				writer.Write(m_RefractEnd - DateTime.UtcNow);
 			if (m_durActivated)
-				writer.Write(m_DurEnd - DateTime.Now);
+				writer.Write(m_DurEnd - DateTime.UtcNow);
 			// Version 3
 			writer.Write(m_ShowContainerStatic);
 			// Version 2
@@ -11259,7 +11259,7 @@ public static void _TraceEnd(int index)
 			writer.Write(m_Running);
 
 			if (m_Running)
-				writer.Write(m_End - DateTime.Now);
+				writer.Write(m_End - DateTime.UtcNow);
 
 			// Write the spawn object list
 			var nso = 0;
@@ -11491,7 +11491,7 @@ public static void _TraceEnd(int index)
 					hasnewobjectinfo = true;
 					m_SequentialSpawning = reader.ReadInt();
 					var seqdelay = reader.ReadTimeSpan();
-					m_SeqEnd = DateTime.Now + seqdelay;
+					m_SeqEnd = DateTime.UtcNow + seqdelay;
 					if (version < 20) tmpSpawnListSize = reader.ReadInt();
 					tmpSubGroup = new List<int>(tmpSpawnListSize);
 					tmpSequentialResetTime = new List<double>(tmpSpawnListSize);

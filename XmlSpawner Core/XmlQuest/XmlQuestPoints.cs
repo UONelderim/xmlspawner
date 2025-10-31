@@ -90,7 +90,7 @@ namespace Server.Engines.XmlSpawner2
 				if (quest != null)
 				{
 					WhenStarted = quest.TimeCreated;
-					WhenCompleted = DateTime.Now;
+					WhenCompleted = DateTime.UtcNow;
 					Difficulty = quest.Difficulty;
 					Name = quest.Name;
 				}
@@ -146,7 +146,7 @@ namespace Server.Engines.XmlSpawner2
 						// found a match, so just change the number and dates
 						e.TimesCompleted++;
 						e.WhenStarted = quest.TimeCreated;
-						e.WhenCompleted = DateTime.Now;
+						e.WhenCompleted = DateTime.UtcNow;
 						// and update the difficulty and party status
 						e.Difficulty = quest.Difficulty;
 						e.PartyEnabled = quest.PartyEnabled;

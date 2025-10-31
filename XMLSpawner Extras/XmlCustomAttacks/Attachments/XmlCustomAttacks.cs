@@ -227,7 +227,7 @@ namespace Server.Engines.XmlSpawner2
 					// lose target focus
 					defender.Combatant = null;
 					// flee
-					if (defender is BaseCreature) ((BaseCreature)defender).ForceFleeUntil = DateTime.Now.AddSeconds(6);
+					if (defender is BaseCreature) ((BaseCreature)defender).ForceFleeUntil = DateTime.UtcNow.AddSeconds(6);
 					// and become paralyzed
 					defender.Freeze(TimeSpan.FromSeconds(3));
 					defender.FixedEffect(0x376A, 9, 32);

@@ -67,12 +67,12 @@ namespace Server.Mobiles
 				if (Searchagedirection)
 				{
 					// true means allow only mobs greater than the age
-					if (DateTime.Now - a.CreationTime > TimeSpan.FromHours(Searchage)) return true;
+					if (DateTime.UtcNow - a.CreationTime > TimeSpan.FromHours(Searchage)) return true;
 				}
 				else
 				{
 					// false means allow only mobs less than the age
-					if (DateTime.Now - a.CreationTime < TimeSpan.FromHours(Searchage)) return true;
+					if (DateTime.UtcNow - a.CreationTime < TimeSpan.FromHours(Searchage)) return true;
 				}
 			}
 

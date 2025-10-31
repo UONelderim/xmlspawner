@@ -908,7 +908,7 @@ namespace Server.Engines.XmlSpawner2
 					}
 			}
 
-			m_EndTime = DateTime.Now + Refractory;
+			m_EndTime = DateTime.UtcNow + Refractory;
 		}
 
 		public override void Serialize(GenericWriter writer)
@@ -937,7 +937,7 @@ namespace Server.Engines.XmlSpawner2
 				writer.Write((int)0);
 
 			writer.Write(m_Refractory);
-			writer.Write(m_EndTime - DateTime.Now);
+			writer.Write(m_EndTime - DateTime.UtcNow);
 		}
 
 		public override void Deserialize(GenericReader reader)
@@ -989,7 +989,7 @@ namespace Server.Engines.XmlSpawner2
 
 					Refractory = reader.ReadTimeSpan();
 					var remaining = reader.ReadTimeSpan();
-					m_EndTime = DateTime.Now + remaining;
+					m_EndTime = DateTime.UtcNow + remaining;
 					break;
 			}
 		}

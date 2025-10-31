@@ -2345,7 +2345,7 @@ namespace Server.Engines.XmlSpawner2
 						op.WriteLine("Operating System: {0}", Environment.OSVersion);
 						op.WriteLine(".NET Framework: {0}", Environment.Version);
 						op.WriteLine("XmlSpawner2: {0}", XmlSpawner.Version);
-						op.WriteLine("Time: {0}", DateTime.Now);
+						op.WriteLine("Time: {0}", DateTime.UtcNow);
 
 						op.WriteLine();
 
@@ -2370,7 +2370,7 @@ namespace Server.Engines.XmlSpawner2
 
 			private static string GetTimeStamp()
 			{
-				var now = DateTime.Now;
+				var now = DateTime.UtcNow;
 
 				return String.Format("{0}-{1}-{2}-{3}-{4}-{5}",
 					now.Day,

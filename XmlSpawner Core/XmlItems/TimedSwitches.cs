@@ -63,7 +63,7 @@ namespace Server.Items
 			get
 			{
 				if (m_Timer != null && m_Timer.Running)
-					return m_End - DateTime.Now;
+					return m_End - DateTime.UtcNow;
 				else
 					return TimeSpan.FromSeconds(0);
 			}
@@ -124,7 +124,7 @@ namespace Server.Items
 
 		public void DoTimer(TimeSpan delay)
 		{
-			m_End = DateTime.Now + delay;
+			m_End = DateTime.UtcNow + delay;
 
 			if (m_Timer != null)
 				m_Timer.Stop();
@@ -167,7 +167,7 @@ namespace Server.Items
 			var running = m_Timer != null && m_Timer.Running;
 			writer.Write(running);
 			if (m_Timer != null && m_Timer.Running)
-				writer.Write(m_End - DateTime.Now);
+				writer.Write(m_End - DateTime.UtcNow);
 		}
 
 		public override void Deserialize(GenericReader reader)

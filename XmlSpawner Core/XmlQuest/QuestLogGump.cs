@@ -360,7 +360,7 @@ namespace Server.Gumps
 							AddLabel(560 - xoffset, y, color, "Not Repeatable");
 						else
 						{
-							var nexttime = DateTime.Now + qa.Expiration;
+							var nexttime = DateTime.UtcNow + qa.Expiration;
 							AddLabel(560 - xoffset, y, color, nexttime.ToString());
 						}
 					}

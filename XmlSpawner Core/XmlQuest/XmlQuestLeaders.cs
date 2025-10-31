@@ -205,13 +205,13 @@ namespace Server.Engines.XmlSpawner2
 					// check for any ranking change and update rank date
 					if (r.Rank != a.Rank)
 					{
-						a.WhenRanked = DateTime.Now;
+						a.WhenRanked = DateTime.UtcNow;
 						if (a.Rank > 0)
 							a.DeltaRank = a.Rank - r.Rank;
 						a.Rank = r.Rank;
 					}
 
-					var timeranked = DateTime.Now - a.WhenRanked;
+					var timeranked = DateTime.UtcNow - a.WhenRanked;
 
 					// write out the entry information
 
@@ -298,13 +298,13 @@ namespace Server.Engines.XmlSpawner2
 					// check for any ranking change and update rank date
 					if (r.Rank != a.Rank)
 					{
-						a.WhenRanked = DateTime.Now;
+						a.WhenRanked = DateTime.UtcNow;
 						if (a.Rank > 0)
 							a.DeltaRank = a.Rank - r.Rank;
 						a.Rank = r.Rank;
 					}
 
-					var timeranked = DateTime.Now - a.WhenRanked;
+					var timeranked = DateTime.UtcNow - a.WhenRanked;
 
 					var quests = "???";
 					try
@@ -540,7 +540,7 @@ namespace Server.Engines.XmlSpawner2
 						// check for any ranking change and update rank date
 						if (r.Rank != a.Rank)
 						{
-							a.WhenRanked = DateTime.Now;
+							a.WhenRanked = DateTime.UtcNow;
 							if (a.Rank > 0)
 								a.DeltaRank = a.Rank - r.Rank;
 							a.Rank = r.Rank;
@@ -590,7 +590,7 @@ namespace Server.Engines.XmlSpawner2
 
 						count++;
 
-						var timeranked = DateTime.Now - a.WhenRanked;
+						var timeranked = DateTime.UtcNow - a.WhenRanked;
 
 						var days = (int)timeranked.TotalDays;
 						var hours = (int)(timeranked.TotalHours - days * 24);

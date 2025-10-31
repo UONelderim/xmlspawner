@@ -247,22 +247,22 @@ namespace Server.Engines.XmlSpawner2
 				}
 
 				Clock.GetTime(map, x, y, out hours, out minutes);
-				return new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, hours, minutes, 0)
+				return new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.UtcNow.Day, hours, minutes, 0)
 					.TimeOfDay;
 			}
 		}
 
 		[CommandProperty(AccessLevel.GameMaster)]
-		public TimeSpan RealTOD => DateTime.Now.TimeOfDay;
+		public TimeSpan RealTOD => DateTime.UtcNow.TimeOfDay;
 
 		[CommandProperty(AccessLevel.GameMaster)]
-		public int RealDay => DateTime.Now.Day;
+		public int RealDay => DateTime.UtcNow.Day;
 
 		[CommandProperty(AccessLevel.GameMaster)]
-		public int RealMonth => DateTime.Now.Month;
+		public int RealMonth => DateTime.UtcNow.Month;
 
 		[CommandProperty(AccessLevel.GameMaster)]
-		public DayOfWeek RealDayOfWeek => DateTime.Now.DayOfWeek;
+		public DayOfWeek RealDayOfWeek => DateTime.UtcNow.DayOfWeek;
 
 
 		[CommandProperty(AccessLevel.GameMaster)]
@@ -928,7 +928,7 @@ namespace Server.Engines.XmlSpawner2
 					if (CurrentEntry != null && CurrentEntry.Pause > 0)
 						pause = TimeSpan.FromSeconds(CurrentEntry.Pause);
 					// check to see if the current pause interval has elapsed
-					if (DateTime.Now - pause > m_LastInteraction)
+					if (DateTime.UtcNow - pause > m_LastInteraction)
 					{
 						// process speech that is not keyword dependent
 						CheckForReset();
@@ -961,7 +961,7 @@ namespace Server.Engines.XmlSpawner2
 		{
 			// check to see if the interaction time has elapsed or player has gone out of range.  If so then reset to entry zero
 			if (!m_HoldProcessing &&
-			    (DateTime.Now - ResetTime > m_LastInteraction ||
+			    (DateTime.UtcNow - ResetTime > m_LastInteraction ||
 			     AttachedTo is IEntity && m_ActivePlayer != null &&
 			     !IsInRange(m_ActivePlayer, (IEntity)AttachedTo, ResetRange)))
 				Reset();
@@ -1016,7 +1016,7 @@ namespace Server.Engines.XmlSpawner2
 				}
 
 				IsActive = true;
-				m_LastInteraction = DateTime.Now;
+				m_LastInteraction = DateTime.UtcNow;
 
 				// execute any action associated with it
 				// allow for multiple action strings on a single line separated by a semicolon
@@ -1131,7 +1131,7 @@ namespace Server.Engines.XmlSpawner2
 					if (m_npc.CurrentEntry != null && m_npc.CurrentEntry.Pause > 0)
 						pause = TimeSpan.FromSeconds(m_npc.CurrentEntry.Pause);
 					// check to see if the current pause interval has elapsed
-					if (DateTime.Now - pause > m_npc.LastInteraction)
+					if (DateTime.UtcNow - pause > m_npc.LastInteraction)
 					{
 						// process speech that is not keyword dependent
 

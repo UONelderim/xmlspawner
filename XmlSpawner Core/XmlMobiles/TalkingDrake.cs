@@ -43,13 +43,6 @@ namespace Server.Mobiles
 			SetSpecialAbility(SpecialAbility.DragonBreath);
 		}
 
-		public override void GenerateLoot()
-		{
-			AddLoot(LootPack.Rich);
-			AddLoot(LootPack.MedScrolls, 2);
-			AddLoot(LootPack.MageryRegs, 3);
-		}
-
 		public override int TreasureMapLevel => 2;
 		public override int Meat => 10;
 		public override int Hides => 20;

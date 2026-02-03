@@ -1835,16 +1835,7 @@ namespace Server.Mobiles
 
 							// execute the command on the objects in the list
 
-							if (executelist.Count > 20)
-								CommandLogging.Enabled = false;
-
 							c.ExecuteList(e, executelist);
-
-							if (executelist.Count > 20)
-							{
-								flushToLog = true;
-								CommandLogging.Enabled = true;
-							}
 
 							c.Flush(@from, flushToLog);
 							return;

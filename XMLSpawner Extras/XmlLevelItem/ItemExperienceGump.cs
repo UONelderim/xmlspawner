@@ -33,7 +33,7 @@ namespace Server.Gumps
 			m_Cat = cat;
 			m_Page = page;
 
-			from.CloseGump(typeof(ItemExperienceGump));
+			from.CloseGump<ItemExperienceGump>();
 
 			Closable = true;
 			Disposable = true;

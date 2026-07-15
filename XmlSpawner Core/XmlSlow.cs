@@ -15,7 +15,7 @@ namespace Server.Commands
 		public static void OnCommand(CommandEventArgs e)
 		{
 			PlayerMobile pm = (PlayerMobile)e.Mobile;
-			pm.CloseGump(typeof(XmlSlowGump));
+			pm.CloseGump<XmlSlowGump>();
 			pm.SendGump(new XmlSlowGump());
 		}
 	}

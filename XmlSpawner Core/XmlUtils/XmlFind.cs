@@ -2143,7 +2143,7 @@ namespace Server.Mobiles
 						{
 							var e = (SearchEntry)m_SearchList[i + DisplayFrom];
 
-							state.Mobile.CloseGump(typeof(XmlGetAttGump));
+							state.Mobile.CloseGump<XmlGetAttGump>();
 							state.Mobile.SendGump(new XmlGetAttGump(state.Mobile, e.Object, 10, 10));
 						}
 					}

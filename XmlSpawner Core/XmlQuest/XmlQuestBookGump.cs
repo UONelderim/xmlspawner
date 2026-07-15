@@ -102,7 +102,7 @@ namespace Server.Gumps
 							if (o != null && !o.Deleted)
 							{
 								m_From.SendGump(new XmlQuestBookGump(m_From, m_Book, m_Page, null));
-								m_From.CloseGump(typeof(XmlQuestStatusGump));
+								m_From.CloseGump<XmlQuestStatusGump>();
 								m_From.SendGump(new XmlQuestStatusGump(o, o.TitleString, 320, 0, true));
 							}
 						}
@@ -139,7 +139,7 @@ namespace Server.Gumps
 
 		public XmlQuestBookGump(PlayerMobile from, XmlQuestBook book, int page, ArrayList list) : base(12, 24)
 		{
-			from.CloseGump(typeof(XmlQuestBookGump));
+			from.CloseGump<XmlQuestBookGump>();
 
 			m_From = from;
 			m_Book = book;

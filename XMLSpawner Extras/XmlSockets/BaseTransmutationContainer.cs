@@ -109,7 +109,7 @@ namespace Server.Items
 				if (m_From == null || m_Box == null || m_Box.Deleted) return;
 
 				// open the transmutation gump
-				m_From.CloseGump(typeof(TransmuteGump));
+				m_From.CloseGump<TransmuteGump>();
 				m_From.SendGump(new TransmuteGump(m_From, m_Box, null));
 			}
 		}
@@ -125,7 +125,7 @@ namespace Server.Items
 		{
 			if (from != null)
 			{
-				from.CloseGump(typeof(TransmuteGump));
+				from.CloseGump<TransmuteGump>();
 				from.SendGump(new TransmuteGump(from, this, item));
 			}
 		}
@@ -137,7 +137,7 @@ namespace Server.Items
 
 			if (from != null && diddrop)
 			{
-				from.CloseGump(typeof(TransmuteGump));
+				from.CloseGump<TransmuteGump>();
 				from.SendGump(new TransmuteGump(from, this, null));
 			}
 
@@ -150,7 +150,7 @@ namespace Server.Items
 
 			if (from != null && diddrop)
 			{
-				from.CloseGump(typeof(TransmuteGump));
+				from.CloseGump<TransmuteGump>();
 				from.SendGump(new TransmuteGump(from, this, null));
 			}
 

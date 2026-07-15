@@ -1139,7 +1139,7 @@ namespace Server.Engines.XmlSpawner2
 		public static void TopPlayers_OnCommand(CommandEventArgs e)
 		{
 			var attachment = XmlAttach.FindAttachment(e.Mobile, typeof(XmlPoints)) as XmlPoints;
-			e.Mobile.CloseGump(typeof(TopPlayersGump));
+			e.Mobile.CloseGump<TopPlayersGump>();
 			if (attachment != null)
 				e.Mobile.SendGump(new TopPlayersGump(attachment));
 		}
@@ -1860,7 +1860,7 @@ namespace Server.Engines.XmlSpawner2
 			// update the top players gump if it is open
 			if (killer.HasGump(typeof(TopPlayersGump)))
 			{
-				killer.CloseGump(typeof(TopPlayersGump));
+				killer.CloseGump<TopPlayersGump>();
 				killer.SendGump(new TopPlayersGump(this));
 			}
 		}
@@ -2205,7 +2205,7 @@ namespace Server.Engines.XmlSpawner2
 			// display the points info gump
 			if (from != null)
 			{
-				from.CloseGump(typeof(PointsGump));
+				from.CloseGump<PointsGump>();
 				from.SendGump(new PointsGump(this, from, (Mobile)AttachedTo, msg.ToString()));
 			}
 
@@ -2360,7 +2360,7 @@ namespace Server.Engines.XmlSpawner2
 						break;
 					case 300:
 						// top players
-						state.Mobile.CloseGump(typeof(TopPlayersGump));
+						state.Mobile.CloseGump<TopPlayersGump>();
 						state.Mobile.SendGump(new TopPlayersGump(m_attachment));
 
 						state.Mobile.SendGump(new PointsGump(m_attachment, state.Mobile, m_target, m_text));
@@ -2692,7 +2692,7 @@ namespace Server.Engines.XmlSpawner2
 
 				var atarg = (XmlPoints)XmlAttach.FindAttachment(target, typeof(XmlPoints));
 
-				from.CloseGump(typeof(IssueChallengeGump));
+				from.CloseGump<IssueChallengeGump>();
 
 				if (a == null || a.Deleted || atarg == null || atarg.Deleted)
 				{

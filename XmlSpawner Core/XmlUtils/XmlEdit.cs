@@ -657,7 +657,7 @@ namespace Server.Engines.XmlSpawner2
 			}
 
 
-			from.CloseGump(typeof(XmlEditDialogGump));
+			from.CloseGump<XmlEditDialogGump>();
 
 			//from.SendGump( new XmlEditDialogGump(from, false, m_Dialog, selected, displayfrom, savefilename, false, null, X, Y) );
 			from.SendGump(new XmlEditDialogGump(from, true, dialog, selected, displayfrom, savefile, false, null, 0,
@@ -1141,7 +1141,7 @@ namespace Server.Engines.XmlSpawner2
 
 							if (m_Gump != null)
 							{
-								state.Mobile.CloseGump(typeof(XmlEditDialogGump));
+								state.Mobile.CloseGump<XmlEditDialogGump>();
 								m_Gump.Refresh(state);
 							}
 						}

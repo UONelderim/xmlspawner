@@ -90,7 +90,7 @@ namespace Server.Gumps
 					// if this player has an XmlQuestPoints attachment, find it
 					var p = (XmlQuestPoints)XmlAttach.FindAttachment(m_From, typeof(XmlQuestPoints));
 
-					m_From.CloseGump(typeof(XmlQuestLeaders.TopQuestPlayersGump));
+					m_From.CloseGump<XmlQuestLeaders.TopQuestPlayersGump>();
 					m_From.SendGump(new XmlQuestLeaders.TopQuestPlayersGump(p));
 
 					break;
@@ -113,7 +113,7 @@ namespace Server.Gumps
 							if (o != null && !o.Deleted)
 							{
 								m_From.SendGump(new XMLQuestLogGump(m_From, m_Page, null));
-								m_From.CloseGump(typeof(XmlQuestStatusGump));
+								m_From.CloseGump<XmlQuestStatusGump>();
 								m_From.SendGump(new XmlQuestStatusGump(o, o.TitleString, 320, 0, true));
 							}
 						}
@@ -129,7 +129,7 @@ namespace Server.Gumps
 		{
 			if (from == null) return;
 
-			from.CloseGump(typeof(XMLQuestLogGump));
+			from.CloseGump<XMLQuestLogGump>();
 
 			var p = (XmlQuestPoints)XmlAttach.FindAttachment(from, typeof(XmlQuestPoints));
 

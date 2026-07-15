@@ -1057,7 +1057,7 @@ namespace Server.Engines.XmlSpawner2
 
 			if (from != null)
 			{
-				from.CloseGump(typeof(MobFactionGump));
+				from.CloseGump<MobFactionGump>();
 				from.SendGump(new MobFactionGump(from, this, gumpmsg.ToString()));
 			}
 

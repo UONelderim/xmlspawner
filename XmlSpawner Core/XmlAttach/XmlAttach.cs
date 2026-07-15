@@ -1542,7 +1542,7 @@ namespace Server.Engines.XmlSpawner2
 
 			if (msg != null)
 			{
-				from.CloseGump(typeof(DisplayAttachmentGump));
+				from.CloseGump<DisplayAttachmentGump>();
 				from.SendMessage("Hidden attributes revealed!");
 
 				from.SendGump(new DisplayAttachmentGump(from, msg, 0, 0));

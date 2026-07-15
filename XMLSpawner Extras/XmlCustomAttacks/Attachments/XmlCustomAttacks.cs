@@ -788,7 +788,7 @@ namespace Server.Engines.XmlSpawner2
 		{
 			// open the specials gump
 			if (parent != null && parent is Mobile && ((Mobile)parent).Player)
-				((Mobile)parent).CloseGump(typeof(CustomAttacksGump));
+				((Mobile)parent).CloseGump<CustomAttacksGump>();
 		}
 
 		public override string OnIdentify(Mobile from)
@@ -907,7 +907,7 @@ namespace Server.Engines.XmlSpawner2
 			{
 				if (a == null) return;
 				if (from != null)
-					from.CloseGump(typeof(CustomAttacksGump));
+					from.CloseGump<CustomAttacksGump>();
 
 				m_attachment = a;
 
@@ -1004,7 +1004,7 @@ namespace Server.Engines.XmlSpawner2
 					}
 					else if (s != null && info.ButtonID == (int)s.AttackID + 2000)
 					{
-						state.Mobile.CloseGump(typeof(CustomAttacksInfoGump));
+						state.Mobile.CloseGump<CustomAttacksInfoGump>();
 						state.Mobile.SendGump(new CustomAttacksGump(state.Mobile, m_attachment));
 						state.Mobile.SendGump(new CustomAttacksInfoGump(state.Mobile, m_attachment, s));
 						break;

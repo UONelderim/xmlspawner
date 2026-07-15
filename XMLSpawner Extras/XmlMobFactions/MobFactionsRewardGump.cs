@@ -28,7 +28,7 @@ namespace Server.Gumps
 
 		public MobFactionsRewardGump(Mobile from, int page) : base(20, 30)
 		{
-			from.CloseGump(typeof(MobFactionsRewardGump));
+			from.CloseGump<MobFactionsRewardGump>();
 
 			// determine the gump size based on the number of rewards
 

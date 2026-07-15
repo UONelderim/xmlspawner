@@ -200,7 +200,7 @@ namespace Server.Engines.XmlSpawner2
 		{
 			if (e == null || e.Mobile == null) return;
 
-			e.Mobile.CloseGump(typeof(XMLQuestLogGump));
+			e.Mobile.CloseGump<XMLQuestLogGump>();
 			e.Mobile.SendGump(new XMLQuestLogGump(e.Mobile));
 		}
 

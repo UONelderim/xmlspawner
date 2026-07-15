@@ -39,7 +39,7 @@ namespace Server.Items
 		public override void OnDoubleClick(Mobile from)
 		{
 			base.OnDoubleClick(from);
-			from.CloseGump(typeof(XmlQuestStatusGump));
+			from.CloseGump<XmlQuestStatusGump>();
 
 			from.SendGump(new XmlQuestStatusGump(this, TitleString));
 		}
@@ -48,7 +48,7 @@ namespace Server.Items
 		{
 			if (from.AccessLevel > AccessLevel.Player)
 			{
-				from.CloseGump(typeof(XmlQuestStatusGump));
+				from.CloseGump<XmlQuestStatusGump>();
 
 				from.SendGump(new XmlQuestStatusGump(this, TitleString));
 			}

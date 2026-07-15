@@ -773,7 +773,7 @@ namespace Server.Engines.XmlSpawner2
 						((Item)target).Delete();
 					else if (target is BaseCreature) ((BaseCreature)target).Delete();
 
-					from.CloseGump(typeof(SocketsGump));
+					from.CloseGump<SocketsGump>();
 
 					return false;
 				}
@@ -996,7 +996,7 @@ namespace Server.Engines.XmlSpawner2
 						if (Augment(from, m_parent, m_s, m_socketnum, a))
 						{
 							// refresh the gump
-							from.CloseGump(typeof(SocketsGump));
+							from.CloseGump<SocketsGump>();
 							from.SendGump(new SocketsGump(from, m_s));
 							from.SendMessage("You successfully augment the target.");
 
@@ -1124,7 +1124,7 @@ namespace Server.Engines.XmlSpawner2
 			{
 				if (a == null) return;
 				if (from != null)
-					from.CloseGump(typeof(SocketsGump));
+					from.CloseGump<SocketsGump>();
 
 				m_attachment = a;
 

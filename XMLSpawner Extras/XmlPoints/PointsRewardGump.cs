@@ -27,7 +27,7 @@ namespace Server.Gumps
 
 		public PointsRewardGump(Mobile from, int page) : base(20, 30)
 		{
-			from.CloseGump(typeof(PointsRewardGump));
+			from.CloseGump<PointsRewardGump>();
 
 			// determine the gump size based on the number of rewards
 			Rewards = XmlPointsRewards.RewardsList;

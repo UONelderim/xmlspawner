@@ -1050,7 +1050,7 @@ namespace Server.Mobiles
 
 			defs.IgnoreUpdate = ignoreupdate;
 
-			from.CloseGump(typeof(XmlAddGump));
+			from.CloseGump<XmlAddGump>();
 
 			defs.IgnoreUpdate = false;
 			from.SendGump(new XmlAddGump(from, defs.StartingLoc, defs.StartingMap, false, defs.ShowExtension, x, y));
@@ -1142,7 +1142,7 @@ namespace Server.Mobiles
 					// bump the autonumber
 					defs.AutoNumberValue++;
 
-				//from.CloseGump(typeof(XmlAddGump));
+				//from.CloseGump<XmlAddGump>();
 				Refresh(m_state.Mobile, true);
 
 				// open the spawner gump 
@@ -1464,14 +1464,14 @@ namespace Server.Mobiles
 						if (defs.NameList[i] == null || defs.NameList[i].Length == 0)
 						{
 							// if no string has been entered then just use the full categorized add gump
-							state.Mobile.CloseGump(typeof(XmlCategorizedAddGump));
+							state.Mobile.CloseGump<XmlCategorizedAddGump>();
 							state.Mobile.SendGump(new XmlCategorizedAddGump(state.Mobile, defs.CurrentCategory,
 								defs.CurrentCategoryPage, i, newg));
 						}
 						else
 						{
 							// use the XmlPartialCategorizedAddGump
-							state.Mobile.CloseGump(typeof(XmlPartialCategorizedAddGump));
+							state.Mobile.CloseGump<XmlPartialCategorizedAddGump>();
 
 							//Type [] types = (Type[])XmlPartialCategorizedAddGump.Match( defs.NameList[i] ).ToArray( typeof( Type ) );
 							var types = XmlPartialCategorizedAddGump.Match(defs.NameList[i]);

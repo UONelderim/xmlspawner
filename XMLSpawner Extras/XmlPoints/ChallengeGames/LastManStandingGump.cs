@@ -35,7 +35,7 @@ namespace Server.Gumps
 		{
 			if (from == null || gauntlet == null || gauntlet.Deleted || gauntlet.Challenger == null) return;
 
-			from.CloseGump(typeof(LastManStandingGump));
+			from.CloseGump<LastManStandingGump>();
 
 			m_gauntlet = gauntlet;
 

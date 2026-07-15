@@ -26,7 +26,7 @@ namespace Server.Items
 		{
 			if (m.Player)
 				if (!m.InRange(Location, 2))
-					m.CloseGump(typeof(QuestRewardGump));
+					m.CloseGump<QuestRewardGump>();
 		}
 
 		public override void Serialize(GenericWriter writer)

@@ -167,7 +167,7 @@ namespace Server.Items
 				if (targeted is Item && m_quest != null && !m_quest.Deleted)
 				{
 					Collect(from, (Item)targeted, m_quest);
-					from.CloseGump(typeof(XmlQuestStatusGump));
+					from.CloseGump<XmlQuestStatusGump>();
 					from.SendGump(new XmlQuestStatusGump(m_quest, m_quest.TitleString));
 				}
 			}
@@ -178,7 +178,7 @@ namespace Server.Items
 			if (e == null || e.Mobile == null) return;
 			var from = e.Mobile;
 
-			from.CloseGump(typeof(XMLQuestLogGump));
+			from.CloseGump<XMLQuestLogGump>();
 			// bring up the quest status gump
 			from.SendGump(new XMLQuestLogGump(from));
 
@@ -192,7 +192,7 @@ namespace Server.Items
 			if (state == null || state.Mobile == null) return;
 			var from = state.Mobile;
 
-			from.CloseGump(typeof(XMLQuestLogGump));
+			from.CloseGump<XMLQuestLogGump>();
 			// bring up the quest status gump
 			from.SendGump(new XMLQuestLogGump(from));
 

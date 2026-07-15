@@ -669,7 +669,7 @@ namespace Server.Mobiles
 							}
 
 							// refresh the gump
-							state.Mobile.CloseGump(typeof(XmlGetAttGump));
+							state.Mobile.CloseGump<XmlGetAttGump>();
 							state.Mobile.SendGump(new XmlGetAttGump(state.Mobile, m_target, 0, 0));
 						}
 

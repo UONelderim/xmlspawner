@@ -525,7 +525,7 @@ namespace Server.Engines.XmlSpawner2
 						var afrom = (XmlPoints)XmlAttach.FindAttachment(entry.Participant, typeof(XmlPoints));
 
 						// update the points gumps on the players if they are open
-						if (afrom != null && entry.Participant.HasGump(typeof(XmlPoints.PointsGump)))
+						if (afrom != null && entry.Participant.HasGump<XmlPoints.PointsGump>())
 							afrom.OnIdentify(entry.Participant);
 					}
 

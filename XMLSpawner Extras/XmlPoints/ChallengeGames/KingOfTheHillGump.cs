@@ -571,12 +571,12 @@ namespace Server.Gumps
 			if (gauntlet.Participants != null)
 				foreach (KingOfTheHillGauntlet.ChallengeEntry entry in gauntlet.Participants)
 					if (entry.Participant != null && entry.Status != ChallengeStatus.Forfeit)
-						if (forced || entry.Participant.HasGump(typeof(KingOfTheHillGump)))
+						if (forced || entry.Participant.HasGump<KingOfTheHillGump>())
 							entry.Participant.SendGump(new KingOfTheHillGump(gauntlet, entry.Participant));
 
 			// update for the organizer
 			if (gauntlet.Challenger != null)
-				if (forced || gauntlet.Challenger.HasGump(typeof(KingOfTheHillGump)))
+				if (forced || gauntlet.Challenger.HasGump<KingOfTheHillGump>())
 					gauntlet.Challenger.SendGump(new KingOfTheHillGump(gauntlet, gauntlet.Challenger));
 		}
 

@@ -1363,9 +1363,9 @@ namespace Server.Engines.XmlSpawner2
 								a.DoTimer(XmlPoints.CancelTimeout);
 
 								// update the points gumps on the challenger if they are open
-								if (from.HasGump(typeof(PointsGump))) a.OnIdentify(@from);
+								if (from.HasGump<PointsGump>()) a.OnIdentify(@from);
 								// update the points gumps on the challenge target if they are open
-								if (a.Challenger.HasGump(typeof(PointsGump)))
+								if (a.Challenger.HasGump<PointsGump>())
 								{
 									var ca = (XmlPoints)XmlAttach.FindAttachment(a.Challenger, typeof(XmlPoints));
 									if (ca != null && !ca.Deleted)
@@ -1430,7 +1430,7 @@ namespace Server.Engines.XmlSpawner2
 				{
 					SendText(from, 100214, m_attachment.Challenger.Name); // "Challenge with {0} has been cancelled"
 
-					if (from.HasGump(typeof(PointsGump))) m_attachment.OnIdentify(@from);
+					if (from.HasGump<PointsGump>()) m_attachment.OnIdentify(@from);
 				}
 
 				// clear the challenger on the challengers attachment
@@ -1453,10 +1453,10 @@ namespace Server.Engines.XmlSpawner2
 				// refresh any open gumps
 				if (from != null && xa != null && xa.AttachedTo is Mobile)
 				{
-					if (from.HasGump(typeof(PointsGump))) m_attachment.OnIdentify(@from);
+					if (from.HasGump<PointsGump>()) m_attachment.OnIdentify(@from);
 
 					// and update the gumps if they are open
-					if (((Mobile)xa.AttachedTo).HasGump(typeof(PointsGump))) xa.OnIdentify((Mobile)xa.AttachedTo);
+					if (((Mobile)xa.AttachedTo).HasGump<PointsGump>()) xa.OnIdentify((Mobile)xa.AttachedTo);
 				}
 			}
 		}
@@ -1853,12 +1853,12 @@ namespace Server.Engines.XmlSpawner2
 					String.Format(SystemText(100216), killer.Name, killed.Name)); // "{0} has defeated {1} in combat."
 
 			// update the points gump if it is open
-			if (killer.HasGump(typeof(PointsGump)))
+			if (killer.HasGump<PointsGump>())
 				// redisplay it with the new info
 				OnIdentify(killer);
 
 			// update the top players gump if it is open
-			if (killer.HasGump(typeof(TopPlayersGump)))
+			if (killer.HasGump<TopPlayersGump>())
 			{
 				killer.CloseGump<TopPlayersGump>();
 				killer.SendGump(new TopPlayersGump(this));
@@ -2928,7 +2928,7 @@ namespace Server.Engines.XmlSpawner2
 							MobileMoving.Send(m_From.NetState, m_Target);
 
 							// update the points gump if it is open
-							if (m_From.HasGump(typeof(PointsGump)))
+							if (m_From.HasGump<PointsGump>())
 								// redisplay it with the new info
 								if (a != null && !a.Deleted)
 									a.OnIdentify(m_From);
@@ -2938,7 +2938,7 @@ namespace Server.Engines.XmlSpawner2
 							MobileMoving.Send(m_Target.NetState, m_From);
 
 							// update the points gump if it is open
-							if (m_Target.HasGump(typeof(PointsGump)))
+							if (m_Target.HasGump<PointsGump>())
 								// redisplay it with the new info
 								if (ta != null && !ta.Deleted)
 									ta.OnIdentify(m_Target);

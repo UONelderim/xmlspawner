@@ -554,12 +554,12 @@ namespace Server.Gumps
 			if (gauntlet.Participants != null)
 				foreach (LastManStandingGauntlet.ChallengeEntry entry in gauntlet.Participants)
 					if (entry.Participant != null)
-						if (force || entry.Participant.HasGump(typeof(LastManStandingGump)))
+						if (force || entry.Participant.HasGump<LastManStandingGump>())
 							entry.Participant.SendGump(new LastManStandingGump(gauntlet, entry.Participant));
 
 			// update for the organizer
 			if (gauntlet.Challenger != null)
-				if (force || gauntlet.Challenger.HasGump(typeof(LastManStandingGump)))
+				if (force || gauntlet.Challenger.HasGump<LastManStandingGump>())
 					gauntlet.Challenger.SendGump(new LastManStandingGump(gauntlet, gauntlet.Challenger));
 		}
 

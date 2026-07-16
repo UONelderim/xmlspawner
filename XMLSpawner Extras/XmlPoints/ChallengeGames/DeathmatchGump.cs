@@ -627,12 +627,12 @@ namespace Server.Gumps
 			if (gauntlet.Participants != null)
 				foreach (DeathmatchGauntlet.ChallengeEntry entry in gauntlet.Participants)
 					if (entry.Participant != null && entry.Status != ChallengeStatus.Forfeit)
-						if (forced || entry.Participant.HasGump(typeof(DeathmatchGump)))
+						if (forced || entry.Participant.HasGump<DeathmatchGump>())
 							entry.Participant.SendGump(new DeathmatchGump(gauntlet, entry.Participant));
 
 			// update for the organizer
 			if (gauntlet.Challenger != null)
-				if (forced || gauntlet.Challenger.HasGump(typeof(DeathmatchGump)))
+				if (forced || gauntlet.Challenger.HasGump<DeathmatchGump>())
 					gauntlet.Challenger.SendGump(new DeathmatchGump(gauntlet, gauntlet.Challenger));
 		}
 

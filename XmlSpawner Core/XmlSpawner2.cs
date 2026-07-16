@@ -2135,7 +2135,7 @@ namespace Server.Mobiles
 				{
 					var m = ((NetState)states[i]).Mobile;
 
-					if (m != null && m.HasGump(typeof(XmlSpawnerGump))) return true;
+					if (m != null && m.HasGump<XmlSpawnerGump>()) return true;
 				}
 
 				return false;

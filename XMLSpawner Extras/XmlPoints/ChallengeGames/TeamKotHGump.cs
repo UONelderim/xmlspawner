@@ -630,12 +630,12 @@ namespace Server.Gumps
 			if (gauntlet.Participants != null)
 				foreach (TeamKotHGauntlet.ChallengeEntry entry in gauntlet.Participants)
 					if (entry.Participant != null)
-						if (force || entry.Participant.HasGump(typeof(TeamKotHGump)))
+						if (force || entry.Participant.HasGump<TeamKotHGump>())
 							entry.Participant.SendGump(new TeamKotHGump(gauntlet, entry.Participant));
 
 			// update for the organizer
 			if (gauntlet.Challenger != null)
-				if (force || gauntlet.Challenger.HasGump(typeof(TeamKotHGump)))
+				if (force || gauntlet.Challenger.HasGump<TeamKotHGump>())
 					gauntlet.Challenger.SendGump(new TeamKotHGump(gauntlet, gauntlet.Challenger));
 		}
 
